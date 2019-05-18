@@ -1,0 +1,38 @@
+ctrl+D 从某种程度上等价于exit
+man手册中使用/key 向下搜索并标记key
+	    ?key 向上搜索并标记key
+使用man -k key模糊搜索key
+
+vim使用小结
+使用%可查找匹配的括号
+使用:%s/old/new/gc 可全文件替换并且给出每一个是否替换的提示
+
+多线程中读写锁:
+写 > 读
+读可多 写只能一个
+
+
+/usr/src/linux-headers-4.15.0-29deepin/include/linux
+
+子进程会获取父进程的资源的副本
+
+
+文件显示命令:
+cat less more tac(cat从尾往前) head tail
+
+新建文件:
+touch
+
+匹配文件指定内容:
+grep
+
+排序:
+sort 
+uniq(去重)
+
+文件比较:
+comm diff
+
+cp mv rm
+
+统计字符wc

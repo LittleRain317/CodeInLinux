@@ -1,0 +1,11 @@
+﻿  Card.cpp
+c:\users\10799\desktop\ancient-spider-master\蜘蛛纸牌\card.cpp(2): fatal error C1010: 在查找预编译头时遇到意外的文件结尾。是否忘记了向源中添加“#include "stdafx.h"”?
+  CardsSlots.cpp
+c:\users\10799\desktop\ancient-spider-master\蜘蛛纸牌\cardsslots.cpp(37): fatal error C1010: 在查找预编译头时遇到意外的文件结尾。是否忘记了向源中添加“#include "stdafx.h"”?
+  Game.cpp
+c:\users\10799\desktop\ancient-spider-master\蜘蛛纸牌\game.cpp(330): fatal error C1010: 在查找预编译头时遇到意外的文件结尾。是否忘记了向源中添加“#include "stdafx.h"”?
+  main.cpp
+c:\users\10799\desktop\ancient-spider-master\蜘蛛纸牌\main.cpp(5): fatal error C1083: 无法打开预编译头文件: “x64\Debug\蜘蛛纸牌.pch”: No such file or directory
+  View.cpp
+c:\users\10799\desktop\ancient-spider-master\蜘蛛纸牌\view.cpp(86): fatal error C1010: 在查找预编译头时遇到意外的文件结尾。是否忘记了向源中添加“#include "stdafx.h"”?
+  正在生成代码...

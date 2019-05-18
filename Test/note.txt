@@ -1,0 +1,26 @@
+b表示break设置断点
+i b表示info break显示断电信息
+cond表示condition设置断点的条件
+r表示run代表运行
+n表示next
+s表示step
+c表示continue
+p表示print
+bt表示backtrace
+
+clear删除断点
+:
+clear function
+clear filename:function
+clear line_number
+clear filename:line_number
+
+delete删除断点
+delete breakpoint_list
+
+
+备份断点save breakpoint filename
+恢复断点gdb 文件名 -x 备份文件名
+
+在gdb中函数返回值必须为int，否则会出现意想不到的结果
+

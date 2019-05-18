@@ -1,0 +1,8 @@
+链路的传输速率以bit/s度量或者bps(bit per second)
+ISP（Internet Service Provider）因特网络服务提供商
+TCP(Transmission Control Protocol)传输控制协议
+IP(Internet Protocol)网际协议
+ONT(Optical Network Terminator)光纤网络端接器(俗称光猫)
+OLT(Optical Line Terminator)光纤线路端接器
+
+
