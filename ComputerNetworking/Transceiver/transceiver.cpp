@@ -35,6 +35,53 @@ void Transceiver::copy(Transceiver::Direction dir)
 		{
 			return;
 		}
-		m_receiveQueue.push_back(m_curRecPacket);
+		m_curRecPacket = m_receiveQueue.front();
 	}
 }
+
+void Transceiver::addQueue(Transceiver::Direction dir)
+{
+	if (dir == fromMsg)
+	{
+		addToSend();
+	}
+	else if(dir == fromRec)
+	{
+		addToRec();
+	}
+}
+
+void Transceiver::addToSend()
+{
+	m_msgQueue.push_back(m_curSendPacket);
+}
+
+void Transceiver::addToRec()
+{
+	m_receiveQueue.push_back(m_curRecPacket);
+}
+
+void Transceiver::rmPacketInQueue(Transceiver::Direction dir)
+{
+	if (dir == fromMsg)
+	{
+		rmFromSend();
+	}
+	else if(dir == fromRec)
+	{
+		rmFromRec();
+	}
+}
+
+void Transceiver::rmFromSend()
+{
+	if (!m_msgQueue.empty())
+		m_msgQueue.pop_front();
+}
+
+void Transceiver::rmFromRec()
+{
+	if (!m_receiveQueue.empty())
+		m_receiveQueue.pop_front();
+}
+

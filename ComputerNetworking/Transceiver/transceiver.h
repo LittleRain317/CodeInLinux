@@ -3,9 +3,14 @@
 
 #include "../Observer/protocol.h"
 
+#define _DEBUG_
 class Transceiver : public Protocol
 {
+	#ifndef _DEBUG_
 	protected:
+	#else
+	public:
+	#endif
 		enum Status
 		{
 			empty
@@ -22,12 +27,23 @@ class Transceiver : public Protocol
 		Packet m_curRecPacket; //当前接收到的分组
 		Packet m_curComPacket; //当前要提交给上层的分组
 		Packet m_reply; //回应分组	
+	#ifndef _DEBUG_
 	protected:
+	#else
+	public:
+	#endif
 		virtual void copy(Direction dir);	
 		virtual Byte send();
 		virtual void receive(Byte data);
 		virtual Packet reply(); //响应	
-		virtual Packet divide() = 0; 
+		virtual void divide() = 0; 
+		virtual void addQueue(Direction dir);
+		virtual void addToSend();
+		virtual void addToRec();		
+		virtual void rmPacketInQueue(Direction dir);
+		virtual void rmFromSend();
+		virtual void rmFromRec();
+		virtual void setReplyMsg() = 0;
 	public:
 		virtual ~Transceiver() { }
 		virtual void transfer(Protocol* transceiver) = 0;

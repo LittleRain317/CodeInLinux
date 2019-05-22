@@ -8,16 +8,24 @@ class TestTransceiver : public Transceiver
 			((TestTransceiver*)transceiver)->receive(send());
 		}
 
-		Packet divide()
+		void divide()
 		{
-			return deque<Byte>();
+			return;
 		}
 };
 
 int main()
 {
 	TestTransceiver t;
+	t.copy(TestTransceiver::fromMsg);
+	t.send();
+	t.receive('b');
 	t.divide();
-	t.transfer(&t);
+	t.addQueue(TestTransceiver::fromRec);
+	t.addToSend();
+	t.addToRec();
+	t.rmPacketInQueue(TestTransceiver::fromMsg);
+	t.rmFromSend();
+	t.rmFromRec();
 	return 0;
 }
