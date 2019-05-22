@@ -1,26 +1,32 @@
-#ifndef UDP_H_
-#define UDP_H_
+//不考虑网络层
+#ifndef _UDP_UDP_H_
+#define _UDP_UDP_H_
 
+#include "../Transceiver/transceiver.h"
 #include <cstdint>
-#include <deque>
-#include <cmemory>
+#include <cstring>
 
-using std::deque;
-
-class UDP
+class UDP : public Transceiver
 {
-public:
-	using Byte = unsigned char;
-	using Packet = Byte [32];
-	const unsigned dataBeginPos = 8;
-	const unsigned dataEndPos = 
-private:
-	Packet packet;
-public:
-	void addPort(uint16_t src, uint16_t dest);
-	void autoFullLength();
-	void autoFullCheckSum();
-	deque<Byte> getData() const;
-	UDP(const deque<Byte>& data);
+
+	private://预留20个字节作为IP包头待以后实现
+		static const unsigned DataBeginPos = 28;
+		static const unsigned MaxLength = 65535;
+	private:
+		uint16_t m_srcPort = 0;
+		uint16_t m_destPort = 0;
+		uint16_t m_length = 0;
+		uint16_t m_checkSum = 0;
+	private:
+		bool check() const; //校验检验和
+		uint16_t calLength();
+		void addLength();
+		uint16_t calCheckSum();
+		void addCheckSum();
+		Packet divide();
+	public:
+	//	UDP(Packet data, uint16_t srcPort, uint16_t destPort);
+		void transfer(Protocol* transceiver);
+		~UDP() { } 
 };
 #endif
