@@ -1,0 +1,276 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{55df75de-c9b9-483a-9119-de1a003f05e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\libgraphics">
+      <UniqueIdentifier>{b17f1be7-47fc-4910-9f3a-cdf6d9a2bc67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\LinkList">
+      <UniqueIdentifier>{93340c1b-5ebc-42e1-8924-d6d5118478ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\simpleGUI">
+      <UniqueIdentifier>{5c20e566-330a-4cf4-a5c9-af2525d54ee6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\edit">
+      <UniqueIdentifier>{b7d5be6d-8907-41dc-a02a-81ddc186296b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\String">
+      <UniqueIdentifier>{73032f61-8a46-45da-be18-5b56853d2a7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{cfa2179d-cbcb-45af-99d1-0dd0883dde6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataSystem">
+      <UniqueIdentifier>{d4eb031c-e56a-4a3b-adfd-488b2fdfdf85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\FileUI">
+      <UniqueIdentifier>{cc665011-8de8-45d6-a29d-6c86631412bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\CourseUI">
+      <UniqueIdentifier>{e2a58d70-5f12-4f7f-8230-c83c6ef8b155}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\HelpUI">
+      <UniqueIdentifier>{ff9d8e16-7857-4f85-bb34-37fd89e69e18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\SearchUI">
+      <UniqueIdentifier>{4390d14c-49bc-4f7c-b785-aad9ad3e2d6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\StudentUI">
+      <UniqueIdentifier>{476623e3-39bf-48d5-a589-7916d6ff9302}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\mainUI">
+      <UniqueIdentifier>{595495f1-61fb-471a-beb7-cdc45a78d7c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataSystem\Student">
+      <UniqueIdentifier>{318604df-5967-4021-8fe5-a46e6c6c0ec1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataSystem\Course">
+      <UniqueIdentifier>{df198960-f746-4aab-ba4b-a03b07465dc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataSystem\DataSystem">
+      <UniqueIdentifier>{695e0141-0193-43f4-9539-e4aa66806c16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataSystem\OptCourse">
+      <UniqueIdentifier>{b4fea7b1-ba46-43d5-bfdb-0fab8508e789}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{9bf2919a-9568-49bc-b72c-af7c50756d0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\error">
+      <UniqueIdentifier>{262ea9d1-9067-4e2a-a7b8-e0622b473a29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\SortUI">
+      <UniqueIdentifier>{71d81f38-5dc5-40f5-b9d6-2099953d4d26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\InputLegalityCheck">
+      <UniqueIdentifier>{1002aafc-72c1-4d59-bc74-0b6c692a8b15}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Lib\libgraphics\exceptio.c">
+      <Filter>Lib\libgraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\libgraphics\genlib.c">
+      <Filter>Lib\libgraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\libgraphics\graphics.c">
+      <Filter>Lib\libgraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\libgraphics\random.c">
+      <Filter>Lib\libgraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\libgraphics\simpio.c">
+      <Filter>Lib\libgraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\libgraphics\strlib.c">
+      <Filter>Lib\libgraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\simpleGUI\imgui.c">
+      <Filter>Lib\simpleGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\String\__string.c">
+      <Filter>Lib\String</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\FileUI.c">
+      <Filter>UI\FileUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\HelpUI.c">
+      <Filter>UI\HelpUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\HelpAssistance.c">
+      <Filter>UI\HelpUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\StudentUI.c">
+      <Filter>UI\StudentUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\mainUI.c">
+      <Filter>UI\mainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\mainUIData.c">
+      <Filter>UI\mainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\UIAssistance.c">
+      <Filter>UI\mainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\SortAssistance.c">
+      <Filter>UI\SortUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DataSystem\Student.c">
+      <Filter>DataSystem\Student</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DataSystem\Student_list.c">
+      <Filter>DataSystem\Student</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DataSystem\Course_list.c">
+      <Filter>DataSystem\Course</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DataSystem\DataSystem.c">
+      <Filter>DataSystem\DataSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DataSystem\OptCourse_list.c">
+      <Filter>DataSystem\OptCourse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\edit\editor.c">
+      <Filter>Lib\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DataSystem\Course.c">
+      <Filter>DataSystem\Course</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DataSystem\OptCourse.c">
+      <Filter>DataSystem\OptCourse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\SearchAssistance.c">
+      <Filter>UI\SearchUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\StudentAssistance.c">
+      <Filter>UI\StudentUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\FileAssistance.c">
+      <Filter>UI\FileUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\CourseAssistance.c">
+      <Filter>UI\CourseUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\CourseUI.c">
+      <Filter>UI\CourseUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\SearchUI.c">
+      <Filter>UI\SearchUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\sortUI.c">
+      <Filter>UI\SortUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lib\check.c">
+      <Filter>Lib\InputLegalityCheck</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lib\libgraphics\exception.h">
+      <Filter>Lib\libgraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\libgraphics\extgraph.h">
+      <Filter>Lib\libgraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\libgraphics\gcalloc.h">
+      <Filter>Lib\libgraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\libgraphics\genlib.h">
+      <Filter>Lib\libgraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\libgraphics\graphics.h">
+      <Filter>Lib\libgraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\libgraphics\random.h">
+      <Filter>Lib\libgraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\libgraphics\simpio.h">
+      <Filter>Lib\libgraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\libgraphics\strlib.h">
+      <Filter>Lib\libgraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\simpleGUI\imgui.h">
+      <Filter>Lib\simpleGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\LinkList\list.h">
+      <Filter>Lib\LinkList</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\String\__string.h">
+      <Filter>Lib\String</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\FileUI.h">
+      <Filter>UI\FileUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\CourseAssistance.h">
+      <Filter>UI\CourseUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\HelpAssistance.h">
+      <Filter>UI\HelpUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\HelpUI.h">
+      <Filter>UI\HelpUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\StudentUI.h">
+      <Filter>UI\StudentUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\StudentAssistance.h">
+      <Filter>UI\StudentUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\SortAssistance.h">
+      <Filter>UI\SortUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\mainUIData.h">
+      <Filter>UI\mainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\UIAssistance.h">
+      <Filter>UI\mainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\LinkList\__list_h.h">
+      <Filter>Lib\LinkList</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\LinkList\__list_c.h">
+      <Filter>Lib\LinkList</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DataSystem\Student.h">
+      <Filter>DataSystem\Student</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DataSystem\Course.h">
+      <Filter>DataSystem\Course</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DataSystem\OptCourse.h">
+      <Filter>DataSystem\OptCourse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\edit\editor.h">
+      <Filter>Lib\edit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DataSystem\DataSystem.h">
+      <Filter>DataSystem\DataSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\SearchAssistance.h">
+      <Filter>UI\SearchUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\FileAssistance.h">
+      <Filter>UI\FileUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\CourseUI.h">
+      <Filter>UI\CourseUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\SearchUI.h">
+      <Filter>UI\SearchUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\error.h">
+      <Filter>Lib\error</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lib\check.h">
+      <Filter>Lib\InputLegalityCheck</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\sortUI.h">
+      <Filter>UI\SortUI</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

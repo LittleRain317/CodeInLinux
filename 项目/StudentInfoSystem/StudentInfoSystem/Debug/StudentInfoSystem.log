@@ -1,0 +1,13 @@
+﻿  test.c
+  sortUI.c
+  mainUIData.c
+  mainUI.c
+  StudentUI.c
+  StudentAssistance.c
+  SearchUI.c
+  SearchAssistance.c
+  CourseUI.c
+  CourseAssistance.c
+  check.c
+  Generating Code...
+  StudentInfoSystem.vcxproj -> C:\Users\12409\Documents\Visual Studio 2010\Projects\StudentInfoSystem\Debug\StudentInfoSystem.exe

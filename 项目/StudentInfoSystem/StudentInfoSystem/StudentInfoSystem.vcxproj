@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{06B7DE6F-B3E5-4698-81B5-64CF25EEC140}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>StudentInfoSystem</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\12409\Documents\Visual Studio 2010\Projects\StudentInfoSystem\Lib\simpleGUI;C:\Users\12409\Documents\Visual Studio 2010\Projects\StudentInfoSystem\Lib\LinkList;C:\Users\12409\Documents\Visual Studio 2010\Projects\StudentInfoSystem\Lib\libgraphics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\DataSystem\Course.c" />
+    <ClCompile Include="..\DataSystem\Course_list.c" />
+    <ClCompile Include="..\DataSystem\DataSystem.c" />
+    <ClCompile Include="..\DataSystem\OptCourse.c" />
+    <ClCompile Include="..\DataSystem\OptCourse_list.c" />
+    <ClCompile Include="..\DataSystem\Student.c" />
+    <ClCompile Include="..\DataSystem\Student_list.c" />
+    <ClCompile Include="..\Lib\check.c" />
+    <ClCompile Include="..\Lib\edit\editor.c" />
+    <ClCompile Include="..\Lib\libgraphics\exceptio.c" />
+    <ClCompile Include="..\Lib\libgraphics\genlib.c" />
+    <ClCompile Include="..\Lib\libgraphics\graphics.c" />
+    <ClCompile Include="..\Lib\libgraphics\random.c" />
+    <ClCompile Include="..\Lib\libgraphics\simpio.c" />
+    <ClCompile Include="..\Lib\libgraphics\strlib.c" />
+    <ClCompile Include="..\Lib\simpleGUI\imgui.c" />
+    <ClCompile Include="..\Lib\String\__string.c" />
+    <ClCompile Include="..\UI\CourseAssistance.c" />
+    <ClCompile Include="..\UI\CourseUI.c" />
+    <ClCompile Include="..\UI\FileAssistance.c" />
+    <ClCompile Include="..\UI\FileUI.c" />
+    <ClCompile Include="..\UI\HelpAssistance.c" />
+    <ClCompile Include="..\UI\HelpUI.c" />
+    <ClCompile Include="..\UI\mainUI.c" />
+    <ClCompile Include="..\UI\mainUIData.c" />
+    <ClCompile Include="..\UI\SearchAssistance.c" />
+    <ClCompile Include="..\UI\SearchUI.c" />
+    <ClCompile Include="..\UI\SortAssistance.c" />
+    <ClCompile Include="..\UI\sortUI.c" />
+    <ClCompile Include="..\UI\StudentAssistance.c" />
+    <ClCompile Include="..\UI\StudentUI.c" />
+    <ClCompile Include="..\UI\UIAssistance.c" />
+    <ClCompile Include="test.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\DataSystem\Course.h" />
+    <ClInclude Include="..\DataSystem\DataSystem.h" />
+    <ClInclude Include="..\DataSystem\OptCourse.h" />
+    <ClInclude Include="..\DataSystem\Student.h" />
+    <ClInclude Include="..\Lib\check.h" />
+    <ClInclude Include="..\Lib\edit\editor.h" />
+    <ClInclude Include="..\Lib\error.h" />
+    <ClInclude Include="..\Lib\libgraphics\exception.h" />
+    <ClInclude Include="..\Lib\libgraphics\extgraph.h" />
+    <ClInclude Include="..\Lib\libgraphics\gcalloc.h" />
+    <ClInclude Include="..\Lib\libgraphics\genlib.h" />
+    <ClInclude Include="..\Lib\libgraphics\graphics.h" />
+    <ClInclude Include="..\Lib\libgraphics\random.h" />
+    <ClInclude Include="..\Lib\libgraphics\simpio.h" />
+    <ClInclude Include="..\Lib\libgraphics\strlib.h" />
+    <ClInclude Include="..\Lib\LinkList\list.h" />
+    <ClInclude Include="..\Lib\LinkList\__list_c.h" />
+    <ClInclude Include="..\Lib\LinkList\__list_h.h" />
+    <ClInclude Include="..\Lib\simpleGUI\imgui.h" />
+    <ClInclude Include="..\Lib\String\__string.h" />
+    <ClInclude Include="..\UI\CourseAssistance.h" />
+    <ClInclude Include="..\UI\CourseUI.h" />
+    <ClInclude Include="..\UI\FileAssistance.h" />
+    <ClInclude Include="..\UI\FileUI.h" />
+    <ClInclude Include="..\UI\HelpAssistance.h" />
+    <ClInclude Include="..\UI\HelpUI.h" />
+    <ClInclude Include="..\UI\mainUIData.h" />
+    <ClInclude Include="..\UI\SearchAssistance.h" />
+    <ClInclude Include="..\UI\SearchUI.h" />
+    <ClInclude Include="..\UI\sortUI.h" />
+    <ClInclude Include="..\UI\SortAssistance.h" />
+    <ClInclude Include="..\UI\StudentAssistance.h" />
+    <ClInclude Include="..\UI\StudentUI.h" />
+    <ClInclude Include="..\UI\UIAssistance.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
