@@ -1,0 +1,165 @@
+使用变量的值（右值的概念）
+$var ${var}
+
+变量赋值不能直接接空格符
+变量名只能是字母与数字，且数字不开头
+
+''号内的$仅为一般字符
+""号内的特殊字符如$可以保留原有特性
+
+使用\转义字符
+
+$(command) `command`率先使用命令
+
+扩增变量的内容
+"$var"或"${var}" eg:PATH=$PATH:/home/bin 因为""内保留$的含义而使用""是为了让变量名不和后面扩增的内容混淆
+
+export 变量 让变量成为环境变量
+子进程仅会继承父进程的环境变量但是不会继承父进程的自定义变量
+export 不加任何变量时会显示所有的环境变量
+
+unset 变量 取消变量
+
+一般情况下，父进程自定义的变量无法在子进程中使用除非使用export
+
+用env观察环境变量
+
+常见的环境变量:
+HOME:代表用户的家目录
+SHELL:目前使用是哪一个shell
+HISTSIZE:历史命令的记录个数
+MAIL:系统会依据该变量去读邮箱信件
+PATH:运行文件搜索的路径，目录和目录间:分割
+LANG:语系数据
+RANDOM:随机数的变量
+$:本shell的PID
+?:上一个命令的返回值
+OSTYPE,HOSTTYPE,MACHTYPE:(主机硬件和核心等级)
+
+
+set观察变量(环境变量和自定义变量)
+
+PS1:命令提示字符的配置
+--------|\d 显示出星期 月 日的日期格式:"Mon Feb 2"
+--------|\H 完整的主机名
+--------|\h 仅取主机名在第一个.之前的名字
+--------|\t 显示时间24小时格式为"HH:MM:SS"
+--------|\T 显示时间12小时格式为"HH:MM:SS"
+--------|\A 显示时间24小时格式为"HH:MM"
+--------|\@ 显示时间，为12小时格式的am/pm样式
+--------|\u 目前使用者的用户名
+--------|\v BASH的版本信息
+--------|\w 完整的工作目录名由根目录写起
+--------|\W 利用basename函数获取工作目录名称，只会列出最后一个目录名称
+--------|\# 下达的第几个命令
+--------|\$ 提示字符，root为#，否则为$
+
+
+locale -a 显示所有支持的语系
+locale 通过显示的结果可以确定修改哪一个变量
+LANG=en_US                   <==主语言的环境
+LC_CTYPE="en_US"             <==字符(文字)辨识的编码
+LC_NUMERIC="en_US"           <==数字系统的显示信息
+LC_TIME="en_US"              <==时间系统的显示数据
+LC_COLLATE="en_US"           <==字符串的比较与排序等
+LC_MONETARY="en_US"          <==币值格式的显示等
+LC_MESSAGES="en_US"          <==信息显示的内容，如菜单、错误信息等
+LC_ALL=                      <==整体语系的环境
+
+语系文件放置在/usr/lib/locale/
+
+
+read [-pt] variable
+--------|-p 后面接提示字符
+--------|-t 后面接等待的秒数
+
+declare [-aixr] variable
+--------|-a 将后面名为variable的变量定义为数组array类型
+--------|-i 。。。。。。。。。。。。。。。整数integer类型
+--------|-x 与export一样，将variable变成环境变量
+--------|-r 设置为readonly类型，无法修改且无法unset
+--------|-p 单独显示变量的类型
+--------|+[aix] 取消对应类型
+
+使用数组元素的值时,${var[index]}
+使用数组元素时（左值），var[index]
+
+
+bash对于变量的基本定义
+1.变量默认为字符型
+2.数值运算只能为int
+
+ulimit [-SHacdfltu] [配额]
+--------|-H hard limit,严格配置，必定不能超过这个配置的数值
+--------|-S soft limit,警告的配置，可以超过但是会有警告,通常sort小于hard
+--------|-a 后面不接任何参数与选项，可列出所有的限制额度
+--------|-c 限制每个core文件的最大容量
+--------|-f 可以创建的最大文件容量单位为KB
+--------|-d 最大段错误容量
+--------|-l 用于锁定lock的内存量
+--------|-t 最大可使用的CPU时间（秒）
+--------|-u 单一用户可以使用的最大进程数量
+
+${变量#key}	若变量内容从头开始的数据符合key则删除最短数据
+${变量##key}	若变量内容从头开始的数据符合key则删除最长数据
+${变量%key}	若变量内容从尾向前的数据符合key则删除最短数据
+${变量%%key}	若变量内容从尾向前的数据符合key则删除最长数据
+${变量/旧字符串/新字符串}	若变量内容符合旧字符串则第一个旧字符串将会被新字符串取代
+${变量//旧字符串/新字符串}	若变量内容符合旧字符串则全部旧字符串将会被新字符串取代
+
+变量设置方式		str没有设置	str为空字符串	str已设置且不为空字符串
+var=${str-expr}		var=expr	var=		var=$str
+var=${str:-expr}	var=expr	var=expr	var=$str
+var=${str+exprt}	var=		var=expr	var=expr
+var=${str:+expr}	var=		var=		var=expr
+var=${str=expr}		str=expr	str不变		str不变
+			var=expr	var=		var=$str
+var=${str:=expr}	str=expr	str=expr	str不变
+			var=expr	var=expr	var=$str
+var=${str?expr}		expr输出至stderr var=		var=$str
+var=${str:?expr}	expr输出至stderr expr输出至stderr var=$str
+
+${}上述都会导致var的变量变化除?
+
+-的作用str没有设置var则为expr
+=的作用str没有设置则str也为expr
++的作用是说str设置了则var=expr(与-相反)
+?的作用与标准输出有关
+
+:的作用是将str为空串视为没有设置
+
+alias unalias 设置/取消别名
+
+histor [n]
+histor [-c]
+histor [-raw] histfiles
+--------|n 数字，列出最近的n笔命令
+--------|-c 将目前shell的histor内容清空
+--------|-a 将新增的history命令写入hisfiles,默认写入~/.bash_history
+--------|-r 将histfiles的内容读到目前shell的history记录中
+--------|-w 将目前的history内容写入到histfiles中默认~/.bash_history
+
+!number:运行第几个命令
+!key:由最新命令向前搜索以key开头的那个命令，并运行
+!!	:运行上一个命令
+
+type -a command
+结果会显示command运行的顺序
+
+
+/etc/issue会显示进站欢迎信息
+/etc/issue.net是给telnet这个远程登录程序使用的
+issue 内的各代码意义
+\d 本地端时间的日期；
+\l 显示第几个终端机接口；
+\m 显示硬件的等级 (i386/i486/i586/i686...)；
+\n 显示主机的网络名称；
+\o 显示 domain name；
+\r 操作系统的版本 (相当于 uname -r)
+\t 显示本地端时间的时间；
+\s 操作系统的名称；
+\v 操作系统的版本。
+
+/etc/motd可以让使用者登录后取得信息
+
+
