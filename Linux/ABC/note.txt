@@ -146,11 +146,11 @@ x	代表用户是否让该目录成为自己的工作目录,同时决定了能�
 重要的目录
 /lost+found	这个目录是使用标准的ext2/ext3文件系统格式才会产生的一个目录，目的在于当文件系统发生错误时， 将一些遗失的片段放置到这个目录下。这个目录通常会在分区的最顶层存在， 例如你加装一颗硬盘于/disk中，那在这个系统下就会自动产生一个这样的目录『/disk/lost+found』
 /proc	这个目录本身是一个『虚拟文件系统(virtual filesystem)』喔！他放置的数据都是在内存当中， 例如系统内核、进程信息(process)、周边设备的状态及网络状态等等。因为这个目录下的数据都是在内存当中， 所以本身不占任何硬盘空间啊！比较重要的文件例如：/proc/cpuinfo, /proc/dma, /proc/interrupts, /proc/ioports, /proc/net/* 等等。
-/sys	这个目录其实跟/proc非常类似，也是一个虚拟的文件系统，主要也是记录与内核相关的信息。 包括目前已加载的内核模块与内核侦测到的硬件设备信息等等。这个目录同样不占硬盘容量喔！
+/sys	这个目录其实跟/proc非常类似，也是一个虚拟的文件系统，主要也是记录与内核相关的信息。 包括目前已加载的内核静态库与内核侦测到的硬件设备信息等等。这个目录同样不占硬盘容量喔！
 /etc：配置文件
 /bin：重要执行档
 /dev：所需要的设备文件
-/lib：执行档所需的函式库与内核所需的模块
+/lib：执行档所需的函式库与内核所需的静态库
 /sbin：重要的系统执行
 
 /bin主要放置在开机时，以及进入单人维护模式后还能够被使用的指令，至于/usr/bin则是大部分软件提供的指令放置处。
@@ -1512,5 +1512,440 @@ sh [-nvx] scripts.sh
 --------|-n 检查语法问题
 --------|-v 先输出shell的内容然后运行
 --------|-x 将用到的shell内容输出，（类似与单步调试)
+
+=============================账号管理与ACL配置================================
+
+/etc/passwd文件中的结构
+root:x:0:0:root:/root:/bin/bash
+x占位（早期密码是直接存放在这个字段中)
+
+UID(id范围)					(ID使用者特性)
+0(系统管理员)				只要将用户的UID改成0，那么就具有了ROOT的权限，一个系统上面不见得只有root一个管理员
+1-499(系统账号)				1-99:由发行版linux自行创建的系统账号,100-499若用户有系统账号需求时，可以使用的账号UID
+500-65535(可登录账号)			2.6.x版本的linux已经支持2^32-1这么多的UID
+
+root		用户信息说明栏使用finger的时候会提供很多信息
+/root		账号的home目录
+shell		所使用的shell
+
+/etc/shadow的文件结构
+
+root:$6$2mNLumdY$YbSqnh7chwBXHmDnJlYg0c5hvgwa5EpfU/TUmqQtcBaI/PBnK0cDHfjebg7m2EVIEj59rOdLDv.mPCHI1MN4Z0:18065:0:99999:7:::
+
+1.账号名称
+2.密码(加密后)
+3.最近一次修改密码的日期(可以使用chage命令来帮助理解该数字)
+该结果为从1970-1-1到修改密码的那一天所经过的天数
+4.密码不可被更改的天数
+(距离上一次修改密码后需要间隔该字段的天数后才能修改)
+5.密码需要重新更改的天数
+(在最近一次修改密码后需要间隔该字段的天数后必须修改，否则过期)
+6.密码需要重新修改的期限前的警告天数(与第五个字段相比)
+(在第五个字段的前该字段天会提示用户，即将过期，需要修改密码)
+7.密码过期后的账号宽限时间(与第五个字段相比)
+密码的有限期为第三个字段加上第五个字段，过期后若用户没有修改密码，则密码过期(但是还是可以使用），直到过了该字段的天数后彻底失效，无法使用,无法登录
+8.账号失效日期
+(与第三个字段一样都是从1970-1-1开始的天数，这个字段表示过期后账号无法使用，无论密码是否过期，一般用于收费的系统，可以配置让用户过了该日期后无法使用)
+9.保留字段
+
+/etc/group文件结构
+lp:x:7:littlerain
+1.用户组
+2.如同/etc/passwd中第二个字段
+3.GID
+4.用户组中的成员中间用,隔开
+
+/etc/passwd中，GID决定了用户的初始化群组
+
+使用groups可以查看目前登录用户所属的用户组,第一个结果决定了用户的有效群组(这个决定了新建文件时的文件所属于的用户组)
+
+newgrp 用户组(修改用户的有效群组)
+newgrp会新起一个进程，在该进程中有效群组变更为新的用户组
+
+/etc/gshadow的文件结构
+lp:*::littlerain
+1.用户组名
+2.密码栏，开头为!表示无合法口令，所以没有群组管理员
+3.群管理员的账号
+4.用户组中的成员
+
+----------------------------useradd的说明--------------------------------------------------------------------------------
+useradd [-u UID] [-g 初始群组] [-G 次要群组] [-mM] [-c 说明栏] [-d 家目录绝对路径] [-s shell] 用户账号名
+--------|-u 直接指定特殊的UID
+--------|-g 该用户组的gid会放置在/etc/passwd的第四个字段中
+--------|-G 决定了用户是否加入其他的用户组，会写到/etc/group中
+--------|-M 强制!不要创建用户家目录(系统账号默认值)
+--------|-m 强制!创建用户家目录（一般账号默认值)
+--------|-c /etc/passwd中第五个字段的说明内容
+--------|-d 指定该目录成为用户的home目录
+--------|-r 创建一个系统账号，这个账号的UID会有限制（/etc/login.defs)
+--------|-s 后面接一个shell，没有制定的话默认是/bin/bash(deepin目前的是/bin/sh
+--------|-e 后面接日期，格式为yyyy-mm-dd，会写入到shadow的第八个字段(用户失效日期)
+--------|-f 后面接shadow的第七个字段，指定密码是否失效，0为立刻失效，-1为永不失效(密码只会过期)
+
+useradd -D显示默认值(/etc/default/useradd中决定)
+GROUP=100 (新建用户的初始群组）
+不同的发行版决定了不同的用户组机制
+1.私有用户组机制(系统会创建一个与账号一样的用户组作为用户的用户组，不会参考GROUP这个默认值)
+2.公共用户组机制(则参考GROUP这个值)
+
+HOME=/home (用户家目录的基准目录，都会创建在/home下面
+
+INACTIVE=-1: 密码过期后是否会失效的配置值（-1不会，0立刻，数字如30则过期后30天失效)
+
+EXPIRE=:    账号的失效日期
+
+SHELL=/bin/bash: 默认使用的shell名称
+
+SKEL=/etc/skel: 用户家目录参考的基准目录
+(创建用户后会copy一份/etc/skel放置在用户home目录里)
+
+CREATE_MAIL_SPOOL=yes: 创建用户的mailbox
+ls -l /var/spool/mail/用户
+
+UID/GID的默认值参考/etc/login.defs
+/etc/login.defs中文件结构
+1.MAIL_DIR /var/spool/mail 	用户默认信息目录
+2.PASS_MAX_DAYS 99999		/etc/shadow内的第五栏，多久需要变成密码
+3.PASS_MIN_DAYS 0		/etc/shadow内的第四栏，多久不可重新配置密码
+4.PASS_MIN_LEN 5		密码最短长度，已经被pam静态库取代
+5.PASS_WARN_AGE	7		/etc/shadow内的第六栏，过期前的警告日期
+7.UID_MIN	500		小于这个数属于系统保留
+8.UID_MAX	60000		使用者最大能够使用的UID
+9.GID_MIN	500		小于属于系统保留
+10.GID_MAX	60000		使用者最大能够使用的GID
+11.CREATE_HOME	yes		在不加-m或-M时，是否主动创建home目录
+12.UMASK	077		用户家目录创建的umask
+13.USERGROUPS_ENAB yes		删除用户时userdel，是否删除初始化群组
+14.MD5_CRYPT_ENAB yes		是否经过md5加密
+
+需要注意的是系统给予一个账户UID时，1参考UID_MIN取得最小数值，然后2.有/etc/passwd中找最大的UID，1和2对比后，在最大的基础上加一就是新的UID
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+passwd [--stdin]  <==所有人均可使用来改自己的密码
+passwd [-l] [-u] [--stdin] [-S] [-n 日期] [-x 日期] [-w 日期] [-i 日期] 账号
+--------|--stdin: 接受标准输入作为密码(不是所有的发行版都支持)
+--------|-l lock的意思，将/etc/shadow的第二栏最前面加上!，使密码失效
+--------|-u unlock
+--------|-S 列出密码相关参数,shadow文件内的大部分信息
+--------|-n 后面接天数，shadow的第四个字段，多久不可修改密码天数
+--------|-x 后面接天数，shadow的第五个字段，多久内必须要修改密码
+--------|-w 后面接天数，shadow的第六个字段，密码过期前的警告天数
+--------|-i 后面接日期，shadow的第七个字段，密码失效日期
+
+chage [-ldEImMW] 用户名
+--------|-l 列出该账号的详细密码参数
+--------|-d 后面接日期，修改shadow的第三个字段（最近一次更改密码的日期）格式YYYY-MM-DD
+--------|-E 后面接日期，修改shadow的第八字段（账号失效日期），格式YYYY-MM-DD
+--------|-I 后面接天数，修改shadow的第七字段（密码失效日期）
+--------|-m 后面接天数，修改shadow的第四字段（密码最短保留天数）
+--------|-M 后面接天数，修改shadow的第五字段（密码多久需要进行变更）
+--------|-W 后面接天数，修改shadow的第六字段（密码过期前警告天数）
+
+usermod [-cdegGlsuLU] username  <==也可直接修改/etc/passwd 或/etc/shadow
+--------|-c /etc/passwd的第五栏的说明栏，可以加入账号的说明
+--------|-d 修改用户的home目录，/etc/passwd的第六个字段
+--------|-e 后面接日期，YYYY-MM-DD /etc/passwd的第八个字段
+--------|-f 后面接天数，shadow的第七个字段
+--------|-g 后面接初始用户组，修改/etc/passwd的第四个字段，也就是gid的字段
+--------|-G 后面接次要用户组，修改的是/etc/group
+--------|-a 与-G一起使用，可添加次要用户组的支持（新增）而不是配置（修改）
+--------|-l 后面接账号名称，修改账号名称,/etc/passwd的第一栏
+--------|-s shell的实际文件，可以使/bin/bash或者/bin/csh
+--------|-u 后面接UID数字，修改/etc/passwd的第三栏数据
+--------|-L 暂时冻结用户密码，/etc/shadow的密码栏
+--------|-U 解冻密码
+
+用户的数据有
+/etc/passwd,/etc/shadow  用户的账号和密码
+/etc/group,/etc/gshadow  用户组的相关信息
+/home/username,/var/spool/mail/username 用户个人文件
+
+------------一般用户可以使用,上述基本属于管理员
+userdel [-r] username
+--------|-r 连同用户的家目录一起删除
+
+finger [-s] usernmae
+--------|-s 仅列出用户账号，全名，终端代号，登录时间等
+--------|-m 列出与后面接的账号相同者，而不是利用部分比对
+
+chfn [-foph] [账号名]  <==会修改/etc/passwd的第五个字段
+--------|-f 全名
+--------|-o 办公室房间号码
+--------|-p 办公室电话号码
+--------|-h 家庭电话
+
+chsh [-ls]   <==change shell
+--------|-l 列出可用的shell，/etc/shells
+--------|-s 配置修改自己的shell
+
+id [username]  <==查看用户的uid/gid相关信息
+
+groupadd [-g gid] [-r] 组名
+--------|-g 特定GID
+--------|-r 创建系统用户组/etc/login.defs中的GID_MIN有关
+
+groupmod [-g gid] [-n group_name] 组名
+--------|-g 修改现有的gid
+--------|-n 修改现有的组名
+
+groupdel [groupname]
+
+gpasswd groupname
+gpasswd [-A user1,...] [-M user3,...] groupname
+gpasswd [-rR] groupname
+--------|  没有参数时，表示给予groupname一个密码/etc/gshadow
+--------|-A 将groupname的控制权给后面的用户管理（用户组管理员)
+--------|-M 将用户加入到该组中
+--------|-r 将groupname的密码移除
+--------|-R 将groupname的密码失效
+gpasswd [-ad] user groupname
+--------|-a 将用户加入用户组
+--------|-d 将用户移除用户组
+
+------------------------------------ACL (access control list)-------------------------
+1.使用者(user) 针对使用者来配置权限
+2.用户组(group) 针对用户组来配置权限
+3.默认属性(mask) 针对该目录下创建文件/目录时，规范新数据的默认权限
+
+若系统没有默认增加ACl的话可以
+mount -o remount,acl /
+修改/etc/fstab
+LABEL=/1 / ext3 defualts,acl 1 1
+
+setfacl [-bkRd] [{-m|-x} acl参数] 目标文件名
+--------|-m 配置后续的acl参数给文件使用，不可与-x合用
+--------|-x 删除后续的acl参数，不可与-m使用
+--------|-b 移除所有的acl参数
+--------|-k 移除默认的acl参数
+--------|-R 递归配置acl
+--------|-d 配置默认的acl参数，只对目录有效，在该目录新建数据时会引用此数据
+1.针对特定使用者的方式
+配置语法:  u:[使用者列表]:[rwx]没有使用者时，默认配置的是文件拥有者
+2.针对特定群组的方式
+配置语法:  g:[用户组列表]:[rwx]
+3.针对有效权限mask的方式
+配置语法:  m:[rwx]   <==限制u和g的最大权限
+4.针对默认权限的配置方式
+配置语法:  d:[ug]:使用者列表/用户组列表:[rwx]
+
+
+getfacl filename
+选项几乎和setfacl一致
+
+su [-lm] [-c 命令] [username]  <==切换谁，需要谁的密码
+--------|- 单独使用时代表使用login-shell的变量文件读取方式来登录系统,若使用者没有，则是切换为root身份
+--------|-l 与-类似，但是后面需要加想要切换的用户账号，也是login-shell的方式
+--------|-m 与-p一样，表示使用目前的环境配置，而不读取新用户的配置文件
+--------|-c 仅执行一次命令，所以要后面加命令
+
+sudo [-b] [-u 新使用者] <==/etc/sudoers决定了谁有权限使用该命令 切换用户来执行某个操作，密码仅仅需要当前使用的用户的密码
+--------|-b 将后续的命令放在后台中让系统自行运行，而不和目前的shell产生影响
+--------|-u 后面接想要切换的用户，没有用户则是root
+
+/etc/sudoers的文件格式
+使用visudo来编辑该文件（会检查语法错误），命令中应该使用绝对路径
+1.单一用户的配置
+使用者账号		登陆者的来源主机名=（可切换的身份）	可下达的命令   
+root 			ALL=(ALL) 				ALL	       
+2.用户组和免密码的配置
+%groupname		ALL=(ALL)				ALL
+username/%groupname	ALL=(ALL)				NOPASSWD:ALL
+3.有限制的命令配置	
+myuser			ALL=(root)				!/usr/bin/passwd, /usr/bin/passwd [A-Za-z]*   <==!代表无法执行，也就是无法修改root的密码
+4.通过别名建立配置
+User_Alias UPPER = user1, user2, user3    <==设置用户别名，别名都需要大写
+Cmnd_Alias UPPERCOM = !/usr/bin/passwd, /usr/bin/passwd [a-zA-Z]*  <==设置命令别名
+UPPER			ALL=(root)				UPPERCOM
+5.sudo的时间间隔为五分钟（五分钟内再次使用sudo不需要密码)
+
+
+特殊的shell /sbin/nologin 可以使用系统资源但是无法登录（无法使用bash获取其他的shell来操作) /etc/nologin.txt可以编辑无法登录的原因告知用户
+
+------------------PAM(Pluggable Authentication Modules，嵌入式模块)
+
+PAM用来进行验证的数据称为Modules
+
+/etc/pam.d/配置文件  使用PAM的程序会调用该目录下同名的配置文件，依据该配置文件寻找对应的PAM静态库
+
+eg:CentOS下/etc/pam.d/passwd
+#%PAM-1.0	<==PAM的版本
+auth	include		system-auth   <==每一行都是验证过程
+account	include		system-auth
+passwordinclude		system-auth
+验证类别控制标准	PAM静态库与静态库参数
+include代表呼叫后面的文件来作为这个类别的验证
+
+第一个字段：验证类别
+1.auth
+	authentication(认证),主要用来验证使用者的身份，通常是需要密码来验证，所以后面接的静态库是用来检验用户的身份
+2.account
+	account(账号)则大部分进行授权，主要验证使用者是否拥有正确的权限
+3.session
+	session会话，使用者在本次登录（本次命令）期间，PAM所给予的环境配置，通常用于记录用户登录或注销时的信息
+4.password
+	主要在提供验证的修改工作，比如修改密码
+
+第二个字段：验证的控制标志（control flag)  <==通过验证的标准
+1.required
+	成功则带有success的标志，否则failure，但不论成功与否都会继续后续的验证流程
+2.requisite(必须的)
+	若验证失败则立刻回复原程序failure，并且终止后续验证，若成功则带有success并继续验证（与1的区别，失败后立即终止后续验证)
+3.sufficient(充足的)
+	成功立刻回复success给原程序，终止后续验证，若失败，则带有failure并且继续（与2相反)
+4.optional
+	大多数用于显示信息
+
+
+/etc/pam.d/* 每个程序个别的PAM配置文件
+/etc/security/* 其他PAM环境的配置文件
+/lib/security/*	PAM静态库文件的实际放置目录
+/usr/share/doc/pam-*/ 详细的PAM说明
+
+较常使用的PAM静态库
+1.pam_securetty.so:
+	限制管理员只能够从安全的终端机登录，安全的终端机配置则写在/etc/securetty这个文件中
+2.pam_nologin.so:
+	限制一般用户是否能够登录主机，当/etc/nologin存在时，则所有一般用户无法再登录系统，并且会显示该配置文件的内容
+3.pam_selinux.so:
+	针对程序来进行细部管理权限的功能
+4.pam_console.so:
+	当系统出现某些问题，或者需要使用特殊的终端接口（如RS232）登录主机时，这个静态库可以帮助处理一些文件的权限，让使用者能够通过特殊终端来登录系统
+5.pam_loginuid.so:
+	验证使用者的UID是否满足程序需要
+6.pam_env.so:
+	配置环境变量的一个静态库，如果需要额外的环境变量配置参考/etc/security/pam_env.conf
+7.pam_unix.so:
+	可以用在验证阶段的认证功能，用在授权阶段的账号许可证管理，用在会话阶段的登陆文件记录，甚至是密码修改阶段的检验，在早期使用的非常频繁
+8.pam_cracklib.so:
+	用来检验密码的强度，包括密码是否在字典中，密码输入几次失败后就断开此次联机都是由该静态库提供
+9.pam_limits.so:
+	ulimit的功能由该静态库提供
+
+
+limits.conf可以限制每次仅能有一个用户登录系统
+
+w / who 查询已经登录在系统上的用户
+lastlog 查询每个账号最近登录的时间会读取/var/log/lastlog文件
+
+-------------------------用户间的通信--------------
+write 用户 [用户所在终端接口]	<==用户之间的通信(但是会打断该用户当前的工作)
+
+mesg n 拒绝除root外的对话
+mesg y 开启对话
+mesg 显示状态
+
+wall 广播
+
+mail username@localhost -s "邮件标题"  <==可使用<重定向来决定邮箱信息
+mail则会查看邮箱内容
+
+-------------------------手动增加用户或者用户组---------------
+pwck 检查/etc/passwd的信息，与实际home目录是否存在的信息，还可以对比/etc/passwd /etc/shadow的信息是否一致
+grpck 则用于检查用户组
+pwconv 主要用于将/etc/passwd内的账号和密码，移动到/etc/shadow当中
+pwunconv 则与上一个相反,并且会删除/etc/shadow文件
+chpasswd 一般用于批量创建用户 eg: echo "username:password" | chpasswd -m
+
+手动创建的步骤
+1.先创建所需要的群组 ( vi /etc/group )；
+2.将 /etc/group 与 /etc/gshadow 同步化 ( grpconv )；
+3.创建账号的各个属性 ( vi /etc/passwd )；
+4.将 /etc/passwd 与 /etc/shadow 同步化 ( pwconv )；
+5.创建该账号的口令 ( passwd accountname )；
+6.创建用户家目录 ( cp -a /etc/skel /home/accountname )；
+7.更改用户家目录的属性 ( chown -R accountname.group /home/accountname )
+
+========================磁盘配额与进阶文件系统管理============================
+Quota的一般用途:
+1.针对www server,例如：每个人的网页空间的容量限制!
+2.针对mail server,例如，每个人的邮件空间限制
+3.针对file server,例如，每个人最大的可用网络磁盘空间
+
+针对linux系统主机上面的配置
+1.限制某一用户组所能使用的最大磁盘配额
+2.限制某一使用者最大的磁盘配额
+3.以硬链接的方式，来使邮件可以作为限制的配额
+
+
+Quota配额的使用限制
+1.只能针对整个文件系统
+2.内核必须支持
+3.Quota的记录文件（现已从quota变成了aquota)
+4.只对一般身份使用者有效(root无法配置quota)
+
+
+对于文件系统的限制有
+1.容量限制block或文件数量限制inode
+2.柔性劝导与硬性规定(soft/hard)
+inode/block有两个配置值一个是hard一个是soft，通常hard比sort还要高，高出sort后会有警告
+3.会倒数计时的宽限时间（grace time),超过soft后会有宽限时间允许用户删除文件，宽限时间过后最大用量将由hard变成soft的值
+
+Quota流程-1.文件系统的支持
+挂载时加入usrquota,grpquota
+
+Quota流程-2.创建quota记录文件
+Quota是通过分析整个文件系统当中，每个使用者（用户组）所拥有的文件总数和容量，再将这些数据记录到该文件系统的最顶层目录，然后在该记录文件中在使用每个账号（用户组）的限制值去规范磁盘使用量的
+
+quotacheck [-avugfM] [/mount_point]  <==扫描文件系统并创建quota的记录文件
+--------|-a 扫描所有在/etc/mtab内，含有quota支持的文件系统，加上此参数后，/mount_point不必写
+--------|-u 针对使用者扫描文件与目录的使用情况，会创建aquota.user
+--------|-g 针对用户组扫描文件与目录的使用情况，会创建aquota.group
+--------|-v 显示扫描过程的信息
+--------|-f 强制扫描文件系统，并写入新的quota的配置文件中（危险）
+--------|-M 强制以读写的方式扫描文件系统，只有在特殊情况才会使用
+
+Quota流程-3.Quota启动，关闭与限制值配置
+quotaon [-avug]
+quotaon [-vug] [/mount_point]
+--------|-u 针对使用者启动(aquota.user)
+--------|-g 针对用户组启动(aduota.group)
+--------|-v 显示启动过程的相关信息
+--------|-a 根据/etc/mtab内的文件系统配置启动有关的quota，若不加-a则后面需要加特定的挂载点
+
+quotaoff [-a]
+quotaoff [-ug] [/mount_point]
+--------|-a 全部的文件系统都关闭，根据/etc/mtab
+--------|-u 仅针对后面那个挂载点关闭user quota
+--------|-g 仅针对后面那个挂载点关闭group quota
+
+edquota <==编辑账号/用户组的限制与宽限时间
+edquota [-u username] [-g groupname]  
+edquota -t <==修改宽限时间
+edquota -p 范本账号 -u 新账号
+--------|-u 后面接用户名，可以进入quota的编辑画面去配置username的限制值(单位KB)(该界面只要保持每一行有七栏即可，不需要对齐
+--------|-g 后面接用户组，可以进入quota的编辑画面去配置groupname的限制值(单位KB)
+--------|-t 可以修改宽限时间
+--------|-p 复制范本，那个范本账号为已经存在并配置好quota的使用者
+	    目的是将范本的账号这个用户的quota限制复制给新账号
+
+Quota流程-4.Quota限制值的报表
+quota [-uvs] [username]
+quota [-gvs] [groupname]
+--------|-u 后面接username表示显示出该使用者的quota限制，若不接则显示出运行者的quota限制
+--------|-v 显示每个用户在文件系统的quota值
+--------|-s 使用1024为倍数来制定单位，会显示如M的单位
+--------|-g 后面接groupname表示显示出该用户组的quota限制值
+
+repquota -a [-vugs] 针对整个文件系统的限额做报表
+--------|-a 查阅/etc/mtab寻找具有quota的标志的文件系统，并报告quota的结果
+--------|-v 输出的数据将含有文件系统相关的细致信息
+--------|-g 显示出个别用户组的quota的值
+--------|-s 使用M，G为单位
+--------|-u 显示出使用者的quota限制值（默认)
+
+Quota流程-5.测试与管理
+
+warnquota根据/etc/warnquota.conf的配置来找出目前系统上超过soft的用户，然后通过email的功能发送给用户和root
+
+setquota <==直接在命令中配置quota的限制值
+setquota [-u|-g] 名称 block(soft) block(hard) inode(soft) inode(hard) 挂载点
+
+------------------------------------------------RAID磁盘阵列--------------------------------
+Redundant Arrays of Inexpensive Disks,RAID
+容错式廉价磁盘阵列
+
+磁盘阵列的等级
+RAID-0(等量模式,stripe)性能最佳
 
 
