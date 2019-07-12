@@ -1,0 +1,1 @@
+cmd_/home/littlerain/Code/Linux/source/simple.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/littlerain/Code/Linux/source/simple.ko /home/littlerain/Code/Linux/source/simple.o /home/littlerain/Code/Linux/source/simple.mod.o ;  true

@@ -1,0 +1,9 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int main()
+{
+	int num = 10;
+	auto f = [num] () mutable -> bool { if (num > 0) num--; return static_cast<bool>(num); };
+
+}
