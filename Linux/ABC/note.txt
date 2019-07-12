@@ -2005,3 +2005,100 @@ mdadm --manage /dev/md[0-9] [--add 设备] [--remove 设备] [--fail 设备]
 
 /etc/mdadm.conf决定了软件磁盘阵列的配置
 mdadm --stop /dev/md[0-9] <==关闭磁盘阵列,如果只是取消挂载的话，在重新分区的时候可能会出现错误
+
+--------------------LVM(Logical Volume Manager)逻辑卷轴管理------------
+LVM在于可以弹性的调整文件系统的容量，可以整合多个分区(或硬盘)在一起，让这些分区看起来就像一个硬盘一样！而且，还可以在未来新增或移除其他的实体分区到这个LVM中
+
+Physical Volume,PV 实体卷轴
+1.需要在实际分区的基础上通过fdisk调整系统识别码成为8e(LVM的识别码），再通过pvcreate将它转化为LVM最底层的实体卷轴PV
+
+Volume Group,VG 卷轴群组
+1.将多个PV组成一个VG，一个VG最多仅能包含65534个PE
+
+Physical Extend,PE,实体延伸区块
+1.LVM默认使用4MB的pe区块，而LVM的VG最多仅能含有65534个PE，因此默认的LVM VG会有256G
+PE是整个LVM最小的储存单元（类似于block)
+
+Logical Volume, LV,逻辑卷轴
+1.VG最终被切割成LV类似于分区，LV的设备名通常为/dev/vgname/lvname
+
+
+LV是如何写入到硬盘中(默认线性模式)
+1.线性模式（linear）：先用前面的设备，当前面的设备容量用完时才用后面的
+2.交错模式（triped）：类似于RAID-0
+
+LVM必须要内核支持并且安装lvm2这个程序
+
+1.制作实体卷轴PV
+pvcreate：将实体分区创建成为PV  eg: pvcreate /dev/sda{1,2,3}
+pvscan：搜索目前系统里面任何具有PV的硬盘或分区
+pvdisplay：展示目前系统上面的PV状态
+pvremove：将PV属性移除
+pvmove: 移动pe <== pvmove src des 
+
+2.创建卷轴群组VG
+vgcreate [-s N[mgt]] VG名称 PV名称
+--------|-s 后面接PE的大小，mgt为单位（大小写均可）
+vgscan:搜索系统上面是否有vg存在
+vgdisplay:显示目前的vg状态
+vgextend:在VG内添加额外的PV <== vgextend vgname /dev/sda{1,2,3}
+vgreduce：在VG内移除pv
+vgchange：配置vg是否启动
+vgremove：删除一个vg
+
+3.对VG进行分割创建LV
+lvcreate [-L N[mgt]] [-n lv名称] vg名称
+lvcreate [-l N] [-n lv名称] vg名称
+--------|-L 后面接容量，最小单位为PE，因此若不符合pe大小时，系统会采取近似值
+--------|-l pe的个数
+--------|-n lv的名称
+lvscan:查询系统上面的lv
+lvdisplay：显示系统上lv的状态  <==第一个指标会显示出LV全名，在使用lv的时候需要用全名，不像vg
+lvextend: 在lv中添加容量
+lvreduce: 在lv中减少容量
+lvremove: 移除整个lv
+lvresize 对大小进行调整
+
+扩容vg
+1.创pv,pvcreate
+2.添加pv,vgextend
+3.添加pe,lvresize  <== lvresize -l +-n 增加扩减少pe的个数
+4.通过resize2fs来将文件系统扩容
+resize2fs [-f] [device] [size]
+--------|-f 强制
+--------|[device] 设备名称
+--------|[size] 加上size则必须要给单位，没有size，则整个分区都使用
+减少vg则相反
+
+LVM的作用创建系统快照(系统备份)
+系统快照:将当时的系统信息记录下来，未来如果有任何数据的变动，则原始数据会被移动到快照区，而没有被变更的区域则由快照区和文件系统共享
+快照和被快照的LV必须在同一个VG中
+lvcreate -l 60 -s -n 快照名 lvdir
+--------|-s 快照
+--------|-n 需要快照的设备名称
+--------|-l 多少个pe给快照区使用
+
+利用快照恢复系统
+
+
+LVM相关命令汇整与LVM的关闭
+任务		PV阶段		VG阶段		LV阶段
+搜索scan	pvscan		vgscan		lvscan
+创建create	pvcreate	vgcreate	lvcreate
+列出display	pvdisplay	vgdisplay	lvdisplay
+添加extend			vgextend	lvextend
+减少reduce			vgreduce	lvreduce
+删除remove	pvremove	vgremove	lvremove
+改变容量resize					lvresize
+改变属性attribute pvchange	vgchange	lvchange
+文件阶段改变大小需要resize2fs命令
+
+卸载lvm:
+1.移除挂载的lvm和快照
+2.lvremove
+3.vgchange -a n VGname 让vgname这个VG不再具有active标志
+4.vgremove
+5.pvremove
+6.fdisk修改回来id
+
+
