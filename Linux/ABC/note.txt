@@ -1987,9 +1987,3 @@ mdadm --create --auto=yes /dev/md[0-9] --raid-devices=N --level=[015] --spare-de
 --------|--spare-devices=N 使用几个作为磁盘阵列的备份设备
 --------|-detail 显示后面的磁盘阵列的信息
 
-
-
-
-
-
-
