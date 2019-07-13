@@ -1,0 +1,21 @@
+#!/bin/bash
+# Program:
+#	批量创建账号
+# History:
+#	date:2019-07-13 11:22:38	author:abc	version:1.0
+PATH=/home/littlerain/Java/jdk-11.0.2/bin:/home/littlerain/bin:/home/littlerain/Java/jdk-11.0.2/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/sbin:/usr/sbin:/home/littlerain/bin
+export PATH
+
+chose="Y"
+while [ "$chose" == "Y" ] 
+do
+	read -p "请输入账号:" account
+	account=${account:-account}
+	read -p "请输入密码:" password
+	password=${password:-password}
+	useradd $account
+	echo "$account:$password" | chpasswd -m
+	echo -e "完成创建!\n"
+	read -p "是否继续？（Y/N)" chose
+done
+exit 0
