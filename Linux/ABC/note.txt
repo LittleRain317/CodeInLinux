@@ -2667,5 +2667,3 @@ ALL：代表全部的 program_name 或者是 IP 都接受的意思，例如 ALL:
 LOCAL：代表来自本机的意思，例如： ALL: LOCAL: allow
 UNKNOWN：代表不知道的 IP 或者是 domain 或者是服务时；
 KNOWN：代表为可解析的 IP, domain 等等信息时；
-
-
