@@ -1,0 +1,90 @@
+第一章:Unix基础
+
+1.内核的接口被称之为系统调用(System call)
+	公用函数库建立在系统调用接口之上（进一步封装）
+
+第二章:Unix标准及其实现
+
+============================================
+第七章:进程环境
+
+进程终止的方法:
+1.main返回
+2.调用exit
+3.调用_exit 或者_Exit
+4.最后一个线程从其启动例程返回
+5.从最后一个线程调用pthread_exit
+
+(异常退出)
+	6.调用abort
+	7.接到一个信号
+	8.最后一个线程对取消请求做出响应
+
+在调用main函数前先调用一个特殊的启动例程，可执行程序会将此启动例程指定为该程序的起始地址
+如果将启动例程(系统调用exec函数)用c代码写exit(main(argc, argv)) 通常汇编实现（通过编译器)
+
+1.退出函数
+#include <stdlib.h>
+void exit(int status);(执行一些清理处理，先对于atexit()函数记录的函数指针进行执行，然后对于所有打开流调用fclose(),最后调用_exit 或者_Exit)  main中return等价
+
+void _Exit(int status);(直接返回内核)
+#include <unistd.h>
+void _exit(int status);(直接返回内核)
+
+2.函数atexit
+#include <stdlib.h>
+int atexit(void (*func)(void));(记录使用exit函数后需要调用的函数指针)
+!!注意点:内核执行某一个程序的唯一方法是调用exec函数
+进程自愿终止的唯一方式是显示或者隐式（exit())调用_exit或者_Exit
+
+ISO c 和 posix.1都规定argv[argc]是NULL
+
+------------------环境表------------------
+如同命令参数表argv一样，每个程序都接收到一个环境表，extern char **environ记录
+历史上int main(int argc, char *argv[], char *envp[]); //但不符合ISO C的规定，所以通常使用environ或者getenv和putenv来操作
+
+------------------------c程序的存储空间布局----------------
+
+1. .text 
+	cpu执行的机器指令部分，可共享（文本编辑器，c编译器和shell）相同的指令在存储器中只需要一个部分即可，一般只读
+2. 初始化数据段(.data数据段)
+	明确地赋初值的全局变量:int max = 0;
+3. 未初始化数据段 .bss段
+	在程序开始执行之前，内核将此段中的数据初始化为0或者为NULL: long sum[100];	
+4. 栈区
+	向下伸长逐渐变小)	
+5. 堆区
+	向上伸长(逐渐变大)
+//a.out中还有若干其他类型的段，例如，包含符号表的段、包含调试信息的段以及包含动态共享库链接表的段等等。在程序执行时是直接忽略这些段
+//a.out只会记录.text和初始化数据段
+//可以使用size命令查看
+//栈帧不一定是要向下伸展逐渐变小
+	//可能是用链表来实现的
+------------------------------共享库----------------------------
+库的存在会增加部分运行时的开销（当调用库函数时)但是优点是可以替换库文件而不需要修改源文件代码或者重新编译可执行程序
+
+gcc -static //阻止gcc使用共享库,默认使用
+
+--------------------------------存储空间分配---------------------
+#include <stdlib.h>
+void *malloc(size_t size);
+void *calloc(size_t nobj, size_t size);//该空间中的每一bit都会初始化为0
+void *realloc(void* ptr, size_t newsize);
+//返回的指针一定是适当内存对齐的
+void free(void *ptr);
+
+----------------------------环境变量--------------------
+#include <stdlib.h>
+char* getenv(const char *name); //获取该name所对应的环境变量值
+int putenv(char* str); //name=value的字符串放入到环境表中
+int setenv(const char* name, const char* value, int rewrite); //rewirte为0则不删除已有的定义，否则删除
+int unsetenv(const char* name); //删除name的定义，即使不存在也不会错
+
+----------------------------函数setjmp和longjmp--------------
+#include <setjmp.h>
+int setjmp(jmp_buf env); //直接调用返回0，否则返回longjmp中val的值
+
+void longjmp(jmp_buf env, int val); //设置env，并且使得栈帧回到调用setjmp的栈帧中
+!!注意点:跳转的后变量的值:全局 静态 volatite(不让编译器进行优化)修饰的变量值不变，放在寄存器中的变量则会复原到调用setjmp之前的值
+
+
