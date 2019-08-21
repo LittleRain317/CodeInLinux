@@ -1,0 +1,444 @@
+第一章:Unix基础
+
+1.内核的接口被称之为系统调用(System call)
+	公用函数库建立在系统调用接口之上（进一步封装）
+
+时钟时间:进程运行的时间总量
+用户cpu时间:执行用户指令的时间量
+系统时间为该进程执行内核程序所经历的时间可用time命令查看
+======================================第三章:文件I/O===================
+所有打开的文件都通过文件描述符来引用
+
+文件描述符中特殊的三个数值0 stdin 1 stdout 2 stderr
+STDIN_FILENO STDOUT_FILENO STDERR_FILENO 定义在<unistd.h>
+
+范围是0 ~ OPEN_MAX - 1
+
+---------------------函数open和openat------------
+#include <fcntl.h>
+int open(const char *path, int oflag, ... /* mode_t mode */); //即使参数完全一致，open的返回值也会是一个新的文件描述符，开启一个新的文件表项，但参数相同时，文件表项中的v节点指针指向同一个v节点
+int openat(int fd, const char *path, int oflag, ... /* mode_t mode */);
+成功返回文件描述符，否则返回-1
+
+按位或来操作oflag
+O_RDONLY	只读打开
+O_WRONLY	只写打开
+O_RDWR      读、写打开
+O_EXEC		只执行打开
+O_SEARCH	只搜索打开（应用于目录)
+必须执行一个，下面是可选的
+O_APPEND	每次写时追加到文件的尾端,（即在write操作时会修改文件表项中的文件偏移量为文件尾部，将lseek(fd, 0, SEEK_END)和open(path, O_WRONLY)封装成一个原子操作)
+O_CLOEXEC	把FD_CLOEXEC常量设置为文件描述符标志
+O_CREAT		若文件不存在则创建它，使用此选项时，open函数需要mode参数，使用mode指定该新文件的访问权限
+O_DIRECTORY	如果path引用的不是目录，则出错
+O_EXCL		如果同时指定了O_CREATE，而文件已经存在，则出错，用此可以测试一个文件是否存在，如果不存在则创建该文件
+O_NOCTTY 	如果path引用的是终端设备，则不将该设备分配作为此进程的控制终端
+O_NOFOLLOW 	如果path引用的是一个符号链接，则出错
+O_NONBLOCK 	如果path引用的是一个FIFO，一个块文件或一个字符文件则此选项为文件的本次打开操作和后续的io操作设置非阻塞方式
+O_SYNC 		使每次write等待物理i/o完成，包括该write操作引起的文件属性更新的i/o
+O_TRUNC 	如果此文件存在，而且为只读或读-写成功打开，则将其长度截断为0
+O_TTY_INIT 	如果打开一个还未打开的终端设备，设置非标准termios参数值，使其符合single unix specificaion标准
+O_DSYNC 	使每次write要等待物理io操作完成，但是如果该写操作并不影响读取刚写入的数据，则不需要等待文件属性被更新
+O_RSYNC		使每一个以文件描述符作为参数进行的read操作等待，直至所有对文件同一部分挂起的写操作完成
+
+fd参数说明:
+1.当path指定的是绝对路径时，fd参数被忽略，openat相当于open
+2.path为相对路径时，fd参数指出了相对路径名在文件系统中的开始地址，fd参数是通过打开相对路径名所在的目录来获取的
+3.path为相对路径名，fd参数为AT_FDCWD，路径名在当前工作目录中获取，openat函数在操作上和open函数相同
+
+概念:TOCTTOU time-of-check-to-time-of-use
+如果有两个基于文件的函数调用，其中第二个调用依赖于第一个调用的结果，那么程序是脆弱的,因为两个调用非原子操作
+
+--------------------------------------------函数create-----------------
+#include <fcntl.h>
+int create(const char *path, mode_t mode);
+等价于open(path, O_WRONLY | O_CREATE | O_TRUNC, mode);
+
+---------------------------------------------函数close-----------------------
+#include <unistd.h>
+int close(int fd); //返回值 若成功返回0 失败-1
+关闭一个文件时还会释放该进程加在该文件上的所有记录锁
+当一个进程结束时，内核自动关闭它所有打开的文件
+
+-------------------------------------函数lseek----------------------
+文件偏移量：相对于开始处的计算的字节数
+#include <unistd.h>
+off_t lseek(int fd, off_t offset, int whence); //返回值 成功：新的文件偏移量，失败-1
+
+若whence是SEEK_SET,	则文件的偏移量设置为距离文件开始处offset个字节
+		  SEEK_CUR, 则文件的偏移量设置为当前值加offset，offset可正负
+		  SEEK_END, 则文件的偏移量设置为文件长度加offset，offset可正负(若文件偏移量大于文件长度，则下一次写的操作会加长该文件并在文件中构成一个空洞（所有中间都被置位0，但这一部分是否占用磁盘空间取决于文件系统)
+
+---------------------------------------函数read----------------------
+#include <unistd.h>
+ssize_t read(int fd, void *buf, size_t nbytes); //返回值 成功:读取到的字节数若到文件尾部返回0，错误返回-1
+
+-----------------------------------------函数write-----------------
+#include <unistd.h>
+ssize_t write(int fd, const void* buf, size_t nbytes); //返回值 成功:以写的字节数，错误返回-1
+
+------------------------------------I/O的效率-----------------
+操作系统试图使用高速缓存技术来将相关文件放在内存中以便重复数据的读写
+
+大多数文件系统为了改善性能都是用预读技术
+
+所谓不带缓冲是指用户层没有缓存，通过系统调用直接对磁盘文件进行读写，但是对于内核来说，还是进行了缓存，内核现将数据写到内核缓冲存储器中，当缓冲存储器溢出时再进行实际的IO操作
+
+标准IO（带缓冲的IO）,标准IO通过库函数提供了无缓冲IO的带缓冲IO接口,在用户层建立一个流缓存区，库函数向流缓存区读写数据，流缓存区溢出时进行系统调用，即再调用无缓冲的IO
+
+无缓冲的IO操作数据流向路径：数据——内核缓存区——磁盘
+
+标准IO操作的数据流向：数据——流缓存区——内核缓存区——磁盘
+
+-------------------------------------文件共享--------------------
+每个进程在进程表中有一个记录项，记录项包含文件描述符和指向文件表项的指针
+
+--------------------------------原子操作-------------------
+原子操作:由多步组成的一个操作，如果该操作原子地执行则要不执行完，要不不执行，不可能执行所有步骤的一个子集
+#include <unistd.h>
+ssize_t pread(int fd, void *buf, size_t nbytes, off_t offset); //返回值 成功读到的字节数，到达文件尾返回0，错误返回-1
+ssize_t pwrite(int fd, const void* buf, size_t nbytes, off_t offset); //返回值 成功返回已写的字节数，失败返回-1
+以上两个函数将lseek和read或write进行了原子操作的封装
+
+----------------------------函数dup和dup2-----------------------
+
+#include <unistd.h>
+int dup(int fd); //返回当前可用的文件描述符的最小值
+int dup2(int fd, int fd2); 返回值 成功返回新的文件描述符，出错则返回-1 //原子操作
+fd2来指定新的文件描述符，如果fd2已经打开，则先关闭，如果fd == fd2则直接返回fd2不关闭，否则fd2的FD_CLOEXEC文件描述符标志就被清除，这样子fd2在进程调用exec是打开状态
+
+!!注意点:每一个文件描述符都有自己的一套文件描述符标志(文件描述符标志目前只有FD_CLOEXEC)
+!!注意点:文件描述符标志和文件状态标志不同，文件状态标志取决于open函数中oflag参数
+
+输入输出重定向的实现与dup有关，2>&1表示的是将fd2重定向至fd1所指向的文件表项 eg: dup2(fd1, fd2);这番操作后文件指针指向同一个文件表项
+-----------------------------函数sync,fsync,fdatasync------------------
+延迟写(delayed write):向文件写入数据时，内核通常先将数据复制到缓冲区中，然后排入队列，晚些时候(当要重新使用该缓冲区时)再写入磁盘
+
+#include <unistd.h>
+int fsync(int fd);  //只对由文件描述符fd指定的一个文件起作用，并且等待写入到磁盘结束才返回,会同步更新文件的属性
+int fdatasync(int fd); //返回值 成功0 错误-1,类似fsync，但是只影响文件的数据部分
+void sync(void); //只是将所有修改过的块缓冲区写入到队列中，并不等待实际的硬盘写入(update守护进程周期性调用sync函数，sync命令也会调用该函数)
+
+---------------------------函数fcntl-------------------
+#include <fcntl.h>
+int fcntl(int fd, int cmd, ... /* int arg */); //修改已经打开的文件属性，返回值 成功依赖于cmd，失败-1
+五种功能:
+1.复制一个已有的文件描述符cmd = F_DUPFD 或 cmd = F_DUPFD_CLOEXEC)
+2.获取/设置文件描述符标志(cmd = F_GETFD 或 cmd = F_SETFD)
+3.获取/设置文件状态标志(cmd = F_GETFL 或 cmd = F_SETFL)
+4.获取/设置异步i/o所有权(cmd = F_GETOWN 或 cmd = F_SETOWN)
+5.获取/设置记录锁(cmd = F_GETLK, F_SETLK F_SETLKW)
+
+
+	F_DUPFD 			复制文件描述符fd，如同dup(fd, fd2),
+	F_DUPFD_CLOEXEC 	复制文件描述符，设置与新描述符关联的FD_CLOEXEC文件描述符标志，返回新的文件描述符
+	F_GETFD				对应于fd的文件描述符标志作为函数值返回，当前之定义了FD_CLOEXEC
+	F_SETFD				对于fd设置文件描述符标志，新标志值按照第3个参数设置
+	F_GETFL 			对应于fd的文件状态标志作为函数值返回
+						O_RDONLY
+						O_WRONLY
+						O_RDWR
+						O_EXEC
+						O_SEARCH
+						O_APPEND
+						O_NONBLOCK
+						O_SYNC 等待写完成（数据和属性)
+						O_DSYNC 等待写完成(仅数据)
+						O_RSYNC 同步读和写
+						O_FSYNC	等待写完成
+						O_ASYNC 异步I/O
+		
+						如何检验:
+			if ((val = fcntl(atoi(argv[1]), F_GETFL, 0)) < 0)
+			{
+				err_sys("fcntl error for fd %d", atoi(argv[1]));
+			}
+			switch (val & O_ACCMODE)
+			{
+			case O_RDONLY:
+				printf("read only");
+				break;
+			case O_WRONLY:
+				printf("write only");
+				break;
+			default:
+				err_dump("unknown access mode");
+			}
+
+			if (val & O_APPEND)
+				printf(", append");
+			if (val & O_NONBLOCK)
+				printf(", nonblocking");
+			if (val & O_SYNC)
+				printf(", synchronous writes");
+#if !defined(_POSIX_C_SOURCE) && defined(O_FSYNC) && (O_FSYNC != O_SYNC)
+			if (val & O_FSYNC)
+				printf(", synchronous writes");
+#endif
+	F_SETFL 			可以修改的有O_APPEND, O_NONBLOCK, O_SYNC, O_DSYNC, O_RSYNC, O_FSYNC, O_ASYNC	
+
+	!!注意点在设置FL或者FD时，应该先获取当前的值，然后采用位运算计算出新的标志，之后再来设置
+	F_GETOWN 			获取当前接收SIGIO和SIGURG信号的进程id或进程组id
+	F_SETOWN 			设置接收SIGIO和SIGURG信号的进程id或进程组id，arg为正则表示进程id，负则表示arg绝对值的进程组id
+
+----------------------------函数ioctl--------------------
+ #include <sys/ioctl.h>
+
+ int ioctl(int fd, unsigned long request, ...); //返回值 出错返回-1，成功返回其他
+通常，需要包含设备专用的头文件比如终端i/o的ioctl命令需要头文件<termios.h>
+
+
+============================================
+第七章:进程环境
+
+进程终止的方法:
+1.main返回(c99才规定main的返回值为0)
+2.调用exit
+3.调用_exit 或者_Exit
+4.最后一个线程从其启动例程返回
+5.从最后一个线程调用pthread_exit
+
+(异常退出)
+	6.调用abort
+	7.接到一个信号
+	8.最后一个线程对取消请求做出响应
+
+在调用main函数前先调用一个特殊的启动例程，可执行程序会将此启动例程指定为该程序的起始地址
+如果将启动例程(系统调用exec函数)用c代码写exit(main(argc, argv)) 通常汇编实现（通过编译器)
+
+1.退出函数
+#include <stdlib.h>
+void exit(int status);(执行一些清理处理，先对于atexit()函数记录的函数指针进行执行，然后对于所有打开流调用fclose(),最后调用_exit 或者_Exit)  main中return等价
+
+void _Exit(int status);(直接返回内核)
+#include <unistd.h>
+void _exit(int status);(直接返回内核)
+
+2.函数atexit
+#include <stdlib.h>
+int atexit(void (*func)(void));(记录使用exit函数后需要调用的函数指针)
+!!注意点:内核执行某一个程序的唯一方法是调用exec函数
+进程自愿终止的唯一方式是显示或者隐式（exit())调用_exit或者_Exit
+
+ISO c 和 posix.1都规定argv[argc]是NULL
+
+------------------环境表------------------
+如同命令参数表argv一样，每个程序都接收到一个环境表，extern char **environ记录
+历史上int main(int argc, char *argv[], char *envp[]); //但不符合ISO C的规定，所以通常使用environ或者getenv和putenv来操作
+
+------------------------c程序的存储空间布局----------------
+
+1. .text 
+	cpu执行的机器指令部分，可共享（文本编辑器，c编译器和shell）相同的指令在存储器中只需要一个部分即可，一般只读
+2. 初始化数据段(.data数据段)
+	明确地赋初值的全局变量:int max = 0;
+3. 未初始化数据段 .bss段
+	在程序开始执行之前，内核将此段中的数据初始化为0或者为NULL: long sum[100];	
+4. 栈区
+	向下伸长逐渐变小)	
+5. 堆区
+	向上伸长(逐渐变大)
+//size a.out无法得出栈和堆的大小，因为在运行时(exec函数执行时)才知道
+//a.out中还有若干其他类型的段，例如，包含符号表的段、包含调试信息的段以及包含动态共享库链接表的段等等。在程序执行时是直接忽略这些段
+//a.out只会记录.text和初始化数据段
+//可以使用size命令查看
+//栈帧不一定是要向下伸展逐渐变小
+	//可能是用链表来实现的
+------------------------------共享库----------------------------
+库的存在会增加部分运行时的开销（当调用库函数时)但是优点是可以替换库文件而不需要修改源文件代码或者重新编译可执行程序
+
+gcc -static //阻止gcc使用共享库,默认使用
+
+--------------------------------存储空间分配---------------------
+#include <stdlib.h>
+void *malloc(size_t size);
+void *calloc(size_t nobj, size_t size);//该空间中的每一bit都会初始化为0,由于存在内存对其，所以所分配的大小应该是大于等于nobj*size的
+void *realloc(void* ptr, size_t newsize);
+//返回的指针一定是适当内存对齐的
+void free(void *ptr);
+
+----------------------------环境变量--------------------
+#include <stdlib.h>
+char* getenv(const char *name); //获取该name所对应的环境变量值
+int putenv(char* str); //name=value的字符串放入到环境表中
+int setenv(const char* name, const char* value, int rewrite); //rewirte为0则不删除已有的定义，否则删除
+int unsetenv(const char* name); //删除name的定义，即使不存在也不会错
+
+----------------------------函数setjmp和longjmp--------------
+#include <setjmp.h>
+int setjmp(jmp_buf env); //直接调用返回0，否则返回longjmp中val的值
+
+void longjmp(jmp_buf env, int val); //设置env，并且使得栈帧回到调用setjmp的栈帧中
+!!注意点:跳转的后变量的值:全局 静态 volatite(不让编译器进行优化)修饰的变量值不变，放在寄存器中的变量则会复原到调用setjmp之前的值
+
+-------------------------函数getrlimit和setrlimit---------------
+//进程的资源限制,由0号进程建立然后由后续进程继承
+#include <sys/resource.h>
+int getrlimit(int resource, struct rlimit *rlptr);
+int setrlimit(int resource, const struct rlimit *rlptr);
+
+       struct rlimit {
+               rlim_t rlim_cur;  /* Soft limit */
+               rlim_t rlim_max;  /* Hard limit (ceiling for rlim_cur) */
+           };
+resource的取值:
+	RLIM_INFINITY 无限制
+	RLIMIT_AS 进程总的可用存储空间的最大字节
+	RLIMIT_CORE core文件的最大字节数, ulimit -a
+				core file size          (blocks, -c) 0
+	RLIMIT_CPU CPU时间的最大量值（秒），当超过该软限制时，向进程发送SIGXCPU信号
+	RLIMIT_DATA 数据段的最大字节长度(初始化数据，未初始化数据，以及堆的总和
+	RLIMIT_FSIZE 可以创建的文件的最大字节长度，超过软限制时，发送SIGXFSZ信号
+	RLIMIT_MEMLOCK 一个进程使用mlock能够锁定在存储空间中的最大字节长度
+	RLIMIT_MSGQUEUE 进程为POSIX消息队列可分配的最大存储字节数
+	RLIMIT_NICE nice的值影响进程的调度优先级,nice可以设置最大限制,ps -fl中的nice
+	RLIMIT_NOFILE 每个进程能打开的最多文件数，会影响sysconf函数在参数_SC_OPEN_MAX中的返回值
+	RLIMIT_NPROC 每个实际用户ID可拥有的最大子进程数，
+	RLIMIT_NPTS 用户可同时打开的伪终端的最大数量
+	RLIMIT_RSS 最大驻内存集字节长度（RSS),如果可用的物理存储器非常少，则内核将从进程处取回超过RSS的部分
+	RLIMIT_SBSIZE 在任一给定时刻，一个用户可以占用的套接字缓冲区的最大字节
+	RLIMIT_SIGPENDING 一个进程可排队的信号最大数量
+	RLIMIT_STACK 栈的最大字节长度
+	RLIMIT_SWAP 用户可消耗的交换空间的最大字节
+	RLIMIT_VMEM 等价于RLIMIT_AS
+	资源限制影响到调用进程并由子进程继承
+
+============================================第八章 进程控制=====================
+通常PID0 为调度进程，也称交换进程是内核的一部分不执行任何磁盘的程序，也称系统进程
+ps:自举 计算机必须具备自举能力将自己所有的元件激活，以便能完成加载操作系统这一目的，然后再由操作系统承担起那些单靠自举代码无法完成的更复杂的任务
+PID1 为init进程，在自举过程结束时由内核调用，负责在自举内核后启动系统，读取与系统相关的初始化文件(/etc/rc* /etc/inittab /etc/init.d ，并将系统引导到一个状态（如多用户，单用户，维护...)，init进程绝不会终止，虽然是普通的用户进程（但是是root来执行)，将成为所有孤儿进程的父进程
+
+#include <unistd.h>
+pid_t getpid(void);
+pid_t getppid(void);
+uid_t getuid(void);
+uid_t geteuid(void); e是有效的缩写
+gid_t getgid(void);
+gid_t getegid(void);
+
+#include <unistd.h>
+pid_t fork(void); //出错返回-1，否则父进程返回子进程pid，子进程返回0
+fork后的子进程享有父进程中数据空间，堆和栈的副本，但共享.text字段
+
+!!!注意点:由于fork后一般加上exec,所以很多实现并不执行一个父进程的拷贝，而是使用了写时复制(COW Copy-On-Write)技术，内核将数据空间，堆栈设置为只读权限，写时制作副本，父进程所有打开的文件描述符都被复制到子进程中,文件共享（文件状态标志，文件偏移量，v节点指针)
+!!fork共享的有:
+	文件共享
+	实际用户id，实际组id，有效用户id，有效组id
+	附属组id
+	进程组id
+	会话id
+	控制终端
+	设置用户id标志和设置组id标志
+	当前工作目录
+	根目录
+	文件模式创建屏蔽字
+	信号屏蔽和安排
+	对任意打开文件描述符的执行时关闭标志
+	环境
+	连接的共性存储段
+	存储映像
+	资源限制
+
+vfork()允许调用者控制哪些部分共享
+vfork和fork的区别:
+	1.不将父进程的地址空间完全复制到子进程中，因为用vfork通常后面接exec，在调用exec或者exit之前，在父进程的空间运行(注意!!)
+	2.vfork保证子进程先执行（但是要是子进程依赖于父进程的动作，则会导致死锁)，子进程调用exec或者exit后父进程才可能被调度
+
+!!!注意点:sizeof是编译期得知
+
+--------------------------------------函数exit-----------
+exit是否对标准io流刷新是未定义行为（取决于实现），但目前不刷新，因为最后仍然会由内核关闭所有已经打开的文件描述符
+
+不管进程如何终止，都会执行内核中的一段代码，这段代码为相应进程关闭所有打开描述符，释放它所使用的存储器
+
+僵尸进程:一个已经终止，但是父进程尚未对起进行善后处理（wait waitpid获取终止进程的有关信息，释放它仍占用的资源) ps可以打印
+
+一个init的子进程：可能是init直接产生的，也可能是由init收养的（其父进程已经终止)
+
+------------------------------------函数wait和waitpid------------------
+wait waitpid 如果其所有子进程还在运行，则阻塞
+			 如果一个子进程已经终止，正等待父进程获取其终止状态，则取得该子进程的终止状态立刻返回
+			 如果它没有任何子进程，则错误返回
+
+#include <sys/wait.h>
+pid_t wait(int *statloc);
+pid_t waitpid(pid_t pid, int *statloc, int options);
+waitpid中pid的作用
+1. pid == -1 等待任意子进程，同wait
+2. pid > 0   等待与pid相等的子进程
+3. pid == 0 等待组id等于调用进程组ID的任意子进程
+4. pid < -1 等待组id等于pid绝对值号的任意子进程
+
+options 为0或者按位或
+	WCONTINUED 若实现支持作业控制，那么由pid指定的任意子进程在停止后已经继续，但其状态尚未报告，返回其状态
+	WNOHANG 若pid指定的子进程不是立即可用的，则waitpid不阻塞，此时返回0
+	WUNTRACED 若实现支持作业控制，而由pid指定的任意子进程已处于停止状态，并且状态自停止以来为报告过，则返回其状态，WIFSTOPPED宏确定返回值是否对应于一个停止的进程
+
+错误返回0或-1,成功返回终止的进程号
+waitpid可以控制是否阻塞
+
+status宏 
+WIFEXITED(status)	若为正常终止子进程返回的状态，则为真，对于这种情况可执行WEXITSTATUS(status)获取子进程传递给exit或_exit参数的低8位
+WIFSIGNALED(status)  若为异常终止子进程返回的状态，则为真，执行WTERMSIG(status)获取使子进程终止的信号编号,另外定义了宏WCOREDUMP的话，若已产生core文件，则为真
+WIFSTOPPED(status) 若为当前暂停子进程的返回的状态，则为真，执行WSTOPSIG(status)获取使得子进程暂停的信号编号
+WIFCONTINUED(status) 若在作业控制暂停后已经继续的子进程返回了状态，则为真
+
+--------------------------------函数waitid---------------------
+#include <sys/wait.h>
+int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
+	成功返回0，错误返回-1
+idtype:
+	P_PID 等待一特定进程：id包含要等待子进程的进程id
+	P_PGID 等待一特定进程组中的任意进程：id包含要等待子进程的进程组id
+	P_ALL 等待任一子进程: 忽略id
+
+options 按位或来操作
+WCONTINUED 等待一进程，它以前曾被停止，此后又继续，但状态为报告
+WEXITED 等待已经退出的进程
+WNOHANG 如无可用的子进程退出状态，立刻返回而非堵塞
+WNOWAIT 不破坏子进程退出状态，该子进程退出状态可以由后续的wait waitpid waitid来调用
+WSTOPPED 等待一进程，它已经停止，但状态未报告
+
+--------------------------------函数wait3 wait4-----------------------
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
+pid_t wait3(int *statloc, int options, struct rusage *resage); resage资源统计信息包括用户cpu时间总量，系统cpu时间总量，缺页次数，接收到信号的次数(man getrusage)
+pid_t wait4(pid_t pid, int *statloc, int options, struct rusage *rusage);
+成功返回进程id，否则返回-1
+
+----------------------------------竞争条件-----------------
+轮询polling
+	while (getppid() != 1)
+		sleep(1); //浪费cpu时间
+
+---------------------------------函数exec---------------
+exec不创建新进程，直接让磁盘上的一个程序替换当前进程的.text .data heap stack
+ #include <unistd.h>
+
+ extern char **environ;
+
+ //若在使用ISO C之前，应该让最后一个参数为(char *)NULL
+ int execl(const char *path, const char *arg, ...
+                       /* (char  *) NULL */);
+
+ int execv(const char *path, char *const argv[]);
+
+ int execle(const char *path, const char *arg, ...
+                      /*, (char *) NULL, char * const envp[] */);
+
+ int execve(const char *pathname, char *const argv[], char *const envp[]);
+
+ int execlp(const char *file, const char *arg, ...
+                       /* (char  *) NULL */);
+ int execvp(const char *file, char *const argv[]);
+
+ int fexecve(int fd, char *const argv[], char *const envp[]);  成功不返回，错误返回-1
+
+ file会根据PATH环境变量来找可执行文件若该文件不是二进制文件而视为shell脚本
+
+ 如何记忆:p表示参数为filename使用PATH环境变量，l表示取参数表，v表示argv[],e表示envp[],f表示fd
+
+
