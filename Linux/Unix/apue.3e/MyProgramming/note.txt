@@ -17,16 +17,18 @@ STDIN_FILENO STDOUT_FILENO STDERR_FILENO 定义在<unistd.h>
 ---------------------函数open和openat------------
 #include <fcntl.h>
 int open(const char *path, int oflag, ... /* mode_t mode */); //即使参数完全一致，open的返回值也会是一个新的文件描述符，开启一个新的文件表项，但参数相同时，文件表项中的v节点指针指向同一个v节点
-int openat(int fd, const char *path, int oflag, ... /* mode_t mode */);
+//内核会以进程的有效用户id和有效组id来检查权限
+int openat(int dirfd, const char *path, int oflag, ... /* mode_t mode */);
 成功返回文件描述符，否则返回-1
 
 按位或来操作oflag
-O_RDONLY	只读打开
-O_WRONLY	只写打开
-O_RDWR      读、写打开
+O_RDONLY	只读打开 (需要有读权限)
+O_WRONLY	只写打开 (需要有写权限)
+O_RDWR      读、写打开 (需要有读写权限)
 O_EXEC		只执行打开
 O_SEARCH	只搜索打开（应用于目录)
-必须执行一个，下面是可选的
+以上必须执行一个，下面是可选的(使用|来连接)
+
 O_APPEND	每次写时追加到文件的尾端,（即在write操作时会修改文件表项中的文件偏移量为文件尾部，将lseek(fd, 0, SEEK_END)和open(path, O_WRONLY)封装成一个原子操作)
 O_CLOEXEC	把FD_CLOEXEC常量设置为文件描述符标志
 O_CREAT		若文件不存在则创建它，使用此选项时，open函数需要mode参数，使用mode指定该新文件的访问权限
@@ -36,15 +38,15 @@ O_NOCTTY 	如果path引用的是终端设备，则不将该设备分配作为此
 O_NOFOLLOW 	如果path引用的是一个符号链接，则出错
 O_NONBLOCK 	如果path引用的是一个FIFO，一个块文件或一个字符文件则此选项为文件的本次打开操作和后续的io操作设置非阻塞方式
 O_SYNC 		使每次write等待物理i/o完成，包括该write操作引起的文件属性更新的i/o
-O_TRUNC 	如果此文件存在，而且为只读或读-写成功打开，则将其长度截断为0
+O_TRUNC 	如果此文件存在，而且为只读或读-写成功打开，则将其长度截断为0(需要有写权限，猜想:>重定向使用了O_TRUNC
 O_TTY_INIT 	如果打开一个还未打开的终端设备，设置非标准termios参数值，使其符合single unix specificaion标准
 O_DSYNC 	使每次write要等待物理io操作完成，但是如果该写操作并不影响读取刚写入的数据，则不需要等待文件属性被更新
 O_RSYNC		使每一个以文件描述符作为参数进行的read操作等待，直至所有对文件同一部分挂起的写操作完成
 
-fd参数说明:
-1.当path指定的是绝对路径时，fd参数被忽略，openat相当于open
-2.path为相对路径时，fd参数指出了相对路径名在文件系统中的开始地址，fd参数是通过打开相对路径名所在的目录来获取的
-3.path为相对路径名，fd参数为AT_FDCWD，路径名在当前工作目录中获取，openat函数在操作上和open函数相同
+dirfd参数说明:
+1.当path指定的是绝对路径时，dirfd参数被忽略，openat相当于open
+2.path为相对路径时，dirfd参数指出了相对路径名在文件系统中的开始地址，dirfd参数是通过打开相对路径名所在的目录来获取的
+3.path为相对路径名，dirfd参数为AT_FDCWD，路径名在当前工作目录中获取，openat函数在操作上和open函数相同
 
 概念:TOCTTOU time-of-check-to-time-of-use
 如果有两个基于文件的函数调用，其中第二个调用依赖于第一个调用的结果，那么程序是脆弱的,因为两个调用非原子操作
@@ -132,7 +134,7 @@ int fcntl(int fd, int cmd, ... /* int arg */); //修改已经打开的文件属�
 
 	F_DUPFD 			复制文件描述符fd，如同dup(fd, fd2),
 	F_DUPFD_CLOEXEC 	复制文件描述符，设置与新描述符关联的FD_CLOEXEC文件描述符标志，返回新的文件描述符
-	F_GETFD				对应于fd的文件描述符标志作为函数值返回，当前之定义了FD_CLOEXEC
+	F_GETFD				对应于fd的文件描述符标志作为函数值返回，(目前实现当前只定义了FD_CLOEXEC, 该项数据在进程表项中)
 	F_SETFD				对于fd设置文件描述符标志，新标志值按照第3个参数设置
 	F_GETFL 			对应于fd的文件状态标志作为函数值返回
 						O_RDONLY
@@ -186,6 +188,314 @@ int fcntl(int fd, int cmd, ... /* int arg */); //修改已经打开的文件属�
 
  int ioctl(int fd, unsigned long request, ...); //返回值 出错返回-1，成功返回其他
 通常，需要包含设备专用的头文件比如终端i/o的ioctl命令需要头文件<termios.h>
+
+
+=====================================第四章：文件和目录====================
+-----------------函数stat, fstat, fstatat和lstat------------------
+#include <sys/stat.h>
+int stat(const char *restrict pathname, struct stat *restrict buf); //文件有关信息的数据结构 ls -l
+int fstat(int fd, struct stat *buf); //fd上打开文件的有关信息
+int lstat(const char *restrict pathname, struct stat *restrict buf); //pathname为符号链接时返回符号连接信息,而非所链接的文件信息
+int fstatat(int dirfd, const char *restrict pathname, struct stat *restrict buf, int flag); //对于当前打开目录dirfd的路径名返回文件信息
+flag 控制是否跟随者一个符号链接
+//flag为AT_SYMLINK_NOFOLLOW时，返回链接本身信息
+//dirfd为AT_FDCWD时，且pathname为相对路径时，fstatat会计算相对于当前目录的pathname参数，否则是相对于dirfd的相对路径
+//如果pathname为绝对路径时，dirfd参数会被忽略
+
+ //返回值 成功0 失败-1
+
+----------------------------文件类型-------------
+struct stat中st_mode记录了下列信息
+1.普通文件(文本或者二进制数据，有别于二进制可执行文件二进制可执行文件需要elf)
+2.目录文件:对于一个目录文件具有读权限的任一进程都可以读该目录的内容，但只有内核可以直接写目录文件，进程需要使用函数来修改目录
+3.块设备文件:每次访问以固定长度为单位进行，提供对设备带缓冲的访问
+4.字符设备文件:不带缓冲的访问
+5.FIFO:（pipe）进程间通信
+6.Socket:进程的网络通信，也可用于在一台主机上进程之间的非网络通信
+7.符号连接
+<sys/stat.h>下的宏用于判断文件类型
+参数为st_mode
+S_ISREG() ：普通文件
+S_ISDIR() ：目录文件
+S_ISCHR() ：字符文件
+S_ISBLK() ：块文件
+S_ISFIFO() ： 管道文件或队列文件
+S_ISLNK() : 软链接符号连接
+S_ISSOCK() : 套接字
+
+S_ISUID S_IDGID常量可以&st_mode来判断文件是否具有其他属性（setuid和setgid,linux笔记中有提及)
+
+从stat结构中确定进程间通信（IPC)对象的类型
+参数为stat结构的指针
+S_TYPEISMQ() : 消息队列
+S_TYPEISSEM() : 信号量
+S_TYPEISSHM() : 共享存储对象
+
+#define S_IFMT  00170000
+#define S_IFSOCK 0140000
+#define S_IFLNK	 0120000
+#define S_IFREG  0100000
+#define S_IFBLK  0060000
+#define S_IFDIR  0040000
+#define S_IFCHR  0020000
+#define S_IFIFO  0010000
+#define S_ISUID  0004000
+#define S_ISGID  0002000
+#define S_ISVTX  0001000
+
+#define S_ISLNK(m)	(((m) & S_IFMT) == S_IFLNK)
+#define S_ISREG(m)	(((m) & S_IFMT) == S_IFREG)
+#define S_ISDIR(m)	(((m) & S_IFMT) == S_IFDIR)
+#define S_ISCHR(m)	(((m) & S_IFMT) == S_IFCHR)
+#define S_ISBLK(m)	(((m) & S_IFMT) == S_IFBLK)
+#define S_ISFIFO(m)	(((m) & S_IFMT) == S_IFIFO)
+#define S_ISSOCK(m)	(((m) & S_IFMT) == S_IFSOCK)
+
+----------------------------------------设置用户id和用户组id------------
+进程包含了至少这些id:
+|实际用户id
+|实际组id 		我们实际上是谁(谁运行的进程)
+------
+|有效用户id
+|有效组id
+|附属组id 		用于文件访问权限检查(可以看做是进程对应的程序文件的拥有者,用户组)(一般等于实际用户id实际组id,当文件具有其他属性如setuid和setgid时则有效id就会变成setuid和setgid中的值)
+------
+|保存的设置用户id
+|保存的设置组id	由exec函数保存包含了有效用户id和有效组id的副本
+------
+文件所有者st_uid,组所有者st_gid
+st_mode中设置特殊标志的话，可以实现文件其他属SetUid和SetGid
+用S_ISUID和S_ISGID来测试是否设置了setuid或setgid
+
+---------------------------------------文件访问权限-----------------------
+st_mode同时包含了文件的访问权限
+
+S_IRUSR 				用户读
+S_IWUSR 				用户写
+S_IXUSR 				用户执行
+
+S_IRGRP 				用户组读
+S_IWGRP 				用户组写
+S_IXGRP 				用户组执行
+
+S_IROTH 				其他读
+S_IWOTH					其他写
+S_IXOTH 				其他执行
+
+---------------------------------新文件和目录的所有权------------
+新文件的用户id设置为进程的有效用户id, 组id取决于实现
+1.新文件的组id可以是进程的有效组id
+2.新文件的组id可以是它所在的目录的组id(linux中新文件的组id默认为进程的有效id，除非所在目录设置了setGid)
+
+---------------------------------函数access和faccessat----------------
+当open函数打开一个文件时，默认是用有效用户id和有效组id来执行权限测试，但有时希望按照实际的(所登录的当前用户用户组)
+#include <unistd.h>
+int access(const char* pathname, int mode);
+int faccessat(int dirfd, const char * pathname, int mode, int flag);
+//返回值 成功0 错误-1
+
+dirfd为AT_FDCWD时，pathname为当前目录的相对路径（否则就以dirfd的目录作为相对)
+pathname为绝对路径时忽略dirfd
+
+mode R_OK 测试读权限
+	 W_OK 测试写权限
+	 X_OK 测试执行权限
+	 F_OK 测试是否存在
+
+flag参数为AT_EACCESS的话则为有效用户id和有效组id
+	     AT_SYMLINK_NOFOLLOW
+               如果pathname是符号链接，请不要取消引用它：而是返回有关链接本身的信息
+			0是默认实际
+
+----------------------------------函数umask-----------------
+#include <sys/stat.h>
+mode_t umask(mode_t cmask);//返回值之前的umask
+参数cmaks为文件访问权限的按位|
+
+!!注意点:当创建文件时，若想要确保指定的文件访问权限已经有，最好先使用umask来修改当前的umask值，否则可能会因为当前的umask值关闭对应权限
+
+---------------------------------函数chmod和fchmod和fchmodat
+#include <sys/stat.h>
+//为了修改文件权限，进程的有效用户id必须等于文件的所有者id，或者该进程具有超级用户权限
+int chmod(const char* pathname, mode_t mode); //在指定文件上操作
+int fchmod(int fd, mode_t mode); //在已经打开的文件进行操作
+int fchmodat(int dirfd, const char*pathname, mode_t mode, int flag); //flag设置了AT_SYMLINK_NOFOLLOW时不会跟随链接文件，而是链接文件本身
+//返回值 成功0 错误-1
+mode为上述9个文件访问权限以及S_ISUID S_ISGID S_ISVTX 分别对应setuid setgid sbit
+							 S_IRWXU S_IRWXG S_IRWXO
+
+!!注意点:需要注意的是进程所属的有效用户id必须和文件拥有者id相匹配，否则错误
+		 其次，若进程的有效gid或者附属gid不等于文件的gid则mode若是setuid和setgid会失效，但是返回成功
+
+---------------------------------粘着位--------
+S_ISVTX setbit (历史原因叫做S_IsSaved-text bit,最初因为加载文件速度的原因，将一份程序的.text段放在了交换空间里，以便下次执行程序更快地加载到内存里)
+
+---------------------------函数chown,fchown,fchownat,lchown--------------------
+#include <unistd.h>
+
+int chown(const char *pathname, uid_t owner, gid_t group); //chown会dereference
+int fchown(int fd, uid_t owner, gid_t group);
+int fchownat(int dirfd, const char* pathname, uid_t owner, gid_t group, int flag); //flag
+  AT_EMPTY_PATH (since Linux 2.6.39) //如果pathname是空字符串，则对dirfd引用的文件（可能是使用open（2）O_PATH标志获取）进行操作。 在这种情况下，dirfd可以引用任何类型的文件，而不仅仅是目录。 如果dirfd是AT_FDCWD，则该调用将在当前工作目录上运行。 该标志是特定于Linux的; define _GNU_SOURCE以获取其定义。
+  AT_SYMLINK_NOFOLLOW
+int lchown(const char *pathname, uid_p owner, gid_t group); // lchown() is like chown(), but does not dereference symbolic links.
+
+owner或group任意一个是-1则对应的ID不变 //返回值 成功0 错误-1
+!!注意点:当_POSIX_CHOWN_RESTRICTED可选地定义在<unistd.h>中，若定义了则不能更改其他用户文件的uid但是可以修改自己所拥有的文件的gid，不过只能修改成自己所属的组
+
+---------------------------文件长度----------------------
+stat结构中st_size记录了以字节为单位的文件长度，只对普通文件、目录文件、符号链接有意义
+
+!!注意点:符号链接的长度等于所指向的文件名的实际长度
+
+
+---------------------------文件中的空洞--------------------------
+如何产生：偏移量超过文件尾部，并且写入了部分数据
+空洞文件作用很大，例如迅雷下载文件，在未下载完成时就已经占据了全部文件大小的空间，这时候就是空洞文件。下载时如果没有空洞文件，多线程下载时文件就都只能从一个地方写入，这就不是多线程了。如果有了空洞文件，可以从不同的地址写入，就完成了多线程的优势任务
+
+--------------------------文件截取-------------------------
+#include <unistd.h>
+int truncate(const char* pathname, off_t length);
+int ftruncate(int fd, off_t length);
+//返回值 成功0 错误-1
+将现有文件截断成length
+1.length > 实际的则文件长度增加（可能在以前的文件尾和新的文件尾之间产生空洞)
+2.length < 实际的则超过部分不能再被访问
+
+---------------------------文件系统----------------------------------
+目录项(inode编号和文件名)不等于目录，目录是一系列目录项的列表
+每一个inode中都有一个链接计数（指向该inode的目录项数，只有当链接计数为0时才会删除该文件也就是释放该文件所占用的block)
+
+在stat结构中，链接计数在st_nlink成员中，该成员类型为nlink_t，这种链接为硬链接，软链接（符号链接）则block中记录了该符号链接所指向的文件的名字
+
+数据类型为ino_t inode包含了文件的所有信息：文件类型，文件访问权限，文件长度和指向文件block的指针，stat结构中的大多数数据来自于inode，只有两项重要数据放在目录项中(包含的文件的文件名和该文件的inode编号)
+
+---------------------------函数link, linkat, unlink, unlinkat和remove----------
+创建一个指向现有文件的硬链接的方法是使用link或linkat
+#include <unistd.h>
+int link(const char*existingpath, const char* newpath);
+int linkat(int efd, const char*existingpath, int nfd, const char* newpath, int flag); 
+//返回值 成功0 错误-1
+
+!!注意点:若newpath已经存在则返回错误，只创建newpath中最后一级，路径中其他部分应该是已经存在的
+at同上述at后缀的函数
+当现有文件是符号链接时，flag设置了AT_SYMLINK_NOFOLLOW则不会对符号链接进行解引用，则创建的是指向符号链接的链接
+!!注意点:创建新目录项和增加链接计数应当是原子操作 
+!!为了避免造成文件系统中的循环，大多数文件系统不允许创建对于目录的硬链接
+
+//删除一个现有的文件，并将pathname所引用文件的链接计数-1
+#include <unistd.h>
+int unlink(const char*pathname);
+int unlinkat(int dirfd, const char*pathname, int flag); //flag为AT_REMOVEDIR时unlinkat的行为如同rmdir函数一样删除目录，否则如同unlink
+//返回值 成功0 错误-1
+!!注意点:当有进程打开了该文件时，该文件也不会被删除，删除一个文件时，内核会率先检查打开该文件的进程个数（推测可能是统计文件表项的个数)，然后再检查链接计数，只有当这两个数值都是0时才会删除该文件的内容
+
+标准库中#include <stdio.h> int remove(const char*pathname); 对于文件达到unlink对于目录达到rmdir
+
+----------------------------函数rename和renameat-----------------------
+#include <stdio.h>
+int rename(const char* oldname, const char*newname);
+int renameat(int oldfd, const char*oldname, int newfd, const char*newname);
+//返回值 成功0 错误-1
+
+1.如果oldname指的是一个文件而不是目录，那么为这个文件或符号链接重命名，如果newname已经存在则它不能引用为一个目录，而且会删除重名的目录项，对包含oldname的目录以及包含newname的目录，调用进程必须具有写权限
+2.如果oldname指的是一个目录，那么为该目录重命名，如果newname已经存在，则必须引用一个目录，而且该目录只能是空目录（只有.和..)，并且会删除重名的目录，然后修改目录名!!注意点:oldname不能是newname前缀，比如/usr/foo /usr/foo/test不能这样子
+3.若oldname或newname引用的符号链接，那么处理的符号链接本身
+4.不能对.和..重名
+5.oldname和newname一样时不做操作返回成功
+
+--------------------------------符号链接-----------------------
+符号链接是对文件的间接指针(推测block中记录了所指向的文件名)
+并且可以指向不同的文件系统
+
+--------------------------------创建和读取符号链接-------------------
+#include <unistd.h>
+int symlink(const char*actualpath, const char *sympath);
+int symlinkat(const char*actualpath, int dirfd, const char*sympath);
+//返回值 成功0 错误-1
+//不要求actualpath已经存在，并且可以位于不同的文件系统
+
+因为open函数会对符号链接进行解引用，所以readlink和readlinkat产生可以读取该链接本身
+#include <unistd.h>
+ssize_t readlink(const char*restrict pathname, char *restrict buf, size_t bufsize);
+ssize_t readlinkat(int dirfd, const char* restrict pathname, char *restrict buf, size_t bufsize);
+//返回值 成功读取到的字节数 失败-1
+
+--------------------------------文件的时间---------------------
+字段	说明					例子		ls选项
+st_atim 文件数据的最后访问时间	read 		ls -u
+st_mtim 文件数据的最后修改时间  write 		默认
+st_ctim i节点状态的最后修改时间 chmod,chown ls -c
+
+文件系统并不会维护inode的最后访问时间
+
+---------------------------------函数futimens,utimennsat和utimes-------
+#include <sys/stat.h>
+int futimens(int fd, const struct timespec times[2]);
+int utimensat(int dirfd, const char*path, const struct timespec times[2], int flag);//flag设置AT_SYMLINK_NOFOLLOW则符号链接本身就会被修改，默认是对符号链接进行解引用，并把文件的时间改成符号链接的时间
+
+数组一个元素是访问时间，第二个元素是修改时间，（都是自从1970:1:1 00:00:00)以来所经过的秒数
+  struct timespec {
+      time_t tv_sec;        /* seconds */
+      long   tv_nsec;       /* nanoseconds */
+  };
+times的解读:
+1.times为NULL,则访问时间和修改时间两者都设置成当前时间
+2.times指向timespec的数组，任一数组元素的tv_nsec的值为UTIME_NOW，相应的时间戳就设置为当前时间，忽略相应的tv_sec字段
+3.times中任一数组元素的tv_nesc字段的值为UTIME_OMIT，则相应的时间戳保持不变，忽略相应的tv_sec字段
+4.times中的元素是正常数值则设置对应时间戳
+
+执行这些函数所要求的权限取决于times的值:
+1.NULL时，或者两个元素的tv_nsec字段为UTIME_NOW时，进程的有效用户id必须等于该文件的所有者id或进程对该文件有写的权限，或者进程是超级用户进程
+2.如果times非空并且任一tv_nsec字段不为UTIME_NOW或UTIME_OMIT，则进程的有效用户id必须等于该文件的所有者id同时进程对文件有写的权限，或者必须是超级用户进程
+3.times非空并且两个元素的tv_nesc字段都为UTIME_OMIT，就不执行权限检查
+
+#include <sys/time.h>
+int utimes(const char *filename, const struct timeval times[2]);
+//返回值 成功0 错误-1
+struct timeval {
+               long tv_sec;        /* seconds */
+               long tv_usec;       /* microseconds */
+};
+
+但是无法修改ctime，因为调用了utimes函数会自动更新ctime
+
+-------------------------------------函数mkdir,mkdirat和rmdir-------------
+#include <sys/stat.h>
+int mkdir(const char*pathname, mode_t mode);
+int mkdirat(int dirfd, const char *pathname, mode_t mode);
+//返回值 成功 0 错误-1
+创建空目录（自动创建.和..)所指定的文件访问权限mode由进程的文件模式创建屏蔽字修改（umask)
+
+#include <unistd.h>
+int rmdir(const char*pathname); //返回值 成功 0 错误-1
+//必须是空目录才能执行成功，为此即使有另外进程打开此目录后也无法创建新文件
+
+---------------------------------------读取目录-------------------
+对某个目录具有访问权限的任一用户都可以读目录，但是为了防止文件系统产生混乱只有内核能够写目录本身
+#include <dirent.h>
+struct dirent {
+       ino_t          d_ino;       /* Inode number */
+       off_t          d_off;       /* Not an offset; see below */
+       unsigned short d_reclen;    /* Length of this record */
+       unsigned char  d_type;      /* Type of file; not supported
+                                     by all filesystem types */
+       char           d_name[256]; /* Null-terminated filename */
+};
+
+DIR *opendir(const char*pathname);
+DIR *fdopendir(int fd); //返回值 成功 返回指针错误NULL(将已经打开的文件描述符转换成DIR结构)
+
+struct dirent *readdir(DIR *dp); //返回值 成功 返回指针 错误或在目录尾部返回NULL(推测内部维护了当前要读取的指针,执行一次readdir后当前指针后移)
+
+void rewinddir(DIR *dp); // The rewinddir() function resets the position of the directory stream dirp to the beginning of the directory.
+
+int  closedir(DIR *dp); //返回值 成功 返回0，错误返回-1
+
+long telldir(DIR *dp); //返回值与dp关联的目录中的当前位置   On success, the telldir() function returns the current location in the directory stream.  On error, -1 is returned, and errno is set appropriately.
+
+void seekdir(DIR *dp, long loc);   seekdir - set the position of the next readdir() call in the directory stream.
+
 
 
 ============================================
@@ -416,6 +726,7 @@ pid_t wait4(pid_t pid, int *statloc, int options, struct rusage *rusage);
 
 ---------------------------------函数exec---------------
 exec不创建新进程，直接让磁盘上的一个程序替换当前进程的.text .data heap stack
+需要注意必须对该文件有执行权限，然后必须是普通文件
  #include <unistd.h>
 
  extern char **environ;
