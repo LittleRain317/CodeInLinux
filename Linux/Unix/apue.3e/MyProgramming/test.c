@@ -1,47 +1,65 @@
-#include "../include/apue.h"
-#include <fcntl.h>
 #include <sys/mman.h>
-
-#define COPYINCR (1024 * 1024 * 1024)
-
-int main(int argc, char *argv[])
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#define ___ 0000
+#define __x 0001
+#define _w_ 0002
+#define _wx 0003
+#define r__ 0004
+#define r_x 0005
+#define rw_ 0006
+#define rwx 0007
+#define _24k(length, path) _24ksb(length, rw_, path)
+void* _24ksb(size_t length, int mode, char *path)
 {
-	int fdin, fdout;
-	void *src, *dst;
-	size_t copysz;
-	struct stat sbuf;
-	off_t fsz = 0;
-
-	if (argc != 3)
-		err_quit("usage: %s <fromfile> <tofile>", argv[0]);
-	if ((fdin = open(argv[1], O_RDONLY)) < 0)
-			err_sys("can't open %s for reading", argv[1]);
-	if ((fdout = open(argv[2], O_RDWR | O_CREAT | O_TRUNC, FILE_MODE)) < 0)
-	 		err_sys("can't creat %s for writing", argv[2]);
-	if (fstat(fdin, &sbuf) < 0)
-		err_sys("fstat error");
-	if (ftruncate(fdout, sbuf.st_size) < 0)
+	int result = 0;
+	switch (mode)
 	{
-		err_sys("ftruncate error");
+		case ___:
+			result = PROT_NONE;
+			break;
+		case __x:
+			result = PROT_EXEC;
+			break;
+		case _w_:
+			result = PROT_WRITE;
+			break;
+		case _wx:
+			result = PROT_EXEC | PROT_WRITE;
+			break;
+		case r__:
+			result = PROT_READ;
+			break;
+		case r_x:
+			result = PROT_EXEC | PROT_READ;
+			break;
+		case rw_:
+			result = PROT_WRITE | PROT_READ;
+			break;
+		case rwx:
+			result = PROT_EXEC | PROT_READ | PROT_WRITE;
+			break;
 	}
-	while (fsz < sbuf.st_size)
+	char temp[1024] = "./XXXXXX";
+	int fd = mkstemp(temp);
+	memcpy(path, temp, strlen(temp));
+	char buff[4096] = { 0 };
+	size_t sz = 0U;
+	for (size_t i = 0; i != length; i += sz)
 	{
-		if ((sbuf.st_size - fsz) > COPYINCR)
-			copysz = COPYINCR;
-		else
-			copysz = sbuf.st_size - fsz;
-		if ((src = mmap(0, copysz, PROT_READ, MAP_SHARED, fdin, fsz)) == MAP_FAILED)
-		{
-			err_sys("mmap error for input");
-		}
-		if ((dst = mmap(0, copysz, PROT_READ | PROT_WRITE, MAP_SHARED, fdout, fsz)) == MAP_FAILED)
-		{
-			err_sys("mmap error for output");
-		}
-		memcpy(dst, src, copysz);
-		munmap(src, copysz);
-		munmap(dst, copysz);
-		fsz += copysz;
+		sz = (length - i > 4096 ? 4096 : length -i);
+		write(fd, buff, sz);
 	}
-	exit(0);
+	return mmap(NULL, length, result, MAP_SHARED, fd, 0); 
+}
+#include <stdio.h>
+int main()
+{
+	char buff[1024] = { 0 };
+	void* test = _24k(30, buff);
+	*(int*)test = 400;
+	printf("缓冲文件:%s\n", buff);
+	//unlink(buff);
+	return 0;
 }

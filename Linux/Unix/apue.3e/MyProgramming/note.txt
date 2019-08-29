@@ -552,6 +552,297 @@ S_ISGID 	setgid 		若S_IXGRP被设置则执行时setgid 	将在目录中创建�
 						否则使强制性锁起作用（若支持)
 S_ISVTX	    setbit 		在交换区缓存.text段(若支持)		限制在目录中删除和重命名文件
 
+
+=================================第五章 标准I/O------------------
+标准io是针对流进行的，而之前是采用文件描述符，当用标准IO库打开或创建一个文件时，是使得流和文件相关联
+#include <stdio.h>
+#include <wchar.h>
+流的定向决定了所读写的字符是单字节还是多字节（宽）
+
+//设置流的定向
+int fwide(FILE *fp, int mode); //返回值 若流是宽字符则返回正值，若是窄则返回负，若流未定向则返回0
+mode为负，则fwide则试图使得指定的流是窄定向（字节定向）
+mode为正，则fwide则试图使得指定的流是宽定向
+mode==0， 则fwide不试图设置流的定向，但返回标识该流定向的值
+!!注意点:fwide并不改变已定向的流
+
+-----------------------------标准输入输出错误---------------------
+#include <stdio.h>
+stdin, stdout, stderr对应了系统调用中常用的
+STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO(#include <unistd.h>)
+
+------------------------------缓冲-------------------------
+标准I/O提供了三种类型的缓冲
+1.全缓冲:
+	在填满标准I/O缓冲区后才实际进行I/O操作，对于驻留在磁盘上的文件(当流涉及到文件)通常是由标准I/O实施全缓冲
+	fflush()可以人为地冲洗流,!!注意点:在UNIX中，flush有两种意思，在标准I/O库方面，flush意味着将缓冲区的内容写到磁盘上（哪怕缓冲区没有满)，而在终端驱动程序方面意味着丢弃缓冲区的数据
+2.行缓冲:
+	在输入和输出遇到换行符时，标准I/O库执行实际的I/O操作，当流涉及到一个终端时（标准输入和标准输出）通常实施行缓冲
+	!!注意点:因为缓冲区固定（所以只要填满了缓冲区哪怕没有写一个换行符也会进行实际的I/O）
+			 任何时候只要通过标准I/O库要求从一个不带缓冲的流或者一个带着行缓冲的流得到输入数据，那么就会冲洗所有行缓冲输出流(标准输入时,或者read(STDIN_FILENO)(不带缓冲的流)从内核中获取数据，会冲刷所有标准输出流)
+3.不带缓冲:
+	stderr一般是不带缓冲的
+	上述一般是因为ISO C中要求的是:
+	(1):当且仅当标准输入和标准输出并不指向交互式设备时，它们才是全缓冲
+	(2):标准错误绝对不是全缓冲
+	所以一般系统是：标准错误是不带缓冲，指向终端设备的流是行缓冲，否则是全缓冲
+
+//更改缓冲类型
+#include <stdio.h>
+void setbuf(FILE* restrict fp, char *restrict buf); //设置或关闭缓冲，带缓冲的话buf的大小必须为BUFSIZ（#include <stdio.h>)，NULL则为不带缓冲，当设置了buf为BUFSIZ后一般就变成了全缓冲，但是流和终端设备有关的话，某些系统仍然会将其设置为行缓冲
+int setvbuf(FILE *restrict fp, char *restrict buf, int mode, size_t size);
+//mode:
+	1._IOFBF   	全缓冲 //buff为NULL时则系统会自动选择合适的缓冲区
+	2._IOLBF 	行缓冲 //buff为NULl时则系统会自动选择合适的缓冲区
+	3._IONBF 	不缓冲 
+//返回值 成功 0 错误非0
+
+
+#include <stdio.h>
+int fflush(FILE *fp); //fp为NULL时将所有输出流被刷新，否则刷新该流所有为写的数据进入内核，返回值 成功0 失败EOF
+
+----------------------------------打开流--------------------------
+#include <stdio.h>
+FILE* fopen(const char *restrict pathname, const char *restrict type);
+FILE* freopen(const char *restrict pathname, const char *restrict type, FILE *restrict fp);
+FILE* fdopen(int fd, const char* type);
+//返回值 成功返回FILE*指针，失败NULL
+
+freopn若fp已经打开则会关闭，若fp已经定向则会清除定向
+
+(POSIX才有)fdopen会让fd和标准的I/O流相关联
+!!注意点：fdopen不能对文件截断（因为fd已经打开)，fdopen也不能用追加来创建文件，因为fd存在则文件一定存在
+
+type:
+字符串	含义		解释			若文件已存在的动作	若文件不存在的动作 对应open系统调用中的mode
+"r"		读			打开文件以读取	从头读				打开失败			O_RDONLY
+"w"		写			创建文件以写入	销毁内容			创建新文件			O_WRONLY | O_CREAT | O_TRUNC
+"a"		后附		后附到文件		写到结尾			创建新文件			O_WRONLY | O_CREAT | O_ADDEND
+"r+"	读扩展		打开文件以读/写	从头读				错误				O_RDWR
+"w+"	写扩展		创建文件以读/写	销毁内容			创建新文件		    O_RDWR   | O_CREAT | O_TRUNC
+"a+"	后附扩展	打开文件以读/写	写到结尾			创建新文件			O_RDWD 	 | O_CREAT | O_APPEND
+b的含义二进制文件(但是UNIX不区分)
+!!注意点:
+1.当文件以更新模式打开时（ '+' 作为上述模式参数值列表的第二或第三个字符），访问流可以进行输入和输出。然而输出不应直接紧随输入，而中间无对 fflush 函数或对文件定位函数（ fseek 、 fsetpos 或 rewind ）的调用，且输入不应直接紧随输出，而中间无对文件定位函数的调用，除非输入操作遇到文件尾。      ----------原因内部只记录了一个文件偏移量，若不进行文件偏移量重新设置，否则下一次读或写都是对于当前的文件偏移量
+2.w或a当文件不存在时，不能确定新文件的访问权限（而open和creat则可以)
+
+#include <stdio.h>
+int fclose(FILE *fp); //返回值 成功 0 错误EOF
+//在关闭之前会冲洗缓冲区的输出数据，缓冲区中的任何输入数据被抛弃
+//当进程结束时（exit或main返回），所有打开的标准I/O流都关闭，所有不带缓冲的流都被刷新
+
+--------------------------------读和写流------------------
+1.每次读写一个字符
+2.每次读写一行
+3.每次读写一定长度
+
+1.--------输入函数
+#include <stdio.h>
+int getc(FILE *fp);
+int fgetc(FILE *fp);
+int getchar(void);
+//成功返回读取到字符，失败或到达文件尾部返回EOF
+//getchar等同于getc(stdin) ,getc一般实现为宏
+#include <stdio.h>
+int ferror(FILE *fp);
+int feof(FILE *fp); //用于鉴定流是抵达了文件尾部还是错误  返回值 对应条件为真则返回非0，否则返回0
+
+void clearerr(FILE *fp);//清除错误和文件结束标记
+
+#include <stdio.h>
+int ungetc(int c, FILE *fp); //将字符压回到读取的流(存在于缓冲区)中 返回值 成功返回c，错误EOF  内部会调用clearerr以便支持在文件尾部后压回
+//scanf中的回车残留在缓冲区则是使用了这种技术
+
+2.--------输出函数
+#include <stdio.h>
+int putc(int c, FILE *fp);
+int fputc(int c, FILE *fp);
+int putchar(int c);
+putchar = putc(c, stdout) putc一般为宏
+
+---------------------------------------------每次一行I/O---------------------------
+#include <stdio.h>
+char* fgets(char *restrict buf, int n, FILE *restrict fp); //n -1个字符送入buf，最后一个为空字符 fgets保留换行符
+char* gets(char *buf); //返回值 成功返回buf，错误或到达文件尾返回NULL  gets不保留换行符  !!不推荐使用，缓冲区溢出问题
+
+#include <stdio.h>
+int fputs(const char *restrict str, FILE *restrict fp); //遇到0会停止
+int puts(const char *str);  //输出会增加换行符
+//返回值 成功 非负 失败EOF
+
+fgets和fputs需要自己处理换行符
+
+--------------------------------标准I/O效率----------
+标准I/O库并不比read和write函数相比慢很多  通常系统调用与普通函数调用相比需要花费更多时间
+
+------------------------------------二进制I/O(每次读写一定长度)-------------------------
+#include <stdio.h>
+size_t fread(void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
+size_t fwrite(const void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp); //nobj是读或写的对象个数 
+//返回值 成功读或写的对象数  错误读可能是失败或者到达文件尾则返回少于nobj具体使用ferror或feof来判断， 写错误则返回少于nobj
+eg:
+ int arr[2];
+ fread(arr, sizeof(int), 2, fp)
+!!注意点：跨系统跨平台读取二进制的话需要注意内存对齐以及大小端，甚至是数据二进制的存储格式
+
+-----------------------------------定位流--------------
+1.ftell fseek long类型的偏移量
+2.ftello fseeko off_t类型代替long
+3.fgetpos fsetpos (便于移植)
+
+#include <stdio.h>
+long ftell(FILE *fp); //返回值 成功 当前文件偏移量 失败-1L
+off_t ftello(FILE *fp); //返回值 成功 当前文件偏移量 失败(off_t)-1
+int fgetpos(FILE *restrict fp, fpos_t *restrict pos); // 返回值 成功 0 错误 非0
+
+int fseek(FILE *fp, long offset, int whence); //返回值 成功 0 失败 -1 
+int fseeko(FILE *fp, off_t offset, int whence); //返回值 成功 0 错误 -1
+int fsetpos(FILE *fp, const fpos_t* pos); //返回值 成功 0 错误 -1
+
+void rewind(FILE *fp); //将流设置到文件起始位置
+
+!!注意点:对于文本文件（win上面存在，unix/linux无视), whence只能设置为SEEK_SET，offset只能为0或ftell的返回值，因为当前偏移量可能不是以字节为单位来度量的
+
+!!注意点:以上重新设置文件偏移量的函数，都会在执行之前刷先fflush(fp)
+----------------------------------格式化I/O---------------
+#include <stdio.h>
+int printf(const char *restrict format, ...);
+int fprintf(FILE *restrict fp, const char*restrict format, ...);
+int dprintf(int fd, const char *restrict format, ...); 
+			//返回值 成功 返回输出字符数，失败负数
+int sprintf(char *restrict buf, const char* restrict format, ...);
+			//返回值 返回存入到buf中的字符数， 若编码错误，返回负数
+int snprintf(char *restrict buf, size_t n, const char *restrict format, ...);
+			//返回值，若buf足够大，则返回要存入数组的字符数目，否则是n，若编码错误，则负数
+
+s系列中的buf会自动包含0，但是0不算在返回值内
+
+format:
+	%[flags][fldwidth][.precision][lenmodifier]convtype
+	flags:
+		'    	 将整数按千分位分组字符(大多数实现不支持)
+		-	 	 在字段内左对齐输出（默认右边)
+		+	 	 总是带符号的正负号
+		' '(空格)如果第一个字符不是正负号，则在前面加入一个空格
+		#	     加上进制的前缀如16进制0x
+	
+	fldwidth 	 表示字段最小宽度
+	precision    表示字段最少位数，或者字符最大字节数 以上两个可以用*来代替，以便后面用变量来控制精度
+																						eg:
+																						printf("%*d", 3, i); 3替换*
+	lenmodifier  说明参数类型
+	     hh 	 signed / unsigned char
+		 h       signed / unsigned short
+		 l       signed / unsigned long 
+		 ll      signed / unsigned long long 
+		 j       intmax_t / uintmax_t
+		 z       size_t
+		 t       ptrdiff_t
+		 L 	     long double
+
+	convtype:
+		d,i      有符号十进制
+		o	     无符号八进制
+		u		 无符号十进制
+		x, X 	 无符号十六进制
+		f,F 	 双精度浮点数
+		e,E      指数格式双精度浮点数
+		g,G 	 根据占位符对应的数据解释为f,F,e或E
+		a,A 	 十六进制指数格式双精度浮点数
+		c 	     字符(若lenmodifier指定为1则为宽字符)
+	    s        字符串（若lenmodifier指定为1，则为宽字符)
+		p        指向void的指针
+		n        到目前为止，printf已经输出的字符数目将被写入到指针所指向带符号整形变量中， eg:
+																							int i = 0;
+																							printf("%s%n", "123", &i); // i = 3
+		%        输出%
+		C		 宽字符(XSL扩展)
+		S        宽字符串(XSL扩展)
+
+
+2.格式化输入-----------------
+#include <stdio.h>
+int scanf(const char*restrict format, ...);
+int fscanf(FILE *restrict fp, const char* restrict format, ...);
+int sscanf(const char* restrict buf, const char*restrict format, ...);
+//返回值 赋值的输入项的个数，若出错或已经到达文件尾则返回EOF
+ 
+%[*][fldwidth][m][lenmodifier]convtype
+*可选：用于抑制转换，仍然按照转换说明的其余部分对输入进行转换，但是不放入参数中
+fldwidth: 最大宽度
+m可选: 用于%c或%s(迫使标准I/O缓冲区为其分配内存)，参数必须是指针地址，由调用者负责管理该内存
+eg:
+	char* ptr = NULL;
+	scanf("%ms", &ptr);
+	free(ptr);
+
+convtype:
+	d 	             有符号十进制数, 基数10
+	i                有符号十进制，基数可以由输入格式决定
+	O 				 无符号八进制（输入可以为有符号，但是会被强转)
+	u 				 无符号十进制，基数为10（输入可以为有符号，但是会被强换)
+	x,X              无符号十六进制（输入可以为有符号，但是会被强转)
+	a,A,e,E,f,F,g,G  浮点数
+	c
+	s
+	[                匹配列出的字符序列以]终止(对应的参数应该为char*并且具有内存) //效果为该参数必须为这个值，否则视为不匹配
+	[^               匹配除字符以外的所有字符，以]终止   //效果为该参数一定不含有[^中的任意字符]
+	p                指向void的指针
+	n                同printf中的convtype:n
+	%
+	C
+	S
+
+
+----------------------------------实现细节-----------------------------
+#include <stdio.h>
+int fileno(FILE* fp); //返回值 与该流相关的文件描述符 POSIX扩展
+
+---------------------------------临时文件-------------------
+#include <stdio.h>
+XXXXXXXXXXXXXXXXXXXXX不推荐使用 char* tmpnam(char *ptr);  //返回指向唯一路径名的指针 //不推荐使用，当多个进程都使用时可能会返回一个结果（尽管在每个进程看来都是唯一的）
+XXXXXXXXXXXXXXXXXXXXX不推荐使用 FILE* tmpfile(void);  //若成功返回文件指针，失败NULL  创建临时文件（内部实现可能是creat(tmpnam(ptr), FILE_MODE); unlink(ptr))
+tmpfile因为不是原子操作，所以可能有其他进程创建同名文件导致被删除的可能，所以也不推荐使用
+
+#include <stdlib.h>
+//随机创建目录
+char* mkdtemp(char *template);  //返回值 成功返回指向目录名的指针，失败NULL   The directory is then created with  
+permissions  0700.
+
+//随机创建文件
+int mkstemp(char *template); //返回值 成功返回文件描述符，错误-1 //template函数会将后6位替换成随机的唯一路径名 !!注意点:与tempfile不同，所创建的文件不会被自动删除，需要自己unlink.  The  file  is  created with permissions 0600, that is, read plus write for owner only.and returns an open(w+权限)
+       file descriptor for the file.(因此需要自己close())
+permissions 0600
+
+以上两个template的最后6个字符必须是XXXXXX
+
+------------------------------内存流---------------
+#include <stdio.h>
+//open memory as stream
+FILE* fmemopen(void *restrict buf, size_t size, const char*restrict type);
+//返回值 成功 返回流指针 失败NULL
+
+如果buf为空，则fmemopen会分配size个字节数的缓冲区，当流关闭时缓冲区会被释放
+type:
+	r rb
+	w wb           内存流被截断（第一个字节而填充0)与fopen中w的不同
+	a ab            为在第一个null字节处写而打开
+	r+ r+b rb+  
+	w+ w+b wb+
+	a+ a+b ab+      为在第一个null字节处读和写而打开
+不适合二进制数据（fwrite中若有数据存在0)
+
+#include <stdio.h>
+FILE* open_memstream(char **bufp, size_t *sizep); 
+#include <wchar.h>
+FILE* open_wmemstream(wchar_t **bufp, size_t *sizep);
+//返回值 成功 返回流指针 失败NULL
+与fmemopen的不同:
+1.只能写打开
+2.不能指定自己的缓冲区，但是可以通过两个参数获取缓冲区地址和大小
+3.关闭流后需要释放缓冲区
+4.对流添加字节会增加缓冲区大小(继续写入)
+	!!注意点:由于缓冲区是动态增长（推测std::vector如同)，所以当下一次写入数据时可能让之前的内存失效
 ============================================
 第七章:进程环境
 
