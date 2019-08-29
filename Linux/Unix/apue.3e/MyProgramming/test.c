@@ -1,29 +1,47 @@
-#include <unistd.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <dirent.h>
+#include "../include/apue.h"
 #include <fcntl.h>
-int main(void)
+#include <sys/mman.h>
+
+#define COPYINCR (1024 * 1024 * 1024)
+
+int main(int argc, char *argv[])
 {
-	DIR *dp = opendir(".");
-	struct dirent *dirp;
-	if (dp == NULL)
-		return -1;
-	long int temp = telldir(dp);
-	int i = 0;
-	while ((dirp = readdir(dp)) != NULL)
+	int fdin, fdout;
+	void *src, *dst;
+	size_t copysz;
+	struct stat sbuf;
+	off_t fsz = 0;
+
+	if (argc != 3)
+		err_quit("usage: %s <fromfile> <tofile>", argv[0]);
+	if ((fdin = open(argv[1], O_RDONLY)) < 0)
+			err_sys("can't open %s for reading", argv[1]);
+	if ((fdout = open(argv[2], O_RDWR | O_CREAT | O_TRUNC, FILE_MODE)) < 0)
+	 		err_sys("can't creat %s for writing", argv[2]);
+	if (fstat(fdin, &sbuf) < 0)
+		err_sys("fstat error");
+	if (ftruncate(fdout, sbuf.st_size) < 0)
 	{
-		printf("name=%s\n", dirp->d_name);
-
-
-	printf("结束%ld\n", telldir(dp));
+		err_sys("ftruncate error");
 	}
-
-	printf("结束%ld\n", telldir(dp));
-	readdir(dp);
-	printf("结束%ld\n", telldir(dp));
-	closedir(dp);
-//	printf("uid=%u gid=%u euid=%u egid=%u\n", getuid(), getgid(), geteuid(), getegid());
-	return 0;
+	while (fsz < sbuf.st_size)
+	{
+		if ((sbuf.st_size - fsz) > COPYINCR)
+			copysz = COPYINCR;
+		else
+			copysz = sbuf.st_size - fsz;
+		if ((src = mmap(0, copysz, PROT_READ, MAP_SHARED, fdin, fsz)) == MAP_FAILED)
+		{
+			err_sys("mmap error for input");
+		}
+		if ((dst = mmap(0, copysz, PROT_READ | PROT_WRITE, MAP_SHARED, fdout, fsz)) == MAP_FAILED)
+		{
+			err_sys("mmap error for output");
+		}
+		memcpy(dst, src, copysz);
+		munmap(src, copysz);
+		munmap(dst, copysz);
+		fsz += copysz;
+	}
+	exit(0);
 }

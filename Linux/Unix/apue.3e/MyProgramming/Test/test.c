@@ -1,12 +1,13 @@
-#include <setjmp.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <stdio.h>
-int global = 1;
-void f1();
-int main()
+#include <string.h>
+#include <dirent.h>
+int main(void)
 {
-	static int stavar = 2;
-	int autovar = 3;
-	if(setjmp(env_alrm) != 0)
-		;
+	if (opendir("test.c") == NULL)
+	{
+		printf("错误\n");
+	}
 	return 0;
 }
