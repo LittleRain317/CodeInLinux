@@ -1,11 +1,8 @@
-int& fun()
-{
-	int b = 10;
-	int &a = b;
-	return a;
-}
+#include <iostream>
 int main()
 {
-	int a = fun();
+	const int buff = 2;
+	const double* ptr;
+	const double* r = new double(4.4);
 	return 0;
 }
