@@ -12,7 +12,7 @@ pHead=""
 read -p "请输入需要爬取的网址:" url
 url=${url:-"www.baidu.com"}
 
-#截取出ArtZG然后创建改目录
+#截取出然后创建改目录
 homeDirName=$(echo $url | cut -c 18-) 
 homeDirName=${homeDirName%/}
 if [ ! -e "$homeDirName" ]; then

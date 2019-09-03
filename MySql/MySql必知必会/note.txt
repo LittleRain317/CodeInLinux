@@ -1,0 +1,895 @@
+======================基本概念=======================
+
+数据库:保存有组织的数据的容器（通常是一个文件或一组文件)
+
+DBMS:数据库软件，通过这个可以创建和操纵数据库
+
+表:某种特定类型数据的结构化清单
+
+表名的唯一性:取决于数据库名和表名的结合即databases1.table1唯一
+
+模式:关于数据库和表的布局及其特性的信息
+
+列:表中的一个字段
+
+行:表中的一个记录
+
+通配符:用来匹配值的一部分的特殊字符
+
+搜索模式:由字面值、通配符或组合而成的搜索条件
+
+谓词:操作符何时不是操作符,在作为谓词时。从技术上说WHERE 的LIKE是谓词不算操作符，虽然结果相同
+
+字段:基本上与列相同，经常互换使用，不过数据库列一般成为列，而术语字段通常用于计算字段的连接上
+
+聚集函数:运行在行组上，计算和返回单个值的函数
+
+外键:外键为某个表中的一列，它包含另外一个表的主键值，定义了两个表之间的关系
+
+笛卡尔积:由没有联结条件的表关系返回的结果为笛卡尔积，检索出的行的数目等于第一个表中的行数乘以第二个表中的行数(因为没有联结条件的存在，第一个表中的每一个行将与第二个表中的每一个行进行匹配，不管是否逻辑上可以匹配)
+
+变量:内存中一个特定的位置，用于临时存储数据
+
+游标:是一个存储在mysql服务器上面的数据库查询，不算一条SELECT语句，而是被该语句检索出来的结果集
+
+触发器:是mysql响应以下任意语句而自动执行的一条mysql语句
+1.DELETE
+2.INSERT
+3.UPDATE
+
+事务处理：可以用来维护数据库的完整性，它能保证成批的sql操作要么完全执行，要么完全不执行（原子操作)
+
+字符集:为字母和符号的集合
+编码:为某个字符集成语的内部表示
+校对:为规定字符如何比较的指令
+
+
+主键规则:
+1.任意两行都不具有相同的主键值
+2.每行必须有主键值(不能NULL)
+
+主键的习惯:
+1.不更新主键列中的值
+2.不重用主键列的值
+3.不在主键列中使用可能会修改的值（比如姓名）
+
+重要事项:
+
+书写规范：
+关键字全部大写，一般的函数大驼峰，聚集函数全部大写，字段表名，数据库名小驼峰
+
+自动增量:不用记住最后一次使用的值，mysql可以自动为每行分配下一个可用编号
+
+SELECT结果若没有加排序，则不应该认为检索出的数据的顺序有意义
+
+SQL WHERE过滤，虽然可以让应用程序或者编程语言来人为过滤，但是会浪费带宽发送多余的数据，其次数据库本身有优化，效果优于人为优化
+
+NULL 和字段包含0，空字符串，仅包含空格是不同的
+
+WHERE语句中的IN一般比用OR来的执行速度更快，同时后面可以继续接SELECT语句
+
+是否忽略大小写可以通过设置来指定
+
+WHERE里面的通配符技巧
+1.不要过度使用
+2.除非绝对有必要，不然不要将通配符放在搜索模式开头（因为会减慢速度)
+3.注意通配符的位置
+
+在字段为时间时，SELECT最好使用Date() 或Time()或者其他函数以便精确获得某个时间单位的部分，一来可以当表数据修改时代码不用改，二来要是'2000-01-01' != '2000-01-01 22:22:22' 而使用Date('2000-01-01') = Date('2000-01-01 22:22:22')
+
+提高整体性能：insert操作可能很耗时（更新索引等)，导致会降低等待处理SELECT语句的性能，如果SELECT是最重要的（一般是），则可以在INSERT LOW_PRIORITY INTO （同样适用于UPDATE和DELETE)
+
+
+关于UPDATE和DELETE的注意点:
+1.除非确认删除和更新每一行，否则绝对不要使用没有WHERE的子句的UPDATE和DELETE
+2.保证每一个表都有主键
+3.在使用UPDATE和DELETE之前，尽可能使用SELECT语句来验证条件是否正确
+4.使用外键约束等约束来限制
+
+因为视图不包含数据只是sql查询，所以每次使用视图时都必须处理查询，如果创建了复杂的视图可能会导致性能下降很多
+
+================================
+mysql命令用;或\g来结束
+mysql -u username -p -h hostname -P port
+
+SHOW DATABASES; 展示所有数据库
+SHOW TABLES; 展示所选数据库的所有数据表
+SOURCE *.sql; 执行该sql文件
+SHOW COLUMNS FROM tableName; 展示该表的字段信息 可以使用DESCRIBE tableName来替换
+SHOW STATUS; 展示mysql服务器状态信息
+SHOW GRANTS; 展示当前用户的权限信息
+SHOW GRANTS FOR  userName; 展示该用户的权限信息
+SHOW ERRORS; || SHOW WARNINGS; 展示服务器错误或警告信息
+SHOW CREATE DATABASE databaseName; || SHOW CREATE TABLE tableName; 展示创建对应数据库|数据表的创建sql语句
+
+建议:关键字使用大写，列名和表名使用小写
+
+
+
+================================数据类型=======================
+CHAR(n) 		1-255个字符的定长串，必须在创建是指定否则默认CHAR(1)
+ENUM 			接受最多64k个串组成的一个预定义集合的某个串
+LONGTEXT 		同TEXT，但最大长度为4GB
+MEDIUMTEXT		同TEXt，单最大长度为16K
+SET  	        接受最多64个串组成的一个预定义集合的零个或多个串
+TEXT            最大长度为64K的可变长字符串
+TINYTEXT        与TEXT相同，但最大长度为255字节
+VARCHAR(n)      长度可变，最多不超过255字节
+使用''来
+
+BIT 			1-64位
+BIGINT 			整数值(范围大于int)
+BOOLEAN(BOOL)   0/1
+DECIMAL(DEC)    精度可变的浮点数
+DOUBLE 			双精度
+FLOAT 			单精度
+INT(INTEGER)	整数值
+MEDIUMINT 		整数值(范围少于int)
+REAL 			4字节的浮点数
+SMALLINT  		整数值(比MEDIUMINT还少的范围)
+TINYINT         整数值(比SMALLINT还少)
+
+DATE 			yyyy-mm-dd
+DATETIME 		DATE和TIME的组合
+TIMESTAMP 		比datatime范围小
+TIME 			HH:MM:SS
+YEAR 			2位是70-69(1970-2069) 四位数是1901-2155
+
+二进制数据
+BLOB 			64kb
+MEDIUMBLOB      16MB
+LONGBLOB        4GB
+TINYBLOB        255B
+
+=========================sql相关操作================================================
+USE databaseName; 使用数据库
+
+SELECT fieldName, fieldName, fieldName  from 数据表名;
+*通配符
+
+SELECT DISTINCT fieldName FROM 数据表名; DISTINCT（明确的）只返回不同的值(去重的效果)
+									  !!注意点:DISTINCT不仅仅是应用于前置它的列，而是所有列，因此如SELECT DISTINCT 字段1， 字段2 FROM tableName;当两个字段都不同的时候就会被认为是不同的记录
+
+SELECT 字段 FROM tableNames LIMIT n1, n2; //n1, n2为数字，表示从第n1(实际是n1 + 1行)行开始的不多于n2条记录将被显示,若只有一个n，则表示从第一行开始显示不多于n条记录  !!注意点:检索出来的行数是从行0开始
+更好的写法为LIMIT n2 OFFSET n1从n1行开始最多取n2条记录
+
+SELECT语句使用完整限定的表名或者字段名如(有些情况需要完全限定名)
+		SELECT table1.fieldName FROM databases1.table1;
+--------------------------------------------------------
+排序:
+ORDER BY fieldName(order by fieldName) (默认升序排列,如同std::sort qsort)
+
+SELECT fieldName FROM tableName ORDER BY fieldName; !!注意点:ORDERY BY 后面的字段名不一定是所显示的字段名可以是别的eg:
+										SELECT fidled1 FROM tableName ORDER BY field2;
+
+ORDER BY field1, field2, ...  !!注意点:当field1相同的时候才会根据fidle2来排序
+
+ORDER BY fieldName DESC (则降序列)
+
+---------------------------------------------------------
+过滤数据:
+!!注意点:单引号用来限定字符串，数值则不用
+eg:field1 为char[20]
+SELECT field1 FROM tableName WHERE field1 = 'ok';
+
+WHERE condition 
+操作符						说明
+=	                        等于
+<>                          不等于
+!=                          不等于
+<                           小于
+<=                          小于等于
+>                           大于
+>=	                        大于等于 
+BETWEEN n1 AND n2			n1 应该< n2(虽然可以大于但是是空集)
+AND							并列两个条件
+OR							两个条件或的关系
+()							使用()来决定优先级
+IN							IN 后面加可能结果集（所以可以加SELECT语句)eg: IN (10, 20, 30)
+NOT							否定后面所接的条件，eg:NOT IN (10, 20)
+												  NOT field1 = 30 //和!=效果一样
+LIKE						指示使用搜索模式，而不是精确匹配(与正则表达式不同LIKE是整个数据匹配，而正则表达式只要含有符合条件的字符即可，不过正则表达式也可以^key$来实现整个字符的完全匹配)
+REGEXP						使用正则表达式后面接'正则表达式'
+
+-------------------------------------------------------------------
+使用通配符进行过滤:
+%							任何字符出现任何次数 !!注意点:尾部空格可能会干扰通配符匹配(但是可以使用函数过滤空格),NULL无法被匹配
+_							匹配任意一个字符
+
+
+fidled1 IS NULL 才能检查是否为NULL
+!!注意点:NULL与不匹配:在通过where过滤数据的时候，结果集不会含有NULL，除非写了is NULL,因为NULL具有特殊含义，数据库不知道它是否匹配
+
+--------------------------------------------------------------------
+正则表达式过滤:(mysql仅仅支持一部分的正则表达式)
+
+默认不区分大小写，如需要则加上BINARY
+					eg: WHERE field1 REGEXP BINARY 'JetPack .000'
+
+匹配特殊字符的时候需要\\特殊字符(这是因为Mysql需要一个\来解释，正则表达式也需要一个\)(其他编程语言是\. \- \\)，eg:\\. \\-  \\\
+
+定位符号:
+^					文本开始
+$					文本结束
+[[:<:]]				词的开始(空格划分每个词)
+[[:>:]]				词的结束
+
+可以使用SELECT 'str' REGEXP 'str' 来简单的测试正则表达式
+
+----------------------------------------------------------
+分组数据:(分组也就是对于字段相同的值视为一组)
+GROUP BY fieldName [WITH ROLLUP](若使用WITH ROLLUP将会依据分组的字段以此从最靠近WITH ROLLUP的字段开始填充NULL，含义为依据SELECT聚集函数而对于该NULL所在的字段的分组进行再一次调用聚集函数)
+eg:
+MariaDB [test]> SELECT country, year, genre, SUM(sales) FROM booksales GROUP BY country, year, genre WITH ROLLUP;
++----------+------+-------------+------------+
+| country  | year | genre       | SUM(sales) |
++----------+------+-------------+------------+
+| Paraguay | 2014 | fiction     |      87870 |
+| Paraguay | 2014 | non-fiction |       8760 |
+| Paraguay | 2014 | NULL        |      96630 | genre填充NULL，调动聚集函数SUM(),结果为genre字段所对应的SUM数据进行再一次SUM也就是87870+8760所以为96630
+| Paraguay | 2015 | fiction     |      76940 |
+| Paraguay | 2015 | non-fiction |       9030 |
+| Paraguay | 2015 | NULL        |      85970 |
+| Paraguay | NULL | NULL        |     182600 |
+| Senegal  | 2014 | fiction     |      12234 |
+| Senegal  | 2014 | non-fiction |      64980 |
+| Senegal  | 2014 | NULL        |      77214 |
+| Senegal  | 2015 |             |      78901 |
+| Senegal  | 2015 | fiction     |      15647 |
+| Senegal  | 2015 | NULL        |      94548 |
+| Senegal  | NULL | NULL        |     171762 |
+| NULL     | NULL | NULL        |     354362 |
++----------+------+-------------+------------+
+!!注意点:
+	1.GROUP BY子句可以包含任意数目的列	（GROUP BY field1, field2)
+	2.GROUP BY子句嵌套分组时，数据将在最后规定的分组上进行汇总
+	3.GROUP BY子句中列出的每一个列都必须是检索列或有效的表达式（但不能是聚集函数），如果在SELECT中使用表达式，则必须在
+	GROUP BY中指定相同的表达式不能是别名	(GROUP BY COUNT(field1)不允许的，只能是明确的检索列，或者有效表达式)
+	4.除聚集计算语句外，SELECT语句中的每一个列都必须在GROUP BY子句中给出	(分组后面接的列，必须是
+SELECT要检索的字段（除了聚集函数部分))
+		eg:
+		SELECT * FROM orders;
++-----------+---------------------+---------+
+| order_num | order_date          | cust_id |
++-----------+---------------------+---------+
+|     20005 | 2005-09-01 00:00:00 |   10001 |
+|     20006 | 2005-09-12 00:00:00 |   10003 |
+|     20007 | 2005-09-30 00:00:00 |   10004 |
+|     20008 | 2005-10-03 00:00:00 |   10005 |
+|     20009 | 2005-10-08 00:00:00 |   10001 |
++-----------+---------------------+---------+
+5 rows in set (0.00 sec)
+		SELECT order_num FROM orders GROUP BY cust_id;
++-----------+
+| order_num |   区别在与10001这条记录上
++-----------+
+|     20005 |
+|     20006 |
+|     20007 |
+|     20008 |
++-----------+
+4 rows in set (0.00 sec)
+
+	5.如果分组列中有NULL值，单独分为一组
+--------------------------------------------------------
+过滤分组:
+HAVING condition 
+1.WHERE过滤行，HAVING过滤分组
+2.HAVING支持WHERE的所有操作符
+3.WHERE在分组前过滤，HAVING在分组后顾虑
+
+-------------------------------------------------------
+子查询:
+建议：格式化SQL利用\Enter续行符
+子查询（由内而外的过程)
+一般用IN来连接子查询,因为结果集的总数不只是一个
+
+!!注意点:
+1.WHERE子句使用子查询，应该保证SELECT语句所返回的结果集具有和WHERE子句中相同数目的列
+2.注意子查询中的限定名二义性（以防歧义性, 没有使用完全限定名列的话默认是所查询的表中的列)
+
+-------------------------------------------------------
+联结表:(是在运行中构造的一个结构，物理不会储存)
+!!注意点:
+完全限定名:在引用的列可能出现二义性时，必须使用完全限定名
+联结的表越多，性能下降的越厉害，不要联结不必要的表
+
+等值联结也称为内部联结
+写法一:SELECT * FROM table1, table2 WHERE table1.field1 = table2.field1;
+写法二:SELECT * FROM table1 INNER JOIN table2 ON table1.field1 = table2.field1;(首选规范写法)
+
+使用表别名:AS（与列别名不同，只是为了便于书写，列别名还返回到客户机)
+SELECT a.field1 FROM table1 AS a WHERE a.xx = xxx;
+
+自联结:
+自己和自己，通常情况下比使用子查询要来的快(但还是需要验证)
+
+自然联结:会排除多次出现的结果，使得每个列只返回一次(而内部联结会返回所有数据，甚至相同的列出现多次),DBMS不会完成这项工作，需要人为操作，如：对一个表使用*,对其余的字段使用完全限定名
+
+外部联结:
+LEFT OUT JOIN | RIGHT OUT JOIN (把左边或者右边的表作为基准表，若基准表中的字段在另外一个表中不含有该字段的值，则另外一个表的数据使用NULL来填充)
+
+综述:最好在一起使用之前，分别测试每个联结是否符合结果
+
+-------------------------------------------------------
+组合查询:(一般用于简化多个WHERE)
+UNION,将多个SELECT语句的结果组合成单个结果集(但是每个SELECT语句所查询的字段数量需要一致,尽管只要求了数量一致，但是为了结果的正确性应该让每个SELECT语句所查询的字段(表达式，聚集函数)数量以及字段完全一致(但是类型可以不同不过需要能够隐式转换),可以顺序不同)
+
+UNION会自动去除重复的行(如果不需要去重则使用UNION ALL) 和WHERE的不同点就在于此，WHERE必定去除重复列
+UNION只能使用一条ORDER BY，不存在每个SELECT使用各自的ORDER BY， 
+语法:
+UNION在两个SELECT语句之间,ORDER BY放置在最后一个SELECT语句后
+
+--------------------------
+	SELECT语句的顺序
+	SELECT [DISTINCT] field1, field2 FROM table1 [WHERER condition] [GROUP BY field1] [HAVING condition] [ORDER BY field1 [DESC], field2] [LIMIT n2 OFFSET n1];
+-------------------------------
+
+全文本搜索:
+并非所有的数据库引擎都支持全文本搜索，常用的有MyISAM和InnoDB前者支持，后者不支持(已经支持)
+全文本搜索可以克服:
+1.性能--通配符和正则表达式通常要求MySql尝试匹配表中所有行(而且这些搜索极少使用表索引)
+2.明确控制--使用通配符和正则表达式很难明确地控制匹配什么和不匹配什么(比如if 'rege1' else 'rege2'的正则表达式)
+3.智能化的结果--例如:一个特殊词的搜索将会返回包含该词的所有行，而不区分包含单个匹配的行和包含多个匹配的行
+
+启用全文本搜索:（注意搜索引擎需要选择支持全文本搜索的)
+全文索引FULLTEXT(fieldName, ...)对这些列启用全文索引，MySql将自动维护（在增删改的时候，索引自动更新),因此在导入数据到一个新表的时候不要使用FULLTEXT，等全部数据导入完再修改表的定义
+eg:
+CREATE TABLE productnotes
+(
+ 	note_text text NULL,
+	FULLTEXT(note_text)
+) ENGINE=MyISAM;
+
+如何使用:
+Match(指定被搜索的列) Against(指定要使用的搜索表达式) 
+	!!注意点:若需要搜索多个列，需要保证每个列在定义表的时候都使用了FULLTEXT(),且顺序和定义的字段顺序一致
+	!!注意点:Against()会返回一个相关性，相关性越高的行，结果被越先显示
+	!!注意点:Against()的相关性依据是MySql根据行中词的数目，唯一词的数目，整个索引词的总数,以及包含该词的行的数目共同决定
+SELECT note_text FROM tableName WHERE Match(note_text) Against('rabbit'); //将会按照结果以相关性降序排序
+
+查询扩展:
+1.首先进行一个基本的全文搜索，找出与搜索条件匹配的所有行
+2.其次，检查这些匹配行并且选择所有有用的词
+3.再其次，再次进行全文本搜索，不过条件是使用所有有用的词
+语法:
+Against('str' WITH QUERY EXPANSION)
+
+布尔方式:
+1.要匹配的词
+2.要排除的词(如果某行包含这个词，则不返回改行，即使它包含其他指定的词也是如此)
+3.排列提示(指定某些词比其他词更重要，更重要的词相关性更高)
+4.表达式分组
+5.另外一些内容
+即使没有FULLTEXT索引，一样可以使用，但是是一个非常缓慢的操作
+语法:
+Against('str' IN BOOLEAN MODE)
+全文本布尔操作符
++        包含，词必须存在
+eg:
+Against('+rabbit +bait' IN BOOLEAN MODE)  //必须含有rabbit和bait
+eg:
+Against('rabbit bait' IN BOOLEAN MODE) //rabbit或者bait
+
+-        排除,词必须不存在
+>        包含，而且增加相关性
+eg:
+Against('>rabbit <bait' IN BOOLEAN MODE) //增加rabbit的相关性,减小bait的相关性
+
+<        包含，但是减小相关性
+
+()       把词组成子表达式（允许这些子表达式作为一个组被包含或者排除或者排列)
+eg:
+Against('+safe +(<combination)' IN BOOLEAN MODE) //必须存在safe和combination但减小后者的相关性
+~        取消一个词的排序值
+
+*        以str为开头的字符，写法:str*
+eg:
+Against('rabbit*' IN BOOLEAN MODE) //匹配以rabbit为开头的行
+
+""       定义一个短语(与单个词的列表不一样，它匹配整个短语以便包含或排序整个短语)
+eg:
+Against('"rabbit bait"' IN BOOLEAN MODE) //匹配短语rabbit bait而不是匹配这两个词
+
+
+说明:
+1.在索引全文本数据时，短词被忽略而从索引中删除，短词定义为那些具有3个或3个以下字符的词,所以若Against('abc')则可能没有结果（如果需要，可以修改)
+2.MySql带有一个内建的非用词列表，这些词在索引全文本数据时总是被忽略(可以修改) 类似于编程语言中的关键字
+3.许多词出现的频率很高，搜索他们没有用处（返回太多的结果）,MySql将一个词出现50%以上则视为无用，将被作为非用词，但不适用IN BOOLEAN MODE
+4.如果表中的行数少于3行，则全文本搜索不返回结果(因为每个词不出现，或则至少出现50%)
+5.忽略词中的'，比如don't索引为dont
+6.不具有词分隔符的语言不能恰当地返回全文本搜索结果(如汉语日语)
+7.只有数据库引擎支持全文本搜索才能使用它
+
+=======================计算字段============================
+
+拼接字段:
+Concat()函数拼接 (mysql使用concat而其他多数DBMS使用+或者||来拼接)
+
+删除数据多余的空格:
+RTrim(); //右侧空格 (修剪)
+LTrim(); //左侧空格
+Trim(); //两侧空格
+
+Now()获得系统当前时间
+
+使用别名:AS (!!!注意点:否则应用程序(使用数据库的程序)无法引用未命名的列)
+
+执行算数技术
++
+-
+*
+/
+
+SELECT 计算字段; 可以用于测试(如同SELECT 'str' REGEXP 'str';)
+
+=======================使用数据处理函数=====================
+可使用help查看说明
+help funName;
+文本处理函数:
+Concat();
+R|L|Trim();
+Upper(); 将文本转化为大写
+Left(); 返回字符串左边的字符
+Length(); 返回字符串的长度
+Locate(); 返回子字符串的位置
+Lower(); 将文本转化为小写
+Right(); 返回字符串右边的字符串
+SubString(); 返回子字符串的字符
+Soundex(); 返回字符串的SOUNDEX值(将字符串转换为发音表示的字母数字形式)，因此若两个字符串的发音类似则Soundex(str1) = Soundex(str2)
+
+
+时间和日期处理函数:
+AddDate(); 增加一个日期(天，周等)
+AddTime(); 增加一个时间(时、分等)
+CurDate(); 返回当前日期
+CurTime(); 返回当前时间
+Date(); 返回日期时间的日期部分
+DateDiff(); 计算两个日期之间的差值天数
+Date_Add() 高度灵活的日期运算函数
+eg:
+	 SELECT DATE_ADD('2100-12-31 23:59:59',
+    ->                 INTERVAL '1:1' MINUTE_SECOND);  //INTERVAL 间隔
+    -> '2101-01-01 00:01:00'
+
+Date_Format(); 返回一个格式化的日期或时间的字符串
+Day(); 返回一个日期的天数部分
+DatOfWeek(); 返回日期对应的星期几
+Hour(); 返回一个时间的小时部分
+Minute(); 返回一个时间的分钟部分
+Month(); 返回一个时间的月份部分
+Now(); 返回当前日期和时间
+Second(); 返回一个时间的秒部分
+Time(); 返回一个日期时间的时间部分
+Year(); 返回一个日期的年份部分
+
+时间的格式YYYY-MM-DD HH:MM:SS
+
+数值处理函数:
+Abs(); 数的绝对值
+Cos(); cos的值
+Exp(); 返回一个数的指数值（logN) Exp(n)
+Mod(); 返回除操作的余数
+Pi(); 返回圆周率
+Rand(); 返回一个随机数
+Sin(); sin的值
+Sqrt(); 平方
+Tan(); tan的值
+
+聚集函数:
+AVG(); 返回某列的平均值(忽略NULL行)
+COUNT(); 返回某列的行数(COUNT(*)不管列中是否含有NULL，都计数，而COUNT(field1)则去除NULL)
+MAX(); 返回某列的最大值(忽略NULL行，虽然一般用于数值，但是也可以用于字符串，按照对应字典序)
+MIN(); 返回某列的最小值(同MAX)
+SUM(); 返回某列之和(忽略NULL)
+
+!!注意点:以上五个聚集函数都可以如下使用：
+	1.对所有行执行计算，默认行为，指定ALL也行（默认ALL)
+	2.只计算不同值，指定DISTINCT参数
+	eg: SUM(DISTINCT field1)//只对不同值进行求和
+
+==============================插入数据========================
+插入数据:
+1.插入完整的行
+2.插入行的一部分
+3.插入多行
+4.插入某些查询的结果
+
+1.插入完整的行，各个列必须以它们在表中定义出现的次序插入
+eg:INSERT INTO tableName VALUES(val1, val2, val3); //val1, val2, val3按照表的字段定义顺序
+	!!!注意点:但是不够安全，高度依赖于表中的字段结构   上述写法必须给每一个字段提供一个值
+2.更安全的写法应该为
+INSERT INTO tableName(field1, field2, field3...) VALUES(val1, val2, val3...); //而这种写法则可以只给给定字段提供值
+!!注意点:省略的字段必须是允许NULL或给出了默认值(auto_increament这类自增字段推测应该属于默认值)
+
+3.插入多行
+INSERT [LOW_PRIORITY] INTO tableName(field1, field2, field3...) VALUES(val1, val2, val3...), (val4, val5, var6...);
+ps:这会提高MySql的性能，单条insert语句比使用多条insert插入快
+
+4.插入查询结果
+INSERT INTO tableName(field1, field2, field3...) SELECT field1, field2, field3 FROM tableName;
+!!注意点:不一定要求列名匹配（INSEET的field和SELCT的field)，事实上mysql并不关心SELECT返回的列名，而是使用列的位置来填充，比如SELECT结果的第一个字段填充到INSERT的第一个字段...
+
+===========================更新和删除记录==================
+更新数据
+1.更新表中特定行
+2.更新表中所有行(没有WHERE)
+UPDATE tableName SET field1 = var1, fie2 = var2 WHERE ...;
+UPDATE tableName SET field1 = SELECT ... FROM tableName ... WHERE ...;
+特殊的:
+UPDATE tableName SET field1 = NULL WHERE ...;
+
+删除数据
+1.删除表中特定行
+2.删除表中所有行(没有WHERE)
+DELETE FROM tableName WHERE ...;
+
+DELETE只能删除表的记录
+
+更快的删除:
+	从表中删除所有行，不要使用DELETE可使用TRUNCATE TABLE语句(删除原有的表并重建一个表，而不是逐条删除表中的数据)
+
+===========================创建和操纵数据表====================
+CREATE TABLE tableName
+(
+ 	field1 type [NOT] NULL other,  //NULL属性是默认的，表示字段可以具有空值
+	field2 type other,
+	other			 ,
+						1.AUTO_INCREAMENT
+							//AUTO_INCREAMENT自动增加 !!注意点:每个表只允许一个这样的列,而且它必须被索引(eg:通过它成为主键),可以在插入的时候使用别的值，但是下一次会从这个值开始+1
+	//!!注意点:可以使用last_insert_id()来获取最后一个AUTO_INCREAMENT的值
+						2.DEFAULT var
+							使用默认值(mysql只允许常量，不允许使用函数来作为默认值)
+
+	PRIMARY KRY(field1, ...)  //设置主键约束
+)[ENGINE=...];  //mysql具有多种数据库引擎
+				1.InnoDB (可靠的事务处理引擎)
+				2.MEMORY 在功能上等同于MyISAM，但是数据存储在内存中（适合于临时表)
+				3.MyISAM是一个性能极高的引擎，但是不支持事物引擎
+					innodb是行锁，MyISAM是表锁，即使出错，也只是当前语句不执行而已
+				!!注意点:外键不能跨越索引
+
+!!注意点:主键只能使用不允许NULL值的列，允许NULL值的列不能作为唯一标识
+!!注意点:若有同名的数据表名则sql会要求首先手动删除该表后才能操作
+
+仅在表名不存在时创建它
+CREATE TABLE tableName IF NOT EXISTS
+();
+
+---------------------修改表---------------
+!!注意点:正常情况应该在表的设计过程中需要花费大量时间来考虑，以便后期不对该表进行大的改动
+
+ALTER TABLE
+ADD field,
+DROP field;
+
+ALTER TABLE tableName CONSTRAINT 约束名称 约束类型 fieldName   
+					[kənˈstreɪnt]
+1.主键约束
+ALTER TABLE tableName ADD CONSTRAINT checkName PRIMARY KEY(fieldName)
+
+2.check约束
+ALTER TABLE tableName ADD CONSTRAINT checkName CHECK(condition)
+
+3.unique约束
+ALTER TABLE tableName ADD CONSTRAINT checkName UNIQUE(ename)
+
+4.默认约束
+ALTER TABLE tableName ADD CONSTRAINT checkName DEFAULT value FOR fieldName
+
+5.外键约束
+ALTER TABLE tableName ADD CONSTRAINT checkName FOREIGN KEY(fieldName) REFERENCES tableName(fieldName)  //修改表某一字段为另外一个表的主键
+
+!!注意点:若一个复杂的表更改一般需要手动删除
+1.新建一个表
+2.insert select数据复制
+3.检验新表
+4.重命名
+5.根据需要创建，触发器，存储过程，索引和外键
+
+!!注意点:ALTER TABLE 应该极其小心，在改动之前做好完整备份(模式和数据的备份)
+
+------------------------删除表-----------------
+DROP TABLE tableName;
+
+------------------------重命名表---------------
+RENAME TABLE tableName TO newName;(可用,来连接多个表)
+
+===================================视图=====================
+视图不包含任何数据或列，包含的只是一个sql查询(封装了SELECT语句)
+
+视图的应用:
+1.重用sql语句
+2.简化复杂的SQL操作（有点类似与编程语言的中的函数)
+3.使用表的组成部分而不是整个表
+4.保护数据，可以给用户授予表的特定部分的访问权限而不算整个表的访问权限（只允许访问某些字段)
+5.更改数据格式和表示，视图可以返回与底层表的表示和格式不同的数据（因为视图只是相当于一个sql查询的封装)
+
+可以对视图进行SELECT操作，过滤和排序数据，将视图联结到其他视图或表，甚至能添加和更新数据（在添加和更新表中的数据后，视图将返回改变后的结果)
+但是对于添加或更新数据（利用视图)
+1.视图中有分组
+2.联结（join)
+3.子查询
+4.并
+5.聚集函数
+6.DISTINCT
+7.计算列（filed1 * field2 AS result)
+都是不可以更新的，换句话说用视图更新数据的话只能更新像表的结构类型的视图（mysql才能确定需要更新的数据有哪些)
+
+
+对于视图的限制:
+1.视图名必须唯一
+2.必须具有足够的访问权限才能够创建视图
+3.视图可以嵌套（类似嵌套SELECT查询语句)
+4.ORDER BY可以用于视图，但是如果从视图检索数据的SELECT语句本身也含有ORDER BY,那么视图中的ORDER BY将被覆盖
+5.视图不能索引，也不能有关联的触发器或默认值
+6.视图可以和表一起使用
+
+CREATE VIEW viewName AS SELECT语句//创建视图
+SHOW CREATE VIEW viewName; //查看视图创建代码
+DROP VIEW viewName; //删除视图
+update更新视图时，可以先DROP然后CREATE，或者直接用CREATE OR REPLACE VIEW viewName; //如果视图不存在则会创建视图否则覆盖原来的视图
+
+
+=================================使用存储过程=====================
+存储过程可以视为批处理程序
+
+使用理由:
+1.把处理封装在容易使用的单元中，简化繁琐操作
+2.由于不要求反复建立一系列处理步骤，这就保证了数据的完整性
+3.简化对变动的管理，（如果存储过程内部有变动，编码人员无需更改代码)
+
+使用存储过程会比单独的SQL语句快
+
+执行存储过程
+CALL name(@arg1, @arg2... )
+
+//使用变量必须以@开始，存储过程内使用变量则不必
+创建代码
+CREATE PROCEDURE procedureName
+(
+	OUT|IN arg1 type,
+	OUT|IN arg2 type //OUT用于传出存储过程，IN用于传入存储过程, INOUT用于传出和传入 
+)
+BEGIN
+	sql语句 //INTO 关键字用于赋值给参数以便参数传出
+	//COMMENT 'str' COMMENT关键字用于在SHOW PROCEDURE STATUS中显示
+END;  !!注意点:在命令行下因为;本身就是分隔符所以会与存储过程里面的sql语句中的；起冲突，因此可以使用DELIMITER char(将char作为新的分隔符),使用后注意再次使用DELIMITER ;来恢复默认设置
+delimiter[dɪ'lɪmɪtə]
+
+删除存储过程
+DROP PROCEDURE procedureName; //若存储过程不存在将产生错误可以使用DROP PROCEDURE IF EXISTS procedureName ;
+
+-- 注释开始 （注意注释和--直接的空格)
+DECLARE varName type [DEFAULT] value;
+//声明变量
+
+SHOW CREATE PROCEDURE procedureName; 展示该存储过程创建代码
+SHOW PROCEDURE STATUS [LIKE 'procedureName'] 显示[指定存储过程]存储过程相关信息
+
+======================使用游标================
+!!注意点:mysql游标只能用于存储过程和函数
+语法:
+DECLARE indexName CURSOR FOR SELECT语句;
+OPEN indexName; //打开游标
+CLOSE indexName; //关闭游标(和程序结束一样，mysql会在end后自动关闭它，释放内存和资源)
+FETCH[发音fetʃ] indexName//获取每一行记录
+
+
+======================流程控制
+
+IF ... THEN
+ ...
+END IF;
+
+
+DECLARE var TINYINT(1) DEFALUT 0; //声明变量
+DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET var = 1 //声明句柄
+REPEAT
+	...
+UNTIL var END REPEAT;
+
+!!注意点:
+	DECLARE语句的顺序：
+		1.变量
+		2.游标
+		3.句柄
+
+=======================使用触发器==========================
+1.唯一的触发器名字
+2.触发器关联的表
+3.触发器应该响应增删改哪一种
+4.触发器何时发生（之前还是之后)
+
+!!注意点:触发器的限制:
+	1.只能增删改的基础上加上之后或之前，一共3*2共6类触发器
+	2.触发器失败，若之前触发器失败则不会之后的sql语句，若before触发器以及sql语句失败，则不会执行after触发器
+CREATE TRIGGER triName AFTER INSERT ON tableName FOR EACH ROW (只有表才支持触发器，视图不支持)
+
+一:
+	INSERT触发器
+	1.存在一个名为NEW的虚拟表，可以访问被插入的行
+	2.在BEFORE INSERT触发器中，NEW中的值也可以被更新（允许更改被插入的值)
+	3.对于AUTO_INCREMENT列，NEW在INSERT执行之前包含0，在INSERT执行之后包含新的自动生成的值
+	4.在mysql5.0以后已经不支持触发器返回结果集	
+二:
+	DELETE触发器
+	1.存在一个名为OLD的虚拟表，可以访问被删除的行
+	2.OLD中的值全都是只读，不能更新
+三:
+	UPDATE触发器
+	1.可以使用OLD来访问旧值，用NEW来访问新值
+	2.在BEFORE UPDATE触发器中，NEW中的值也可以更改
+	3.OLD中的值全都是只读的，不能更新
+
+================================管理事务处理===================
+事务:一组sql语句
+回退:撤销指定sql语句的过程
+提交:将未存储的sql语句结果写入数据库表
+保留点:指事务处理中设置的临时占位符（以便可以回退到这个保留点而不用回退整个事务)
+
+事务开始:
+START TRANSACTION
+[træn'zækʃ(ə)n]
+回退:ROLLBACK  (回退到当前事务START TRANSACTION之前的状态)
+
+限制:
+	1.可以回退
+	INSERT和UPDATE和DELETE语句
+	2.尽管可以在CREATE和DROP操作使用ROLLBACK，但是不会被撤销
+
+在事务处理块中的数据不会隐式提交，需要明确提交COMMIT;
+(实际上若事务中途失败，会被自动ROLLBACK)
+
+当ROLLBACK或COMMIT语句执行后，事务会自动关闭
+
+创建保留点:
+SAVEPOINT savepointName;
+ROLLBACK TO savepointName;
+
+保留点越多越好，以便控制灵活的回退
+!!注意点:保留点在事务处理完会自动释放（也可以用RELEASE SAVEPOINT来明确释放)
+
+SET autocommit=0;(能够修改当前连接数据库，是否自动提交，而不能修改服务器的配置)
+
+============================================全球化和本地化===============================
+SHOW CHARACTER SET;
+显示所有可用的字符集以及每个字符集的描述和默认校对
+SHOW COLLATION; 显示所支持校对的完整列表
+
+显示目前所使用的字符集和校对:
+SHOW VARIABLES LIKE 'character%';
+SHOW VARIABLES LIKE 'collation%';
+
+CREATE TABLE tableName
+(
+	fieldName type CHARACTER SET chartacterName COLLATION collationName
+)DEFAULT CHARACTER SET chartacterName
+ COLLATION collationName;
+
+ //字段或者表都可以设置字符集和校对
+ //SELECT语句也可以使用ORDER BY filedName COLLATION collationName ，如何校对影响排序, GROUP BY , HAVING, 聚集函数，别名等都可以使用COLLATION
+
+=============================================安全管理=========================
+mysql这个数据库记录了mysql用户账号和信息
+SELECT user FROM user;
+
+创建用户:
+CREATE USER username IDENTIFIED BY 'password'; 
+重命名用户:
+RENAME USER username TO newName; 
+删除用户:
+DROP USER username;
+
+查看访问权限:
+SHOW GRANTS FOR username;
+GRANT USAGE ON *.* TO 'bforta'@'%' IDENTIFIED BY PASSWORD '*652F5C6351D0ED09328FE3DE88902CDFB6948F7E'
+//结果中USAGE ON表示没有权限 *.*任何数据库任何表 username@hostname来标识用户 hostname为%表示使用默认的主机名
+
+授权
+GRANT SELECT ON databaseName.tableName TO username; 可以使用*来表示任意
+
+撤销权限
+REVOKE SELECT ON databaseName.tableName FROM username;
+
+更改口令
+SET PASSWORD FOR username = Password('password');
+
+SET PASSWORD = Password('password') //修改自己的口令
+
+==================================数据库维护========================
+1.mysqldump命令转存所有数据库内容到某个外部文件
+2.mysqlhotcopy命令从一个数据库复制所有数据
+3.mysql中使用BACKUP TABLE或SELECT INTO OUTFILE转储所有数据到某个外部文件，数据可以使用RESTORE TABLE来恢复(XXXXX现在版本已经删除)
+在备份前使用FLUSH TABLES来保证所有数据都被写入硬盘
+
+ANALYZE TABLE tableName;ANALYZE TABLE分析并存储表的密钥分配（索引统计）
+
+CHECK TABLE tableName; 检查表
+
+REPAIRE TABLE tableName;修复表
+
+当表删除大量数据时可以使用OPTIMIZE['ɒptɪmaɪz] TABLE tableName来回收空间
+
+mysqld --help 显示帮助
+mysqld --safe-mode 装载减去某些最佳配置的服务器
+mysqld --verbose显示全文本消息
+
+日志文件:
+1.错误日志:
+	mysqld --log-error 位于data目录一般为hostname.err
+2.查询日志:
+	mysqld --log data目录下hostname.log
+3.二进制日志:
+	mysqld --log-bin hostname-bin文件
+4.缓慢查询日志:
+	mysqld --log-slow-queries hostname-slow.log文件
+
+	FLUSH LOGS来刷新所有日志文件在操作日志文件之前
+
+======================================改善性能====================
+1.可以使用SHOW VARIABLES和SHOW STATUS来查看配置信息
+2.可以使用SHOW PROCESSLIST来显示所有活动进程
+3.总是有多种方式写sql应该试试连接，并，子查询等
+4.使用EXPLAIN语句来让mysql解释如何执行一个select语句
+5.一般来说执行存储过程比一条条执行sql语句快
+6.再导入数据时应该关闭自动提交，因为可能想删除索引（比如FULLTEXT）然后导入完创建索引
+7.如果一个简单的where子句所返回的结果需要时间过长，则可以认为该字段需要索引
+8.存在多个or的SELECT语句，可以用多条SELECT语句和UNION语句，后者的效率优于前者
+9.索引能够改善数据查询的性能，但是有损插入删除和修改，因为如果有数据表是不经常被查询的，应该取消索引
+
+
+
+
+
+
+=======================================Mysql语法=========
+ALTER TABLE tableName
+(
+ 	ADD column datatype [NULL | NOT NULL] [CONSTRAINTS],
+	CHANGE column columns datatype [NULL | NOT NULL] [CONSTRAINTS],
+	DROP column,
+	...
+)
+
+COMMIT;
+
+CREATE INDEX indexName ON tableName (column [ASC| DESC], ...);
+
+CREATE PROCEDURE procedureName([parameters])
+	BEGIN 
+		....
+	END;
+
+CREATE TABLE tableName
+(
+	column datatype [NULL | NOT NULL] [CONSTRAINTS],
+	column datatype [NULL | NOT NULL] [CONSTRAINTS],
+	...
+)
+
+
+CREATE USER userName[@hostname] [INDENTIFIED BY [PASSWORD] 'password']
+
+
+CREATE [OR REPLACE] VIEW viewName AS SELECT...;
+
+DELETE FROM tableName [WHERE ...];
+
+DROP DATABASE | INDEX | PROCEDURE | TABLE | TRIGGER | USER | VIEW itemName;
+
+INSERT INTO tableName([columns, ...]) VALUES(values, ...);
+
+INSERT INTO tableName[(columns, ...)] SELECT columns, ... FROM tableName .... [ WHERE ...];
+
+ROLLBACK [TO savepointName];
+
+SAVEPOINT savepointName;
+
+SELECT columns, ... FROM tableName ,... [WHERE ...] [UNION ...] [GROUP BY ...] [HAING ...] [ORDER BY ...];
+
+START TRANSACTION;
+
+UPDATE tableName SET columns = value, ... [WHERE ...];
+
+
