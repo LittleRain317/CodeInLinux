@@ -32,7 +32,7 @@ O_SEARCH	只搜索打开（应用于目录)
 以上必须执行一个，下面是可选的(使用|来连接)
 
 O_APPEND	每次写时追加到文件的尾端,（即在write操作时会修改文件表项中的文件偏移量为文件尾部，将lseek(fd, 0, SEEK_END)和open(path, O_WRONLY)封装成一个原子操作)
-O_CLOEXEC	把FD_CLOEXEC常量设置为文件描述符标志
+O_CLOEXEC	把FD_CLOEXEC常量设置为文件描述符标志,(若设置了则在exec时关闭该文件描述符)
 O_CREAT		若文件不存在则创建它，使用此选项时，open函数需要mode参数，使用mode指定该新文件的访问权限
 O_DIRECTORY	如果path引用的不是目录，则出错
 O_EXCL		如果同时指定了O_CREAT，而文件已经存在，则出错，用此可以测试一个文件是否存在，如果不存在则创建该文件
@@ -1178,6 +1178,7 @@ fork后的子进程享有父进程中数据空间，堆和栈的副本，但共�
 
 !!!注意点:由于fork后一般加上exec,所以很多实现并不执行一个父进程的拷贝，而是使用了写时复制(COW Copy-On-Write)技术，内核将数据空间，堆栈设置为只读权限，写时制作副本，父进程所有打开的文件描述符都被复制到子进程中,文件共享（文件状态标志，文件偏移量，v节点指针)
 !!fork共享的有:
+	环境
 	文件共享
 	实际用户id，实际组id，有效用户id，有效组id
 	附属组id
@@ -1272,12 +1273,12 @@ pid_t wait4(pid_t pid, int *statloc, int options, struct rusage *rusage);
 		sleep(1); //浪费cpu时间
 
 ---------------------------------函数exec---------------
-exec不创建新进程，直接让磁盘上的一个程序替换当前进程的.text .data heap stack
+exec不创建新进程(所以exec打印pid仍然是调用exec的进程id)，直接让磁盘上的一个程序替换当前进程的.text .data heap stack
 需要注意必须对该文件有执行权限，然后必须是普通文件
  #include <unistd.h>
 
  extern char **environ;
-
+对于envp的格式为"name=value"
  //若在使用ISO C之前，应该让最后一个参数为(char *)NULL
  int execl(const char *path, const char *arg, ...
                        /* (char  *) NULL */);
@@ -1298,5 +1299,6 @@ exec不创建新进程，直接让磁盘上的一个程序替换当前进程的.
  file会根据PATH环境变量来找可执行文件若该文件不是二进制文件而视为shell脚本
 
  如何记忆:p表示参数为filename使用PATH环境变量作为相对路径，l表示va_list表，v表示argv[],e表示envp[],f表示fd
+		 没有e则会使用全局变量里面的environ作为当前进程的环境
 
 
