@@ -388,6 +388,9 @@ locate [ir] keyword
 手动更新数据库updatedb
 
 find [PATH] [option] [action] -a -o -a连接两个选项 -o或
+关于find正则表达式
+find path -regextype "posix-extended" -regex "\.(cpp|c|h)$"
+
 1.与时间有关的选项-atime -ctime -mtime
 	如:
 	-mtime n: 在n天之前的一天之内被更改过内容的文件
@@ -1138,6 +1141,7 @@ stty [-a]  <==终端机的环境配置
 stty 配置项 配置值 <==配置特殊热键
 
 set [-uvCHhmBx]  <==配置整个命令的输入输出环境
+set +uvCHhmBx 反选
 --------|-u 默认不激活，激活后，使用没有配置的变量报错
 --------|-v 默认不激活，激活后，若信息被输出前，会显示信息的原始内容
 --------|-x 默认不激活，激活后，会显示命令的内容前面有++符合
