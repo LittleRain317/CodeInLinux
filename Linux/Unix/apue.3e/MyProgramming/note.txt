@@ -6,6 +6,15 @@
 时钟时间:进程运行的时间总量
 用户cpu时间:执行用户指令的时间量
 系统时间为该进程执行内核程序所经历的时间可用time命令查看
+
+================================打印错误码===================
+    #include <stdio.h>
+
+       void perror(const char *s);
+  #include <string.h>
+
+       char *strerror(int errnum);
+
 ======================================第三章:文件I/O===================
 所有打开的文件都通过文件描述符来引用
 
@@ -1301,6 +1310,387 @@ exec不创建新进程(所以exec打印pid仍然是调用exec的进程id)，直�
  如何记忆:p表示参数为filename使用PATH环境变量作为相对路径，l表示va_list表，v表示argv[],e表示envp[],f表示fd
 		 没有e则会使用全局变量里面的environ作为当前进程的环境
 
+
+
+--------------------------------更改用户id和更改组id------------------
+一般而言，在设计应用时，我们总是视图用最小权限模型
+
+#include <unistd.h>
+int setuid(uid_t uid);
+int setgid(gid_t gid); //两个函数返回值:若成功返回0，错误返回-1
+
+!!注意点:(以下同gid)
+1.若进程具有超级用户特权，则setuid函数将实际uid，有效uid和saved set-user-id 都设置为uid参数
+2.若进程没有超级用户特权，但是uid等于实际uid或saved set-user-id  ,则setuid只将有效uid设置为uid参数，不更改实际uid和saved set-user-id
+3.若都不满足则错误
+
+!!注意点:
+内核维护了三个用户id
+ID	                        exec                                        setuid(uid)
+	                    rws中没有设置s       rws中设置了s             root   一般用户
+实际uid                 不变                 不变                     uid参数 不变
+有效uid                 不变                 文件所有者uid            uid参数 uid参数
+saved set-user-id       从有效uid复制        从有效uid复制            uid参数 不变
+(为euid副本)
+
+getresuid, getresgid - get real, effective and saved user/group IDs
+#define _GNU_SOURCE         /* See feature_test_macros(7) */
+#include <unistd.h>
+int getresuid(uid_t *ruid, uid_t *euid, uid_t *suid);
+int getresgid(gid_t *rgid, gid_t *egid, gid_t *sgid);
+
+NAME
+       setreuid, setregid - set real and/or effective user or group ID
+SYNOPSIS
+#include <sys/types.h>
+#include <unistd.h>
+
+int setreuid(uid_t ruid, uid_t euid);
+int setregid(gid_t rgid, gid_t egid); //返回值以上四个成功返回0失败返回-1
+
+==================================第11章:线程========================
+每个线程都包含有表示执行环境所必须的信息，其中包括线程id，一组寄存器值，栈，调度优先级和策略以及信号屏蔽字，errno变量以及线程私有数据
+一个进程的所有信息是所有线程共享的，包括可执行代码套，程序的全局，堆，栈以及文件描述符
+
+-------------------------------线程标识---------------------
+#include <pthread.h>
+int pthread_equal(pthread_t tid1, pthread_t tid2);
+//返回值 相等返回非0 否则返回0
+
+#include <pthread.h>
+pthread_t pthread_self(void);
+//返回值 调用线程的id
+
+#include <pthead.h>
+int pthread_create(pthread_t *restrict tidp, const pthread_attr_t *restrict attr, void *(*start_rtn)(void*), void *restrict arg);
+//返回值 成功0 错误返回错误编号
+//函数一旦开始就进入了竞争阶段
+
+--------------------------------线程终止--------------------
+如果进程中的任意线程调用了exit（_Exit _exit)那么整个进程就会终止
+线程终止:
+1.调用pthread_exit
+2.可以被同一进程的其他线程取消
+3.可以简单地从启动例程中返回return((void*)val)，返回值是线程的退出码
+
+#include <pthread.h>
+void pthread_exit(void *rval_ptr);
+pthread_exit（）函数终止调用线程并通过retval返回一个值（如果线程是可连接的,进程中的其他线程也可以通过调用pthread_join来访问这个指针
+
+#include <pthread.h>
+int pthread_join(pthread_t thread, void **rval_ptr);//void* rval_ptr, &rval_ptr来传输
+//返回值 成功 0 否则返回出错码
+//调用线程将一直阻塞，直到指定的线程调用pthread_exit，从启动例程(开启新线程的线程)中返回或者被取消
+//如果线程返回了则ravl_ptr就指向pthread_exit或return的值(!!注意点:线程不要返回局部的地址)，如果线程被取消，则rval_ptr所指向的内存单元就设置为PTHREAD_CANCELED
+//可以通过调用pthread_join自动把线程置于分离状态，这样子资源就可以恢复，如果线程已经处于分离状态，则pthread_join就会失败
+
+
+#include <pthread.h>
+int pthread_cancel(pthread_t tid);
+//取消同一进程中的其他线程,只是提议，可以被指定的线程忽略或者控制如何被取消，成功取消的话效果等价于pthread_exit(PTHREAD_CANCELED);
+//返回值 成功0 失败 返回错误码
+
+#include <pthread.h>
+//同进程退出时调用函数atexit,
+//以下两个函数可能实现为宏
+void pthread_cleanup_push(void (*rtn)(void *), void *arg);
+void pthread_cleanup_pop(int execute);//删除上一次push
+1.调用pthread_exit时(但线程return返回时不会调用trn)
+2.响应取消时
+3.用非零execute调用pthead_cleanup_pop时(如果execute被设置为0，则清理函数不被调用,但是如果在push和pop之间插入pthread_exit的话则仍然会调用trn)
+以上任意一种情况会由pthread_cleanup_push调用rtn(注意push和pop的个数需要在与线程相同的作用域内匹配(这个函数实现为宏，该宏push设置了{而pop设置了},如果pop和push不匹配则编译错误)
+
+
+#include <pthread.h>
+int pthread_detach(pthread_t tid);//不会像join一样阻塞当前线程
+//返回值成功0 错误返回错误码
+//分离线程的作用
+//对于一个分离状态的线程不能用pthread_join来等待它的终止状态（如果线程被分离，则线程的底层资源可以在线程终止时立即被回收)
+//默认情况下，线程的终止状态会被保存，直到pthread_join
+
+--------------------------------线程同步--------------------
+同步问题涉及到存储器周期
+
+---------------------------互斥量（确保同一个时间只有一个线程访问数据)---------------
+互斥量从本质来说是一把锁，在访问共享资源前对互斥量进行设置，在访问完成后释放互斥量
+当释放互斥量（解锁）后，被阻塞的线程中第一个变成运行的线程会对互斥量进行上锁，这样操作后就可以保证每次只有一个线程在运行
+
+#include <pthread.h>
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;//效果等价于pthread_mutex_init(&mutex, NULL)但是不执行错误检查
+int pthread_mutex_init(pthread_mutex_t *restrict mutex, const pthread_mutexattr_t *restrict attr);
+int pthread_mutex_destroy(pthread_mutex_t *mutex);//返回值 成功 0 失败返回错误码
+
+#include <pthread.h>
+int pthread_mutex_lock(pthread_mutex_t *mutex);
+int pthread_mutex_trylock(pthread_mutex_t *mutex);
+int pthread_mutex_unlock(pthread_mutex_t *mutex);
+//返回值 成功 0 失败 错误码
+
+pthread_mutex_trylock()调用在参数mutex指定的mutex对象当前被锁住的时候立即返回，除此之外，pthread_mutex_trylock()跟pthread_mutex_lock()功能完全一样。
+pthread_mutex_trylock() 在成功获得了一个mutex的锁后返回0，否则返回一个错误提示码错误.
+
+---------------------------------避免死锁-----------------
+1.线程试图对同一个互斥量加锁两次(因为第一次加锁后还没有释放,第二次则只能等待)
+2.可能出现的死锁只会发生在一个线程试图锁住另外一个线程以相反的顺序锁住的互斥量
+(A:mutex1 mutex2(等待2解锁) B:mutex2 mutex1(等待1解锁))
+(可以用pthread_mutex_trylock来测试mutex2，若返回错误的话，可以释放mutex1）
+
+--------------------------------------函数pthread_mutex_timedlock---------------
+#include <pthread.h>
+#include <time.h>
+//超过abstime这个绝对时间(表示在abstime这个绝对时间之前可以阻塞)就放弃阻塞返回错误码
+//注意阻塞的时间可能会有不同，1.调度延迟可能会增加时间2.系统时钟的精度可能不足以支持这个abstime的设置
+int pthread_mutex_timedlock(pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime);
+//返回值 成功0 失败  错误码
+
+------------------------------------读写锁(也叫作共享互斥锁)--------------------------------
+读写锁类似互斥量:
+但是有三种状态
+1.读模式下加锁状态(所有读模式被放行，写模式被阻塞)
+2.写模式下加锁状态(写模式一次只有一个线程可以占有,一般情况下如果有读写锁处于读模式锁住的情况下，若有一个线程试图以写模式获取锁，读写锁通常会阻塞后面的读模式请求，以防止写模式一直得不到满足)
+3.不加锁状态
+通常适用于读的次数大于写的次数的情况，在使用之前必须初始化
+
+#include <pthread.h>
+int pthread_rwlock_init(pthread_rwlock_t *restrict rwlock, const pthread_rwlockattr_t *restrict attr);
+int pthread_rwlock_destroy(pthread_rwlock_t *rwlock);
+//返回值 成功 返回0 错误返回错误码
+pthread_rwlock_t rwlock = PTHREAD_RWLOCK_INITIALIZER;//同pthread_mutex_宏初始化
+
+#include <pthread.h>
+int pthread_rwlock_rdlock(pthread_rwlock_t *rwlock);
+int pthread_rwlock_wrlock(pthread_rwlock_t *rwlock);
+int pthread_rwlock_unlock(pthread_rwlock_t *rwlock);
+//返回值 成功 返回 0 失败返回错误码
+
+//对应于mutex_trylock
+#include <pthread.h>
+int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock);
+int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock);
+//返回值 成功 返回 0 失败返回错误码
+
+#include <pthread.h>
+#include <time.h>
+//同pthread_mutex_timedlock
+int pthread_rwlock_timedrdlock(pthread_rwlock_t *restrict rwlock,
+    const struct timespec *restrict abstime);
+int pthread_rwlock_timedwrlock(pthread_rwlock_t *restrict rwlock,
+    const struct timespec *restrict abstime);
+
+
+----------------------------条件变量——-------------------------
+#include <pthread.h>
+int pthread_cond_destroy(pthread_cond_t *cond);
+int pthread_cond_init(pthread_cond_t *restrict cond,    const pthread_condattr_t *restrict attr);
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+//返回值 成功 0 失败返回错误码
+
+int pthread_cond_timedwait(pthread_cond_t *restrict cond,      pthread_mutex_t *restrict mutex,      const struct timespec *restrict abstime);
+int pthread_cond_wait(pthread_cond_t *restrict cond,      pthread_mutex_t *restrict mutex);
+//返回值 成功 0 失败返回错误码
+//mutex需要先上锁
+//执行以上两个函数后，会让调用线程放在等待条件的线程列表上，然后对互斥量解锁（以便其他线程获得锁开启其他工作),当函数返回时，互斥量再次上锁
+//!!注意点:当条件变量为真时，需要再次验证所保护的条件是否真的满足，因为可能另一线程发出pthread_cond_signal信号之前，条件被其他线程所更改了
+
+//通知线程条件已经满足
+#include <pthread.h>
+int pthread_cond_signal(pthread_cond_t *cond);//至少唤醒一个等待该条件的线程,此时条件变量应该为真
+int pthread_cond_broadcast(pthread_cond_t *cond);//唤醒全部等待该条件的线程
+//返回值 成功0 失败 返回错误码
+
+--------------------------------------------自旋锁---------------------------------
+自旋锁类似于互斥量(随着处理器进步，以及有些互斥量的实现会先让试图获取互斥量的线程先自旋一段时间，导致和互斥量的性能基本相同)，但是不是通过休眠使得线程阻塞，而是在获取锁之前处于忙等（自旋）阻塞状态
+一般用于锁被持有的时间短，而且线程不希望在重新调度上花费太多成本
+
+自旋锁通常作为底层原语用于实现其他类型的锁，根据所基于的系统体系结构，可以通过使用测试并设置指令来实现，当线程自旋等待锁变为可用时，cpu不能做其他事情，这也是自旋锁只能够被持有一小段时间的原因
+#include <pthread.h>
+int pthread_spin_destroy(pthread_spinlock_t *lock);
+int pthread_spin_init(pthread_spinlock_t *lock, int pshared);
+//返回值 成功0 失败返回错误码
+pshard:
+1.PTHREAD_PROCESS_SHARED:自旋锁能够被可以访问锁底层内存的线程所获取（即使那些线程属于不同的进程)
+2.PTHREAD_PROCESS_PRIVATE:自旋锁只能被初始化该锁的进程内部的线程所访问
+
+#include <pthread.h>
+int pthread_spin_lock(pthread_spinlock_t *lock);
+int pthread_spin_trylock(pthread_spinlock_t *lock);//不进行自旋，如果不能获取锁里面返回
+int pthread_spin_unlock(pthread_spinlock_t *lock);
+//返回值 成功0 失败返回错误码
+!!注意点:不要在持有自旋锁状态下调用需要进入休眠状态的函数
+
+----------------------------------------------屏障--------------------------------
+屏障是用户协调多个线程并行工作的同步机制，允许每个线程等待，直到所有的合作线程都到达了某一点
+//pthread_join就是一种屏障，允许一个线程等待，直到另外一个线程退出(到达了退出状态)
+['bæriə(r)]barrier
+#include <pthread.h>
+int pthread_barrier_destroy(pthread_barrier_t *barrier);
+int pthread_barrier_init(pthread_barrier_t *restrict barrier,    const pthread_barrierattr_t *restrict attr, unsigned count);
+//返回值 成功0 失败返回错误码
+//count指定了，在允许所有线程继续运行之前，必须到达屏障的线程数目
+
+#include <pthread.h>
+//准备等待其他线程到达屏障
+int pthread_barrier_wait(pthread_barrier_t *barrier);
+//返回值 成功0或者PTHREAD_BARRIER_SERIAL_THREAD
+								['sɪəriəl]串行
+//调用该函数的线程会在屏障计数为到达count之前进入休眠状态，如果该线程是最后一个调用该函数的线程，就满足了屏障计数，那么所有的线程都被唤醒
+//pthread_barrier_wait（）函数将为在屏障处同步的单个（任意）线程返回PTHREAD_BARRIER_SERIAL_THREAD，并为每个其他线程返回零。
+
+
+=====================================第12章 线程控制=====================
+-----------------------------------线程控制----------------------------
+sysconf来获取
+
+---------------------------------线程属性---------------------------
+1.每个对象与自己类型的属性对象进行关联（线程与线程属性关联，互斥量与互斥量属性关联)
+2.有一个初始化函数，把属性值设置为默认值
+3.还有一个销毁属性对象的函数
+4.每个属性都有一个从属性对象中获取属性值的函数
+5.每个属性都有一个设置属性值的函数(按值传递)
+
+#include <pthread.h>
+int pthread_attr_init(pthread_attr_t *attr);//在调用该函数后，线程属性是操作系统实现支持的默认属性
+int pthread_attr_destroy(pthread_attr_t *attr);
+//返回值 成功 0 失败返回错误码
+
+属性:
+名称						描述							
+detachstate 				线程的分离状态属性
+guardsize[ɡɑː(r)d](警戒)	线程栈末尾的警戒缓冲区大小（byte)//避免栈溢出导致的程序崩溃（若在线程栈末尾之后仍超过该值则会越界访问)
+stackaddr 					线程栈的最低地址//如果修改了该属性操作系统会认为需要自己管理栈，于是等价于将guardsize设置为0
+stacksize 					线程栈的最小长度（byte)
+#include <pthread.h>
+int pthread_attr_setdetachstate(pthread_attr_t *attr, int detachstate);
+int pthread_attr_getdetachstate(const pthread_attr_t *attr, int *detachstate);
+//返回值 成功 0 失败返回错误码
+detachstate:
+PTHREAD_CREATE_DETACHED(线程结束后状态不保留立即被操作系统回收)
+       Threads that are created using attr will be created in a detached state.
+PTHREAD_CREATE_JOINABLE
+       Threads that are created using attr will be created in a joinable state.
+
+
+#include <pthread.h>
+int pthread_attr_setstack(pthread_attr_t *attr,
+                          void *stackaddr, size_t stacksize);
+int pthread_attr_getstack(const pthread_attr_t *attr,
+                          void **stackaddr, size_t *stacksize);
+//返回值 成功 0 失败返回错误码
+//stackaddr属性是线程栈的最低地址，但是不一定是栈的开始位置（依赖于处理器结构，栈是低生长还是高生长)
+//同一个进程中的所有线程共同享有进程的栈大小
+
+#include <pthread.h>
+int pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
+int pthread_attr_getstacksize(const pthread_attr_t *attr, size_t *stacksize);
+//返回值 成功 0 失败返回错误码
+//利用该函数就不用考虑处理器结构的问题
+//但是stacksize不能小于PTHREAD_STACK_MIN
+
+#include <pthread.h>
+int pthread_attr_setguardsize(pthread_attr_t *attr, size_t guardsize);
+int pthread_attr_getguardsize(const pthread_attr_t *attr, size_t *guardsize);
+//返回值 成功 0 失败返回错误码
+//如果guardsize被修改了，则操作系统可能会把它取为内存页大小的整数倍
+
+---------------------------------------------------同步属性----------------------------------
+自旋锁拥有一个属性为进程共享属性
+----------------------------互斥量属性---------------------------------
+#include <pthread.h>
+int pthread_mutexattr_destroy(pthread_mutexattr_t *attr);
+int pthread_mutexattr_init(pthread_mutexattr_t *attr);
+//返回值 成功 0  失败返回错误码
+
+1.进程共享属性
+#include <pthread.h>
+int pthread_mutexattr_getpshared(const pthread_mutexattr_t
+    *restrict attr, int *restrict pshared);
+int pthread_mutexattr_setpshared(pthread_mutexattr_t *attr,
+    int pshared);
+//返回值 成功 0 失败返回错误码
+//使用PTHREAD_PROCESS_PRIVATE进程共享属性初始化的同步变量只能由初始化它们的进程中的线程操作
+//使用PTHREAD_PROCESS_SHARED进程共享属性初始化的同步变量可以由任何有权访问它的进程中的任何线程操作
+
+2.健壮属性
+#include <pthread.h>
+int pthread_mutexattr_getrobust(const pthread_mutexattr_t *restrict
+    attr, int *restrict robust);
+int pthread_mutexattr_setrobust(pthread_mutexattr_t *attr,
+       int robust);
+//返回值 成功 0  失败返回错误码
+PTHREAD_MUTEX_STALLED
+              持有互斥锁的进程终止时，不会采取任何特殊操作。 如果没有其他线程可以解锁互斥锁，则可能导致死锁。(对于另一个进程来说)
+              这是默认值。
+PTHREAD_MUTEX_ROBUST
+			  如果一个线程调用pthread_mutex_lock获取锁，而该锁被另外一个进程所拥有而该进程终止时没有解锁，则该调用pthread_mutex_lock的线程的函数返回值为EOWNERDEAD而不是0
+//不管该属性如何都应该进行恢复,否则该互斥量处于永久不可用状态
+
+//针对上述情况产生了
+#include <pthread.h>
+int pthread_mutex_consistent(pthread_mutex_t *mutex);//返回值 成功 0 失败返回错误码
+//该函数可以指明该互斥量的状态在互斥量解锁之前是一致的
+//如果线程没有先调用该函数然后解锁，那么其他试图获取互斥量的阻塞线程就会得到错误码(防止死锁)，此时该互斥量不可再用
+//通过提前调用该函数就可以使得互斥量正常工作
+
+3.类型属性
+PTHREAD_MUTEX_NORMAL:不做任何特殊的错误检查或死锁检测
+PTHREAD_MUTEX_ERRORCHECK:提供错误检查
+PTHREAD_MUTEX_RECURSIVE(recursive[rɪ'kɜː(r)sɪv]递归的)//允许统一线程在互斥量解锁之前对该互斥量进行多次加锁（会验证加锁次数是否等于解锁次数,若不相等则不会释放锁)//在单线程接口移植到多线程环境中，获取该属性是有用的，但是很难处理，除非没有其他方法不要选取该属性（避免死锁,但是需要解锁多次)!!!!!!!!!!!!!!!
+PTHREAD_MUTEX_DEFAULT:根据实现映射到上述三种类型
+
+互斥量类型					没有解锁时重新加锁?				本线程不占有锁时对另一线程的锁进行解锁?				在已经解锁后继续解锁
+PTHREAD_MUTEX_NORMAL		死锁							未定义												未定义
+PTHREAD_MUTEX_ERRORCHECK 	返回错误（可以用于调试bug)		返回错误											返回错误
+PTHREAD_MUTEX_RECURSIVE 	允许							返回错误											返回错误
+
+#include <pthread.h>
+int pthread_mutexattr_gettype(const pthread_mutexattr_t *restrict attr,
+           int *restrict type);
+int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
+//返回值 成功 返回0 失败返回错误码
+
+--------------------------------读写锁属性---------------------------
+#include <pthread.h>
+int pthread_rwlockattr_destroy(pthread_rwlockattr_t *attr);
+int pthread_rwlockattr_init(pthread_rwlockattr_t *attr);
+唯一属性:
+	进程共享属性
+#include <pthread.h>
+int pthread_rwlockattr_getpshared(const pthread_rwlockattr_t
+           *restrict attr, int *restrict pshared);
+int pthread_rwlockattr_setpshared(pthread_rwlockattr_t *attr,
+           int pshared);
+
+------------------------------条件变量属性--------------------------
+#include <pthread.h>
+int pthread_condattr_destroy(pthread_condattr_t *attr);
+int pthread_condattr_init(pthread_condattr_t *attr);
+属性:
+	进程共享属性  
+		#include <pthread.h>
+       int pthread_condattr_getpshared(const pthread_condattr_t *restrict attr,
+           int *restrict pshared);
+       int pthread_condattr_setpshared(pthread_condattr_t *attr,
+           int pshared);
+	时钟属性:
+	    #include <pthread.h>
+
+       int pthread_condattr_getclock(const pthread_condattr_t *restrict attr,
+           clockid_t *restrict clock_id);
+       int pthread_condattr_setclock(pthread_condattr_t *attr,
+           clockid_t clock_id);
+		//clockid_t的类型决定了pthread_cond_timedwait()中的时间采取哪种时间类型
+
+-----------------------------------------屏障属性-------------------------------
+#include <pthread.h>
+int pthread_barrierattr_destroy(pthread_barrierattr_t *attr);
+int pthread_barrierattr_init(pthread_barrierattr_t *attr);
+唯一属性:
+	进程共享属性:
+	    #include <pthread.h>
+       int pthread_barrierattr_getpshared(const pthread_barrierattr_t
+           *restrict attr, int *restrict pshared);
+       int pthread_barrierattr_setpshared(pthread_barrierattr_t *attr,
+           int pshared);
 
 ==================================第16章 网络IPC:套接字
 套接字描述符：（如同文件描述符）应用程序用套接字描述符来访问套接字

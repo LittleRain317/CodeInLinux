@@ -1,10 +1,7 @@
+#include <unistd.h>
 #include <stdio.h>
-#include <arpa/inet.h>
-int main()
+int main(int argc, char *argv[])
 {
-	char src[] = "139.196.84.233";
-	char dst[32] = { 0 };
-	inet_pton(AF_INET, src, dst);
-	printf("dst=%s\n", dst);
+	printf("%lu\n", (unsigned long)sysconf(_SC_THREAD_STACK_MIN));
 	return 0;
 }
