@@ -1,5 +1,5 @@
 #include "../include/apue.h"
-
+#include <unistd.h>
 int globvar = 6;		
 int main(void)
 {
@@ -15,8 +15,9 @@ int main(void)
 	{
 		globvar++;
 		var++;
-		exit(0);
+		fclose(stdout);
+		_exit(0);
 	}
-	printf("pid = %ld, glob = %d, var = %d\n", (long)getpid(), globvar, var);
+	printf("result = %d\n",printf("pid = %ld, glob = %d, var = %d\n", (long)getpid(), globvar, var));
 	exit(0);
 }

@@ -462,6 +462,7 @@ times的解读:
 3.times非空并且两个元素的tv_nesc字段都为UTIME_OMIT，就不执行权限检查
 
 #include <sys/time.h>
+//改变文件访问和修改内容时间
 int utimes(const char *filename, const struct timeval times[2]);
 //返回值 成功0 错误-1
 struct timeval {
@@ -1172,6 +1173,7 @@ resource的取值:
 通常PID0 为调度进程，也称交换进程是内核的一部分不执行任何磁盘的程序，也称系统进程
 ps:自举 计算机必须具备自举能力将自己所有的元件激活，以便能完成加载操作系统这一目的，然后再由操作系统承担起那些单靠自举代码无法完成的更复杂的任务
 PID1 为init进程，在自举过程结束时由内核调用，负责在自举内核后启动系统，读取与系统相关的初始化文件(/etc/rc* /etc/inittab /etc/init.d ，并将系统引导到一个状态（如多用户，单用户，维护...)，init进程绝不会终止，虽然是普通的用户进程（但是是root来执行)，将成为所有孤儿进程的父进程
+孤儿进程：一个父进程退出，而它的一个或多个子进程还在运行，那么那些子进程将成为孤儿进程。孤儿进程将被init进程(进程号为1)所收养，并由init进程对它们完成状态收集工作
 
 #include <unistd.h>
 pid_t getpid(void);
@@ -1210,7 +1212,32 @@ vfork和fork的区别:
 	1.不将父进程的地址空间完全复制到子进程中，因为用vfork通常后面接exec，在调用exec或者exit之前，在父进程的空间运行(注意!!)
 	2.vfork保证子进程先执行（但是要是子进程依赖于父进程的动作，则会导致死锁)，子进程调用exec或者exit后父进程才可能被调度
 
-!!!注意点:sizeof是编译期得知
+!!!注意点:sizeof是编译期得知,vfork由于是在父进程的地址空间中执行指令，因此若修改了父进程的栈帧容易导致不可预测的结果（如f1（）里面调用vfork后调用f2()，则父进程的f1栈帧被改写)
+void f1()
+{
+	pid_t pid;
+	if ((pid = vfork()) < 0)
+	{
+		err_sys("vfork error");
+	}
+}
+void f2()
+{
+	printf("test\n");
+}
+int main(void)
+{
+	f1();
+	f2();
+	return 0;
+}
+-----------------					    -----------------
+|	main栈帧 	|						|   main栈帧	|
+-----------------	----------------> 	-----------------
+|	f1栈帧		|						|   f2栈帧		|
+-----------------						-----------------
+vfork后调用f2之前的栈帧示意图		子进程结束后，父进程f1的栈帧可能会被f2覆盖
+
 
 --------------------------------------函数exit-----------
 exit是否对标准io流刷新是未定义行为（取决于实现），但目前不刷新，因为最后仍然会由内核关闭所有已经打开的文件描述符
@@ -1218,6 +1245,7 @@ exit是否对标准io流刷新是未定义行为（取决于实现），但目�
 不管进程如何终止，都会执行内核中的一段代码，这段代码为相应进程关闭所有打开描述符，释放它所使用的存储器
 
 僵尸进程:一个已经终止，但是父进程尚未对起进行善后处理（wait waitpid获取终止进程的有关信息，释放它仍占用的资源) ps可以打印
+如果进程不调用wait / waitpid的话， 那么保留的那段信息就不会释放，其进程号就会一直被占用，但是系统所能使用的进程号是有限的，如果大量的产生僵死进程，将因为没有可用的进程号而导致系统不能产生新的进程. 此即为僵尸进程的危害，应当避免。
 
 一个init的子进程：可能是init直接产生的，也可能是由init收养的（其父进程已经终止)
 
@@ -1251,6 +1279,45 @@ WIFCONTINUED(status) 若在作业控制暂停后已经继续的子进程返回�
 
 --------------------------------函数waitid---------------------
 #include <sys/wait.h>
+
+siginfo_t {
+    int      si_signo;     /* Signal number */
+    int      si_errno;     /* An errno value */
+    int      si_code;      /* Signal code */
+    int      si_trapno;    /* Trap number that caused
+                              hardware-generated signal
+                              (unused on most architectures) */
+    pid_t    si_pid;       /* Sending process ID */
+    uid_t    si_uid;       /* Real user ID of sending process */
+    int      si_status;    /* Exit value or signal */
+    clock_t  si_utime;     /* User time consumed */
+    clock_t  si_stime;     /* System time consumed */
+    sigval_t si_value;     /* Signal value */
+    int      si_int;       /* POSIX.1b signal */
+    void    *si_ptr;       /* POSIX.1b signal */
+    int      si_overrun;   /* Timer overrun count;
+                              POSIX.1b timers */
+    int      si_timerid;   /* Timer ID; POSIX.1b timers */
+    void    *si_addr;      /* Memory location which caused fault */
+    long     si_band;      /* Band event (was int in
+                              glibc 2.3.2 and earlier) */
+    int      si_fd;        /* File descriptor */
+    short    si_addr_lsb;  /* Least significant bit of address
+                              (since Linux 2.6.32) */
+    void    *si_lower;     /* Lower bound when address violation
+                              occurred (since Linux 3.19) */
+    void    *si_upper;     /* Upper bound when address violation
+                              occurred (since Linux 3.19) */
+    int      si_pkey;      /* Protection key on PTE that caused
+                              fault (since Linux 4.6) */
+    void    *si_call_addr; /* Address of system call instruction
+                              (since Linux 3.5) */
+    int      si_syscall;   /* Number of attempted system call
+                              (since Linux 3.5) */
+    unsigned int si_arch;  /* Architecture of attempted system call
+                              (since Linux 3.5) */
+}
+
 int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
 	成功返回0，错误返回-1
 idtype:
@@ -1289,6 +1356,9 @@ exec不创建新进程(所以exec打印pid仍然是调用exec的进程id)，直�
  extern char **environ;
 对于envp的格式为"name=value"
  //若在使用ISO C之前，应该让最后一个参数为(char *)NULL
+ //第一个参数为程序名 
+eg:
+	execl("/usr/bin/ls", "ls", "-l", "/" , (char*)0);
  int execl(const char *path, const char *arg, ...
                        /* (char  *) NULL */);
 
@@ -1321,7 +1391,7 @@ int setgid(gid_t gid); //两个函数返回值:若成功返回0，错误返回-1
 
 !!注意点:(以下同gid)
 1.若进程具有超级用户特权，则setuid函数将实际uid，有效uid和saved set-user-id 都设置为uid参数
-2.若进程没有超级用户特权，但是uid等于实际uid或saved set-user-id  ,则setuid只将有效uid设置为uid参数，不更改实际uid和saved set-user-id
+2.若进程没有超级用户特权，但是uid参数等于实际uid或saved set-user-id  ,则setuid只将有效uid设置为uid参数，不更改实际uid和saved set-user-id
 3.若都不满足则错误
 
 !!注意点:
@@ -1348,9 +1418,187 @@ SYNOPSIS
 int setreuid(uid_t ruid, uid_t euid);
 int setregid(gid_t rgid, gid_t egid); //返回值以上四个成功返回0失败返回-1
 
+-------------------------------函数seteuid和setegid-----------------------
+NAME
+       seteuid, setegid - set effective user or group ID
+
+SYNOPSIS
+       #include <sys/types.h>
+       #include <unistd.h>
+
+       int seteuid(uid_t euid);
+       int setegid(gid_t egid);
+	   //返回值 成功 0 失败 -1
+	   //对于普通用户可以修改其euid为实际uid和saved set-user-id
+	   //对于超级用户可以将euid设置为euid参数(不同与setuid将全部改变)
+
+//以上uid都适用于gid,但是附属gid不受影响
+
+
+--------------------------------解释器文件(文本文件)---------------------------
+形式是:
+#! pathname[optional-argument]//#! pathname中间的空格是可选项
+#!/bin/bash 最常见的
+pathname通常是绝对路径(内核才会识别解释器文件,内核通过调用exec函数执行的实际上不是解释器文件而是pathname所指定的文件(该程序叫做解释器))
+//exec  如果未识别文件的标题（尝试的execve（2）因错误ENOEXEC而失败），则这些exec函数将执行shell（/ bin / sh），并将文件的路径作为其第一个参数。 （如果此尝试失败，则不再进行进一步搜索。）
+//如果识别文件标题为解释器文件则内核会exec解释器文件中#!pathname, 然后将[optional-argument]传递给pathename,之后再将解释器文件绝对路径传递给pathename这个解释器程序作为后续的参数，如果解释器文件后面仍然有参数，则会继续将这些传递给解释器文件的参数作为解释器后续参数
+eg:
+解释器文件myls
+
+#!/usr/bin/ls -l 
+
+解释器/usr/bin/ls
+
+myls需要具有可执行权限
+./myls fild1 filed2 
+则会等价于/usr/bin/ls -l myls的绝对路径 fild1 fild2
+
+---------------------------------函数system----------------------------
+#include <stdlib.h>
+int system(const char *cmdstring);
+//返回值 
+1.参数为NULL,若有任一shell可用则返回非0值，否则返回0
+2.fork失败或者waitpid返回除EINTR之外的错误，则system返回-1，并且设置errno以表示错误类型
+3.如果exec失败(不能执行shell)，则返回值如同shell执行了_exit(127)
+4.否则返回shell的终止状态（它所执行的最后一个命名的终止状态)
+
+//在fork之后exec之前应该将有效用户id有效组id修改为实际uid实际组id,否则fork后子进程会继承父进程的环境而exec仅仅替换.data .txt stack heap .bss段
+
+
+----------------------------------process accounting进程记账------------------------
+启用该选项后，每当进程结束时内核就会写一个记录，一般包含命令名，所使用的CPU时间总量，用户id和组id，启动时间等.
+acct(5)
+打印comp_t数据的方法
+static unsigned long 
+compt2ulong(comp_t comptime)
+{
+	return (comptime & 0x1fff) << (((comptime >> 13) & 0x7) * 3);
+}
+
+
+	 #define ACCT_COMM 16
+     typedef u_int16_t comp_t;
+	   Linux 2.4及更高版本中的GID和GID。记录定义如下：
+           struct acct_v3 {
+               char ac_flag; / *标志* /
+               char ac_version; / *始终设置为ACCT_VERSION（3）* /
+               u_int16_t ac_tty; / *控制终端* /
+               u_int32_t ac_exitcode; / *进程终止状态* /
+               u_int32_t ac_uid; / *真实用户ID * /
+               u_int32_t ac_gid; / *真实组ID * /
+               u_int32_t ac_pid; / *进程ID * /
+               u_int32_t ac_ppid; / *父进程ID * /
+               u_int32_t ac_btime; / *进程创建时间* /
+               float ac_etime; / *经过的时间* /
+               comp_t ac_utime; / *用户CPU时间* /
+               comp_t ac_stime; /* 系统时间 */
+               comp_t ac_mem; / *平均内存使用量（kB）* /
+               comp_t ac_io; / *转移的字符（未使用）* /
+               comp_t ac_rw; / *块读取或写入
+                                          （没用过） */
+               comp_t ac_minflt; / *次要内存页错误* /
+               comp_t ac_majflt; / *主要内存页错误* /
+               comp_t ac_swaps; / *swap交换区数量（未使用）* /
+               char ac_comm [ACCT_COMM]; / *命令名* /
+           };
+           enum {          /* Bits that may be set in ac_flag field */
+               AFORK = 0x01,           /* Has executed fork, but no exec */
+               ASU   = 0x02,           /* Used superuser privileges */(进程使用了超级用户特权)
+               ACORE = 0x08,           /* Dumped core */
+               AXSIG = 0x10            /* Killed by a signal */
+           };
+
+-----------------------------用户标识--------------------------
+#include <unistd.h>
+char* getlogin(void); //返回值 成功 返回指向登录名的字符串指针 失败NULL
+
+----------------------------进程调度-------------------------
+历史上调整nice值（通过调整nice值来降低它对cpu的占有，因此该进程是“nice”的，所有越nice，优先级越低)
+一般范围是0-(2*NZERO)-1//NZERO为操作系统默认nice值，通过sysconf(_SC_NZERO)来获取
+
+#include <unistd.h>
+int nice(int inc);
+//返回值 成功inc的值 失败返回-1
+inc为增加到该进程原有nice值,所以要想提高优先级需要inc为负数，!!注意点:但是由于返回值可以为-1（nice为-1），则需要判断errno是否被设置了非0
+//同nice命令的规则只有超级用户才能提高进程优先级
+
+#include <sys/time.h>
+#include <sys/resource.h>
+int getpriority(int which, id_t who);优先级[praɪ'ɒrəti]//成功返回-NZERO-NZERO-1之间的值，出错返回-1
+which:
+1.PRIO_PROCESS:进程id
+2.PRIO_PGRP:进程组id,此时的返回值为nice最小的进程（优先级最高的)
+3.PRIO_USER表示用户id
+who为0时表示当前的进程id或进程组id或实际用户id
+
+
+int setpriority(int which, id_t who, int prio);
+prio增加到NZERO上,成功返回0，错误返回-1
+
+------------------------------进程时间---------------------------------
+#include <sys/times.h>
+//获取进程时间
+clock_t times(struct tms* buf);
+  struct tms {
+               clock_t tms_utime;  /* user time */
+               clock_t tms_stime;  /* system time */
+               clock_t tms_cutime; /* user time of children */
+               clock_t tms_cstime; /* system time of children */
+           };
+//返回值 成功 返回流逝的挂钟时间（真实时间）以clock_t(时钟滴答数为单位),失败返回(clock_t)-1
+//buf是一个相对值（比如times（buf)，times(buf)两次结果相减才是挂钟时间
+clock_t类型的值可以通过sysconf(_SC_CLK_TCK)来获取每秒时钟滴答次数
+
+==================================第9章:进程关系========================
+==================================第10章:信号==========================
+信号是软件中断，SIG开头
+信号是异步事件的典型实例，产生信号的事件对进程而言是随机出现的（不可预测的），进程无法通过一个变量如errno来判断是否发生了信号，而是告诉内核"在此信号发生时该做什么"
+可以做三类事情:
+1.忽略此信号（但是有两种信号不能忽略SIGKILL和SIGSTOP)
+2.捕获信号（告诉内核当发生该信号时自动调用一个用户函数）(但是不能捕获SIGKILL和SIGSTOP)
+3.执行系统默认动作(大多数信号的系统默认动作是终止该进程)
+!!注意点:The signals SIGKILL and SIGSTOP cannot be caught, blocked, or ignored.
+!!注意点:调用exec函数会导致原先设置要捕获的信号都更改为默认动作（因为在新进程中信号处理函数的地址已经无意义)
+!!注意点:在一个进程调用fork后，子进程会复制父进程的信号处理方式，因为子进程在开始时就复制了父进程的内存映像
+
+信号处理是每个进程的属性，在多线程应用中，信号的处理对于所有线程都是相同的
+
+#include <signal.h>
+void (*signal(int sig, void (*func)(int)))(int);
+//!注意点:then first either the disposition is reset to SIG_DFL, or the signal  is  blocked  (see Portability  below)//首次调用func后会重置该信号的处理函数（设置为SIG_DFL)
+
+//返回值 成功返回func，失败返回SIG_ERR
+sig是signal(7)中的值，func是常量SIG_IGN(忽略)或SIG_DFL(默认)或当接收到该信号的时候处理函数的地址
+信号处理函数也叫作（signal handler）（signal-catching function)
+
+-----------------------(上古时期)不可靠信号-------------------
+不可靠指的是信号存在丢失情况(捕获信号在处理信号之前发生了又一个信号)
+
+-----------------------中断的系统调用----------------------
+上古时期如果进程在执行一个低速的系统调用而阻塞期间捕捉到一个信号则该系统调用就被中断不再继续执行。
+为了满足该特性：系统调用分为两种（低速系统调用和其他），低速系统调用(一般是操作低速设备)是可能会使进程永远阻塞的一类系统调用，为了使该系统调用不需要程序员进行人工地重启（如read系统调用被中断时可能返回错误，并且errno设置为EINTR)，某些操作系统引入了自动重启功能
+
+----------------------可重入函数(在信号处理过程中保证调用安全(比如进程正在执行malloc时捕获到的信号，用于处理信号的函数中再次使用mallo，可能会导致进程破坏)c的函数,也称之为异步信号安全的async-signal safe)---------------------
+当进程捕获到信号并对其进行处理时，会临时中断正在执行的正常指令序列(若该操作不是原子的，则可能会导致难以预计的结果)
+
+应该避免在信号处理程序中使用不可重入函数(异步信号不安全函数)
+
+--------------------------SIGCLD语义--------------------------
+在 x86_64 Linux 4.15.0-30deepin-generic,SIGCLD等同于SIGCHLD
+在别的早期系统上SIGCLD则不等同于SIGCHLD,如果进程特地设置该信号的配置为SIG_IGN,则调用进程的子进程将不产生僵死进程,如果将SIGCLD的配置设置为捕捉，则内核立即检查是否有子进程准备好被等待，如果是这样，则调用SIGCLD处理程序。
+
+-----------------------可靠信号术语和语义------------------------
+当造成信号的事件发生时，为进程！！产生！！一个信号（或向一个进程发送一个信号），当一个信号产生时，内核通常在进程表中以某种形式设置一个标记位，当对信号采取了这种动作时，我们说向进程！！递送！！了一个信号，在信号产生和递送之间的时间间隔内，称信号为未决的
+
+执行信号的处理动作成为信号递达（Delivery），信号从产生到递达之间的状态称为信号未决(Pending)。进程可以选择阻塞(Block)某个信号。
+被阻塞的信号产生时将保持在未决状态，直到进程解除对此信号的阻塞，才执行递达的动作
+注意：阻塞和忽略是不同的，只要信号被阻塞就不会递达，而忽略是在递达之后可选的一种处理动作
+
+每一个进程都有一个信号屏蔽字，它规定了当前要阻塞递送到该进程的信号集
+
 ==================================第11章:线程========================
 每个线程都包含有表示执行环境所必须的信息，其中包括线程id，一组寄存器值，栈，调度优先级和策略以及信号屏蔽字，errno变量以及线程私有数据
-一个进程的所有信息是所有线程共享的，包括可执行代码套，程序的全局，堆，栈以及文件描述符
+一个进程的所有信息是所有线程共享的，包括可执行代码，程序的全局，堆，栈以及文件描述符
 
 -------------------------------线程标识---------------------
 #include <pthread.h>

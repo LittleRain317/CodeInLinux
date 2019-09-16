@@ -1,0 +1,850 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh-cn">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>GNU GCC &#25163;&#20876; 3</title>
+</head>
+
+<body>
+  <DIV align=center>
+    <TABLE border=0>
+      <TBODY>
+        <TR>
+          <TD>[ <A href="index.html" alt="gcc 1">GCC 1 </A> </TD>
+          <TD> || </TD>						
+          <TD><A href="002.html" alt="gcc 2">GCC 2 </A> </TD>
+          <TD> || </TD>			
+		  <TD><A href="003.html" alt="gcc 3">GCC 3 </A> </TD>
+          <TD> || </TD>						
+          <TD><A href="004.html" alt="gcc 4">GCC 4 </A> </TD>
+          <TD> || </TD>			  
+          <TD><A href="005.html" alt="gcc 5">GCC 5 </A> ]</TD>
+        </TR>
+      </TBODY>
+    </TABLE>
+      </DIV>
+<H1><FONT face="Courier New" size=2>GCC 3 </FONT><FONT face="Courier New" size=4><a href="https://2641797006.github.io/html/">home</a></FONT></H1>
+<FONT face="Courier New" 
+size=2>Section: GNU Tools (1)<BR>
+Updated: 2003/12/05<BR>
+</FONT>
+<HR>
+<DL compact>
+  <DD>
+    <P></P>
+  </DD>
+</DL>
+<H2><FONT size=2>&#35843;&#35797;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>(DEBUGGING OPTION)</FONT></H2>
+<FONT face="Courier New" size=2>GNU CC</FONT><FONT 
+size=2>&#25317;&#26377;&#35768;&#22810;&#29305;&#21035;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#26082;&#21487;&#20197;&#35843;&#35797;&#29992;&#25143;&#30340;&#31243;&#24207;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20063;&#21487;&#20197;&#23545;</FONT><FONT face="Courier New" size=2>GCC</FONT><FONT 
+size=2>&#25490;&#38169;</FONT><FONT face="Courier New" size=2>:</FONT>
+<DL compact>
+  <DT><B><FONT face="Courier New" size=2>-g</FONT></B>
+  <DD><FONT size=2>&#20197;&#25805;&#20316;&#31995;&#32479;&#30340;&#26412;&#22320;&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(stabs, COFF, XCOFF,</FONT><FONT size=2>&#25110;</FONT><FONT face="Courier New" 
+size=2>DWARF).</FONT><FONT size=2>&#20135;&#29983;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>. GDB</FONT><FONT size=2>&#33021;&#22815;&#20351;&#29992;&#36825;&#20123;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#22312;&#22823;&#22810;&#25968;&#20351;&#29992;</FONT><FONT face="Courier New" size=2>stabs</FONT><FONT 
+size=2>&#26684;&#24335;&#30340;&#31995;&#32479;&#19978;</FONT><FONT face="Courier New" size=2>, `<B>-g</B>'</FONT><FONT 
+size=2>&#36873;&#39033;&#21551;&#21160;&#21482;&#26377;</FONT><FONT face="Courier New" size=2>GDB</FONT><FONT 
+size=2>&#25165;&#20351;&#29992;&#30340;&#39069;&#22806;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>;</FONT><FONT 
+size=2>&#36825;&#20123;&#20449;&#24687;&#20351;</FONT><FONT face="Courier New" size=2>GDB </FONT><FONT 
+size=2>&#35843;&#35797;&#25928;&#26524;&#26356;&#22909;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20294;&#26159;&#26377;&#21487;&#33021;&#23548;&#33268;&#20854;&#20182;&#35843;&#35797;&#22120;&#23849;&#28291;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#25110;&#25298;&#32477;&#35835;&#20837;&#31243;&#24207;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#22914;&#26524;&#20320;&#30830;&#23450;&#35201;&#25511;&#21046;&#26159;&#21542;&#29983;&#25104;&#39069;&#22806;&#30340;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>, </FONT><FONT 
+size=2>&#20351;&#29992;</FONT><FONT face="Courier New" size=2>`<B>-gstabs+</B>', `<B>-gstabs</B>', `<B>-gxcoff+</B>', `<B>-gxcoff</B>', `<B>-gdwarf+</B>',</FONT><FONT size=2>&#25110;</FONT><FONT face="Courier New" 
+size=2>`<B>-gdwarf</B>' (</FONT><FONT size=2>&#35265;&#19979;&#25991;</FONT><FONT face="Courier New" 
+size=2>).</FONT>
+      <P><FONT size=2>&#21644;&#22823;&#22810;&#25968;</FONT><FONT face="Courier New" size=2>C</FONT><FONT 
+size=2>&#32534;&#35793;&#22120;&#19981;&#21516;</FONT><FONT face="Courier New" size=2>, GNU CC</FONT><FONT 
+size=2>&#20801;&#35768;&#32467;&#21512;&#20351;&#29992;</FONT><FONT face="Courier New" size=2>`<B>-g</B>'</FONT><FONT 
+size=2>&#21644;</FONT><FONT face="Courier New" size=2>`<B>-O</B>'</FONT><FONT 
+size=2>&#36873;&#39033;</FONT><FONT face="Courier New" size=2>.</FONT><FONT size=2>&#20248;&#21270;&#30340;&#20195;&#30721;&#20598;&#23572;&#21046;&#36896; &#19968;&#20123;&#24778;&#24322;&#30340;&#32467;&#26524;</FONT><FONT face="Courier New" size=2>:</FONT><FONT 
+size=2>&#26576;&#20123;&#22768;&#26126;&#36807;&#30340;&#21464;&#37327;&#26681;&#26412;&#19981;&#23384;&#22312;</FONT><FONT face="Courier New" size=2>;</FONT><FONT 
+size=2>&#25511;&#21046;&#27969;&#31243;&#30452;&#25509;&#36305;&#21040;&#27809;&#26377;&#39044;&#26009;&#21040;&#30340;&#22320;&#26041;</FONT><FONT face="Courier New" size=2>;</FONT><FONT 
+size=2>&#26576;&#20123;&#35821;&#21477;&#22240;&#20026;&#35745;&#31639;&#32467;&#26524;&#26159;&#24120;&#37327;&#25110;&#24050;&#32463;&#30830;&#23450;&#32780; &#27809;&#26377;&#25191;&#34892;</FONT><FONT face="Courier New" 
+size=2>;</FONT><FONT size=2>&#26576;&#20123;&#35821;&#21477;&#22312;&#20854;&#20182;&#22320;&#26041;&#25191;&#34892;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#22240;&#20026;&#20182;&#20204;&#34987;&#31227;&#21040;&#24490;&#29615;&#22806;&#38754;&#20102;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT size=2>&#28982;&#32780;&#23427;&#35777;&#26126;&#20102;&#35843;&#35797;&#20248;&#21270;&#30340;&#36755;&#20986;&#26159;&#21487;&#33021;&#30340;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#23545;&#21487;&#33021;&#21547;&#26377;&#38169;&#35823;&#30340;&#31243;&#24207;&#20351;&#29992;&#20248;&#21270;&#22120;&#26159;&#21512;&#29702;&#30340;</FONT><FONT face="Courier New" 
+size=2>.</FONT> </P>
+  </DD>
+</DL>
+<P><FONT size=2>&#22914;&#26524;</FONT><FONT face="Courier New" size=2>GNU CC</FONT><FONT 
+size=2>&#25903;&#25345;&#36755;&#20986;&#22810;&#31181;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#19979;&#38754;&#30340;&#36873;&#39033;&#21017;&#38750;&#24120;&#26377;&#29992;</FONT><FONT face="Courier New" size=2>.</FONT>
+<P>
+<DL compact>
+  <DT><B><FONT face="Courier New" size=2>-ggdb</FONT></B>
+  <DD><FONT size=2>&#20197;&#26412;&#22320;&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#22914;&#26524;&#25903;&#25345;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#36755;&#20986;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#23613;&#21487;&#33021;&#21253;&#25324;</FONT><FONT face="Courier New" size=2>GDB</FONT><FONT 
+size=2>&#25193;&#23637;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-gstabs</FONT></B>
+  <DD><FONT size=2>&#20197;</FONT><FONT face="Courier New" size=2>stabs</FONT><FONT 
+size=2>&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#22914;&#26524;&#25903;&#25345;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#36755;&#20986;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#19981;&#21253;&#25324;</FONT><FONT face="Courier New" size=2>GDB</FONT><FONT 
+size=2>&#25193;&#23637;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#36825;&#26159;&#22823;&#22810;&#25968;</FONT><FONT face="Courier New" size=2>BSD</FONT><FONT 
+size=2>&#31995;&#32479;&#19978;</FONT><FONT face="Courier New" size=2>DBX</FONT><FONT 
+size=2>&#20351;&#29992;&#30340;&#26684;&#24335;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-gstabs+</FONT></B>
+  <DD><FONT size=2>&#20197;</FONT><FONT face="Courier New" size=2>stabs</FONT><FONT 
+size=2>&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#22914;&#26524;&#25903;&#25345;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#36755;&#20986;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20351;&#29992;&#21482;&#26377;</FONT><FONT face="Courier New" size=2>GNU</FONT><FONT 
+size=2>&#35843;&#35797;&#22120;</FONT><FONT face="Courier New" size=2>(GDB)</FONT><FONT 
+size=2>&#29702;&#35299;&#30340;</FONT><FONT face="Courier New" size=2>GNU</FONT><FONT 
+size=2>&#25193;&#23637;</FONT><FONT face="Courier New" size=2>.</FONT><FONT size=2>&#20351;&#29992;&#36825;&#20123;&#25193;&#23637;&#26377;&#21487;&#33021;&#23548;&#33268; &#20854;&#20182;&#35843;&#35797;&#22120;&#23849;&#28291;&#25110;&#25298;&#32477;&#35835;&#20837;&#31243;&#24207;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-gcoff</FONT></B>
+  <DD><FONT size=2>&#20197;</FONT><FONT face="Courier New" size=2>COFF</FONT><FONT 
+size=2>&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#22914;&#26524;&#25903;&#25345;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#36755;&#20986;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#36825;&#26159;&#22312;</FONT><FONT face="Courier New" size=2>System V</FONT><FONT 
+size=2>&#31532;&#22235;&#29256;&#20197;&#21069;&#30340;&#22823;&#22810;&#25968;</FONT><FONT face="Courier New" size=2>System V</FONT><FONT 
+size=2>&#31995;&#32479;&#19978;</FONT><FONT face="Courier New" size=2>SDB</FONT><FONT size=2>&#20351;&#29992;&#30340; &#26684;&#24335;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-gxcoff</FONT></B>
+  <DD><FONT size=2>&#20197;</FONT><FONT face="Courier New" size=2>XCOFF</FONT><FONT 
+size=2>&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#22914;&#26524;&#25903;&#25345;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#36755;&#20986;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#36825;&#26159;</FONT><FONT face="Courier New" size=2>IBM RS/6000</FONT><FONT 
+size=2>&#31995;&#32479;&#19978;</FONT><FONT face="Courier New" size=2>DBX</FONT><FONT 
+size=2>&#35843;&#35797;&#22120;&#20351;&#29992;&#30340;&#26684;&#24335;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-gxcoff+</FONT></B>
+  <DD><FONT size=2>&#20197;</FONT><FONT face="Courier New" size=2>XCOFF</FONT><FONT 
+size=2>&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#22914;&#26524;&#25903;&#25345;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#36755;&#20986;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20351;&#29992;&#21482;&#26377;</FONT><FONT face="Courier New" size=2>GNU</FONT><FONT 
+size=2>&#35843;&#35797;&#22120;</FONT><FONT face="Courier New" size=2>(GDB)</FONT><FONT 
+size=2>&#29702;&#35299;&#30340;</FONT><FONT face="Courier New" size=2>GNU</FONT><FONT 
+size=2>&#25193;&#23637;</FONT><FONT face="Courier New" size=2>.</FONT><FONT size=2>&#20351;&#29992;&#36825;&#20123;&#25193;&#23637;&#26377;&#21487;&#33021;&#23548;&#33268; &#20854;&#20182;&#35843;&#35797;&#22120;&#23849;&#28291;&#25110;&#25298;&#32477;&#35835;&#20837;&#31243;&#24207;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-gdwarf</FONT></B>
+  <DD><FONT size=2>&#20197;</FONT><FONT face="Courier New" size=2>DWARF</FONT><FONT 
+size=2>&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#22914;&#26524;&#25903;&#25345;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#36755;&#20986;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#36825;&#26159;&#22823;&#22810;&#25968;</FONT><FONT face="Courier New" size=2>System V</FONT><FONT 
+size=2>&#31532;&#22235;&#29256;&#31995;&#32479;&#19978;</FONT><FONT face="Courier New" size=2>SDB</FONT><FONT 
+size=2>&#20351;&#29992;&#30340;&#26684;&#24335;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-gdwarf+</FONT></B>
+  <DD><FONT size=2>&#20197;</FONT><FONT face="Courier New" size=2>DWARF</FONT><FONT 
+size=2>&#26684;&#24335;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#22914;&#26524;&#25903;&#25345;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#36755;&#20986;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20351;&#29992;&#21482;&#26377;</FONT><FONT face="Courier New" size=2>GNU</FONT><FONT 
+size=2>&#35843;&#35797;&#22120;</FONT><FONT face="Courier New" size=2>(GDB)</FONT><FONT 
+size=2>&#29702;&#35299;&#30340;</FONT><FONT face="Courier New" size=2>GNU</FONT><FONT 
+size=2>&#25193;&#23637;</FONT><FONT face="Courier New" size=2>.</FONT><FONT size=2>&#20351;&#29992;&#36825;&#20123;&#25193;&#23637;&#26377;&#21487;&#33021;&#23548;&#33268; &#20854;&#20182;&#35843;&#35797;&#22120;&#23849;&#28291;&#25110;&#25298;&#32477;&#35835;&#20837;&#31243;&#24207;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  </DD>
+</DL>
+<P><FONT face="Courier New" size=2><B>-g</B><I>level</I> <BR>
+      <B>-ggdb</B><I>level</I> <BR>
+      <B>-gstabs</B><I>level</I> <BR>
+      <B>-gcoff</B><I>level</I> <B>-gxcoff</B><I>level</I> </FONT>
+<DL compact>
+  <DT><FONT face="Courier New" size=2><B>-gdwarf</B><I>level</I> </FONT>
+  <DD><FONT size=2>&#35831;&#27714;&#29983;&#25104;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#21516;&#26102;&#29992;</FONT><FONT face="Courier New" size=2><I>level</I></FONT><FONT 
+size=2>&#25351;&#20986;&#38656;&#35201;&#22810;&#23569;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#40664;&#35748;&#30340;</FONT><FONT face="Courier New" size=2>level</FONT><FONT 
+size=2>&#20540;&#26159;</FONT><FONT face="Courier New" size=2>2.</FONT>
+      <P><FONT face="Courier New" size=2>Level 1</FONT><FONT 
+size=2>&#36755;&#20986;&#26368;&#23569;&#37327;&#30340;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20165;&#22815;&#22312;&#19981;&#25171;&#31639;&#35843;&#35797;&#30340;&#31243;&#24207;&#27573;&#20869;</FONT><FONT face="Courier New" 
+size=2>backtrace.</FONT><FONT size=2>&#21253;&#25324;&#20989;&#25968;&#21644;&#22806;&#37096;&#21464;&#37327;&#30340;&#25551;&#36848;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20294;&#26159; &#27809;&#26377;&#23616;&#37096;&#21464;&#37327;&#21644;&#34892;&#21495;&#20449;&#24687;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT face="Courier New" size=2>Level 3</FONT><FONT 
+size=2>&#21253;&#21547;&#26356;&#22810;&#30340;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#22914;&#31243;&#24207;&#20013;&#20986;&#29616;&#30340;&#25152;&#26377;&#23439;&#23450;&#20041;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#24403;&#20351;&#29992;</FONT><FONT face="Courier New" size=2>`<B>-g3</B>'</FONT><FONT 
+size=2>&#36873;&#39033;&#30340;&#26102;&#20505;</FONT><FONT face="Courier New" size=2>,</FONT><FONT size=2>&#26576;&#20123;&#35843;&#35797;&#22120;&#25903;&#25345; &#23439;&#25193;&#23637;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-p</FONT></B>
+  <DD><FONT size=2>&#20135;&#29983;&#39069;&#22806;&#20195;&#30721;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#29992;&#20110;&#36755;&#20986;</FONT><FONT face="Courier New" size=2>profile</FONT><FONT 
+size=2>&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20379;&#20998;&#26512;&#31243;&#24207;</FONT><FONT face="Courier New" size=2><B>prof</B></FONT><FONT 
+size=2>&#20351;&#29992;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-pg</FONT></B>
+  <DD><FONT size=2>&#20135;&#29983;&#39069;&#22806;&#20195;&#30721;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#29992;&#20110;&#36755;&#20986;</FONT><FONT face="Courier New" size=2>profile</FONT><FONT 
+size=2>&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20379;&#20998;&#26512;&#31243;&#24207;</FONT><FONT face="Courier New" size=2><B>gprof</B></FONT><FONT 
+size=2>&#20351;&#29992;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-a</FONT></B>
+  <DD><FONT size=2>&#20135;&#29983;&#39069;&#22806;&#20195;&#30721;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#29992;&#20110;&#36755;&#20986;&#22522;&#26412;&#22359;</FONT><FONT face="Courier New" size=2>(basic block)</FONT><FONT 
+size=2>&#30340;</FONT><FONT face="Courier New" size=2>profile</FONT><FONT 
+size=2>&#20449;&#24687;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#23427;&#35760;&#24405;&#21508;&#20010;&#22522;&#26412;&#22359;&#30340;&#25191;&#34892;&#27425;&#25968;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20379;&#35832;&#22914; </FONT><FONT face="Courier New" size=2><B>tcov</B></FONT><FONT 
+size=2>&#27492;&#31867;&#30340;&#31243;&#24207;&#20998;&#26512;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#20294;&#26159;&#27880;&#24847;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#36825;&#20010;&#25968;&#25454;&#26684;&#24335;&#24182;&#38750;</FONT><FONT face="Courier New" size=2><B>tcov</B></FONT><FONT 
+size=2>&#26399;&#24453;&#30340;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#26368;&#32456;</FONT><FONT face="Courier New" size=2>GNU <B>gprof</B> </FONT><FONT 
+size=2>&#23558;&#22788;&#29702;&#36825;&#20123;&#25968;&#25454;</FONT><FONT face="Courier New" size=2>.</FONT>
+  <DT><B><FONT face="Courier New" size=2>-ax</FONT></B>
+  <DD><FONT size=2>&#20135;&#29983;&#39069;&#22806;&#20195;&#30721;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#29992;&#20110;&#20174;</FONT><FONT face="Courier New" size=2>'bb.in'</FONT><FONT 
+size=2>&#25991;&#20214;&#35835;&#21462;&#22522;&#26412;&#22359;&#30340;</FONT><FONT face="Courier New" size=2>profile</FONT><FONT 
+size=2>&#21442;&#25968;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#25226;</FONT><FONT face="Courier New" size=2>profile</FONT><FONT 
+size=2>&#30340;&#32467;&#26524;&#20889;&#21040;</FONT><FONT face="Courier New" size=2>'bb.out' </FONT><FONT 
+size=2>&#25991;&#20214;</FONT><FONT face="Courier New" size=2>. `bb.in'</FONT><FONT 
+size=2>&#21253;&#21547;&#19968;&#24352;&#20989;&#25968;&#21015;&#34920;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#19968;&#26086;&#36827;&#20837;&#21015;&#34920;&#20013;&#30340;&#26576;&#20010;&#20989;&#25968;</FONT><FONT face="Courier New" size=2>, profile</FONT><FONT 
+size=2>&#25805;&#20316;&#23601;&#24320;&#22987;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#31163;&#24320;&#26368;&#22806;&#23618;&#30340;&#20989;&#25968;&#21518;</FONT><FONT face="Courier New" size=2>, profile</FONT><FONT 
+size=2>&#25805;&#20316;&#23601;&#32467;&#26463;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#20197;</FONT><FONT face="Courier New" size=2>`-'</FONT><FONT 
+size=2>&#20026;&#21069;&#32512;&#21517;&#30340;&#20989;&#25968;&#25490;&#38500;&#22312;</FONT><FONT face="Courier New" size=2>profile</FONT><FONT 
+size=2>&#25805;&#20316;&#20043;&#22806;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#22914;&#26524;&#20989;&#25968;&#21517;&#19981;&#26159;&#21807;&#19968;&#30340;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#23427;&#21487;&#20197;&#20889;&#25104; </FONT><FONT face="Courier New" 
+size=2>`/path/filename.d:functionname'</FONT><FONT size=2>&#26469;&#28548;&#28165;</FONT><FONT 
+face="Courier New" size=2>. `bb.out'</FONT><FONT size=2>&#23558;&#21015;&#20986;&#19968;&#20123;&#26377;&#25928;&#30340;&#25991;&#20214;&#21517;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#36825;&#22235;&#20010;&#20989;&#25968;&#21517;&#20855;&#26377; &#29305;&#27530;&#21547;&#20041;</FONT><FONT 
+face="Courier New" size=2>: `__bb_jumps__'</FONT><FONT size=2>&#23548;&#33268;&#36339;&#36716;</FONT><FONT 
+face="Courier New" size=2>(jump)</FONT><FONT size=2>&#39057;&#29575;&#20889;&#36827;</FONT><FONT 
+face="Courier New" size=2>`bb.out'. `__bb_trace__'</FONT><FONT size=2>&#23548;&#33268;&#22522;&#26412;&#22359;&#24207;&#21015;&#36890;&#36807; &#31649;&#36947;&#20256;&#21040;</FONT><FONT face="Courier New" size=2>`gzip',</FONT><FONT 
+size=2>&#36755;&#20986;</FONT><FONT face="Courier New" size=2>`bbtrace.gz'</FONT><FONT 
+size=2>&#25991;&#20214;</FONT><FONT face="Courier New" size=2>. `__bb_hidecall__'</FONT><FONT 
+size=2>&#23548;&#33268;&#20174;&#36319;&#36394;</FONT><FONT face="Courier New" size=2>(trace)</FONT><FONT 
+size=2>&#20013;&#25490;&#38500;</FONT><FONT face="Courier New" size=2>call </FONT><FONT 
+size=2>&#25351;&#20196;</FONT><FONT face="Courier New" size=2>. `__bb_showret__'</FONT><FONT 
+size=2>&#23548;&#33268;&#22312;&#36319;&#36394;&#20013;&#21253;&#25324;&#36820;&#22238;&#25351;&#20196;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><FONT face="Courier New" size=2><B>-d</B><I>letters</I> </FONT>
+  <DD><FONT size=2>&#32534;&#35793;&#30340;&#26102;&#20505;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#22312;</FONT><FONT face="Courier New" size=2><I>letters</I></FONT><FONT 
+size=2>&#25351;&#23450;&#30340;&#26102;&#21051;&#20570;&#35843;&#35797;&#36716;&#20648;</FONT><FONT face="Courier New" size=2>(dump).</FONT><FONT 
+size=2>&#29992;&#20110;&#35843;&#35797;&#32534;&#35793;&#22120;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#22823;&#22810;&#25968;&#36716;&#20648;&#30340;&#25991;&#20214;&#21517; &#36890;&#36807;&#28304;&#25991;&#20214;&#21517;&#28155;&#21152;&#23383;&#35789;&#33719;&#24471;</FONT><FONT face="Courier New" 
+size=2>(</FONT><FONT size=2>&#20363;&#22914;</FONT><FONT face="Courier New" 
+size=2>`<B>foo.c.rtl</B>'</FONT><FONT size=2>&#25110;</FONT><FONT face="Courier New" 
+size=2>`<B>foo.c.jump</B>').</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dM</FONT></B>
+  <DD><FONT size=2>&#39044;&#22788;&#29702;&#32467;&#26463;&#30340;&#26102;&#20505;&#36716;&#20648;&#25152;&#26377;&#30340;&#23439;&#23450;&#20041;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#19981;&#36755;&#20986;&#21040;&#25991;&#20214;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dN</FONT></B>
+  <DD><FONT size=2>&#39044;&#22788;&#29702;&#32467;&#26463;&#30340;&#26102;&#20505;&#36716;&#20648;&#25152;&#26377;&#30340;&#23439;&#21517;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dD</FONT></B>
+  <DD><FONT size=2>&#39044;&#22788;&#29702;&#32467;&#26463;&#30340;&#26102;&#20505;&#36716;&#20648;&#25152;&#26377;&#30340;&#23439;&#23450;&#20041;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#21516;&#26102;&#36827;&#34892;&#27491;&#24120;&#36755;&#20986;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dy</FONT></B>
+  <DD><FONT size=2>&#35821;&#27861;&#20998;&#26512;</FONT><FONT face="Courier New" size=2>(parse)</FONT><FONT 
+size=2>&#30340;&#26102;&#20505;&#22312;&#26631;&#20934;&#38169;&#35823;&#36716;&#20648;&#35843;&#35797;&#20449;&#24687;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dr</FONT></B>
+  <DD><FONT face="Courier New" size=2>RTL</FONT><FONT size=2>&#38454;&#27573;&#21518;&#36716;&#20648;&#21040;</FONT><FONT 
+face="Courier New" size=2>`<I>file</I><B>.rtl</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dx</FONT></B>
+  <DD><FONT size=2>&#20165;&#23545;&#20989;&#25968;&#29983;&#25104;</FONT><FONT face="Courier New" size=2>RTL,</FONT><FONT 
+size=2>&#32780;&#19981;&#26159;&#32534;&#35793;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#36890;&#24120;&#21644;</FONT><FONT face="Courier New" size=2>`<B>r</B>'</FONT><FONT 
+size=2>&#32852;&#29992;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dj</FONT></B>
+  <DD><FONT size=2>&#31532;&#19968;&#27425;&#36339;&#36716;&#20248;&#21270;&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.jump</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-ds</FONT></B>
+  <DD><FONT face="Courier New" size=2>CSE (</FONT><FONT size=2>&#21253;&#25324;&#26377;&#26102;&#20505;&#36319;&#22312;</FONT><FONT 
+face="Courier New" size=2>CSE</FONT><FONT size=2>&#21518;&#38754;&#30340;&#36339;&#36716;&#20248;&#21270;</FONT><FONT 
+face="Courier New" size=2>)</FONT><FONT size=2>&#21518;&#36716;&#20648;&#21040;</FONT><FONT 
+face="Courier New" size=2>`<I>file</I><B>.cse</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dL</FONT></B>
+  <DD><FONT size=2>&#24490;&#29615;&#20248;&#21270;&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.loop</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dt</FONT></B>
+  <DD><FONT size=2>&#31532;&#20108;&#27425;</FONT><FONT face="Courier New" size=2>CSE</FONT><FONT 
+size=2>&#22788;&#29702;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#21253;&#25324;&#26377;&#26102;&#20505;&#36319;&#22312;</FONT><FONT face="Courier New" size=2>CSE</FONT><FONT 
+size=2>&#21518;&#38754;&#30340;&#36339;&#36716;&#20248;&#21270;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.cse2</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-df</FONT></B>
+  <DD><FONT size=2>&#27969;&#31243;&#20998;&#26512;</FONT><FONT face="Courier New" size=2>(flow analysis)</FONT><FONT size=2>&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.flow</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dc</FONT></B>
+  <DD><FONT size=2>&#25351;&#20196;&#32452;&#21512;</FONT><FONT face="Courier New" size=2>(instruction combination)</FONT><FONT size=2>&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.combine</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dS</FONT></B>
+  <DD><FONT size=2>&#31532;&#19968;&#27425;&#25351;&#20196;&#23433;&#25490;</FONT><FONT face="Courier New" size=2>(instruction schedule)</FONT><FONT size=2>&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.sched</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dl</FONT></B>
+  <DD><FONT size=2>&#23616;&#37096;&#23492;&#23384;&#22120;&#20998;&#37197;&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.lreg</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dg</FONT></B>
+  <DD><FONT size=2>&#20840;&#23616;&#23492;&#23384;&#22120;&#20998;&#37197;&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.greg</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dR</FONT></B>
+  <DD><FONT size=2>&#31532;&#20108;&#27425;&#25351;&#20196;&#23433;&#25490;</FONT><FONT face="Courier New" size=2>(instruction schedule)</FONT><FONT size=2>&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.sched2</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dJ</FONT></B>
+  <DD><FONT size=2>&#26368;&#21518;&#19968;&#27425;&#36339;&#36716;&#20248;&#21270;&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.jump2</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dd</FONT></B>
+  <DD><FONT size=2>&#25512;&#36831;&#20998;&#25903;&#35843;&#24230;</FONT><FONT face="Courier New" size=2>(delayed branch scheduling)</FONT><FONT size=2>&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.dbr</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dk</FONT></B>
+  <DD><FONT size=2>&#23492;&#23384;&#22120;</FONT><FONT face="Courier New" size=2>-</FONT><FONT 
+size=2>&#22534;&#26632;&#36716;&#25442;&#21518;&#36716;&#20648;&#21040;</FONT><FONT face="Courier New" 
+size=2>`<I>file</I><B>.stack</B>'.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-da</FONT></B>
+  <DD><FONT size=2>&#20135;&#29983;&#20197;&#19978;&#25152;&#26377;&#30340;&#36716;&#20648;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dm</FONT></B>
+  <DD><FONT size=2>&#36816;&#34892;&#32467;&#26463;&#21518;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#22312;&#26631;&#20934;&#38169;&#35823;&#26174;&#31034;&#20869;&#23384;&#20351;&#29992;&#32479;&#35745;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-dp</FONT></B>
+  <DD><FONT size=2>&#22312;&#27719;&#32534;&#36755;&#20986;&#21152;&#27880;&#25351;&#26126;&#20351;&#29992;&#20102;&#21738;&#20123;&#27169;&#24335;</FONT><FONT face="Courier New" 
+size=2>(pattern)</FONT><FONT size=2>&#21450;&#20854;&#26367;&#20195;&#27169;&#24335;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fpretend-float</FONT></B>
+  <DD><FONT size=2>&#20132;&#21449;&#32534;&#35793;&#30340;&#26102;&#20505;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20551;&#23450;&#30446;&#26631;&#26426;&#21644;&#23487;&#20027;&#26426;&#20351;&#29992;&#21516;&#26679;&#30340;&#28014;&#28857;&#26684;&#24335;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#23427;&#23548;&#33268;&#36755;&#20986;&#38169;&#35823;&#30340;&#28014;&#28857;&#24120;&#25968;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20294;&#26159;&#22312;&#30446;&#26631;&#26426;&#19978;&#36816;&#34892;&#30340;&#26102;&#20505;</FONT><FONT face="Courier New" size=2>, </FONT><FONT 
+size=2>&#30495;&#23454;&#30340;&#25351;&#20196;&#24207;&#21015;&#26377;&#21487;&#33021;&#21644;</FONT><FONT face="Courier New" size=2>GNU CC</FONT><FONT 
+size=2>&#24076;&#26395;&#30340;&#19968;&#26679;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-save-temps</FONT></B>
+  <DD><FONT size=2>&#20445;&#23384;&#37027;&#20123;&#36890;&#24120;&#26159;</FONT><FONT face="Courier New" size=2>``</FONT><FONT 
+size=2>&#20020;&#26102;</FONT><FONT face="Courier New" size=2>''</FONT><FONT 
+size=2>&#30340;&#20013;&#38388;&#25991;&#20214;</FONT><FONT face="Courier New" size=2>;</FONT><FONT 
+size=2>&#32622;&#20110;&#24403;&#21069;&#30446;&#24405;&#19979;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#24182;&#19988;&#26681;&#25454;&#28304;&#25991;&#20214;&#21629;&#21517;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#22240;&#27492;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#29992;</FONT><FONT face="Courier New" size=2>`<B>-c -save-temps</B>'</FONT><FONT size=2>&#36873;&#39033;&#32534;&#35793;</FONT><FONT face="Courier New" 
+size=2>`<B>foo.c </B>'</FONT><FONT size=2>&#20250;&#29983;&#25104;</FONT><FONT face="Courier New" 
+size=2>` <B>foo.cpp</B>'</FONT><FONT size=2>&#21644;</FONT><FONT face="Courier New" 
+size=2>`<B>foo.s</B>' </FONT><FONT size=2>&#20197;&#21450;</FONT><FONT face="Courier New" 
+size=2>`<B>foo.o</B>'</FONT><FONT size=2>&#25991;&#20214;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><FONT face="Courier New" size=2><B>-print-file-name=</B><I>library</I> </FONT>
+  <DD><FONT size=2>&#26174;&#31034;&#24211;&#25991;&#20214;</FONT><FONT face="Courier New" 
+size=2><I>library</I></FONT><FONT size=2>&#30340;&#20840;&#36335;&#24452;&#21517;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#36830;&#25509;&#26102;&#20250;&#20351;&#29992;&#36825;&#20010;&#24211;</FONT><FONT face="Courier New" 
+size=2>---</FONT><FONT size=2>&#20854;&#20182;&#20160;&#20040;&#20107;&#24773;&#37117;&#19981;&#20316;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#26681;&#25454;&#36825;&#20010;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>, GNU CC</FONT><FONT size=2>&#26082;&#19981;&#32534;&#35793;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20063;&#19981;&#36830;&#25509;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20165;&#20165;&#26174;&#31034;&#25991;&#20214;&#21517;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-print-libgcc-file-name</FONT></B>
+  <DD><FONT size=2>&#21644;</FONT><FONT face="Courier New" 
+size=2>`<B>-print-file-name=libgcc.a</B>'</FONT><FONT size=2>&#19968;&#26679;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><FONT face="Courier New" size=2><B>-print-prog-name=</B><I>program</I> </FONT>
+  <DD><FONT size=2>&#31867;&#20284;&#20110;</FONT><FONT face="Courier New" 
+size=2>`<B>-print-file-name</B>',</FONT><FONT size=2>&#20294;&#26159;&#26597;&#25214;&#31243;&#24207;</FONT><FONT 
+face="Courier New" size=2>program</FONT><FONT size=2>&#22914;</FONT><FONT 
+face="Courier New" size=2>`<B>cpp</B>'.</FONT>
+</dl>
+<p>&nbsp;</p>
+<H2><FONT size=2>&#20248;&#21270;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>(OPTIMIZATION OPTION)</FONT></H2>
+<FONT size=2>&#36825;&#20123;&#36873;&#39033;&#25511;&#21046;&#22810;&#31181;&#20248;&#21270;&#25514;&#26045;</FONT><FONT face="Courier New" 
+size=2>:</FONT>
+<DL compact>
+  <DT><B><FONT face="Courier New" size=2>-O</FONT></B>
+  <DD>
+  <DT><B><FONT face="Courier New" size=2>-O1</FONT></B>
+  <DD><FONT size=2>&#20248;&#21270;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#23545;&#20110;&#22823;&#20989;&#25968;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20248;&#21270;&#32534;&#35793;&#21344;&#29992;&#31245;&#24494;&#22810;&#30340;&#26102;&#38388;&#21644;&#30456;&#24403;&#22823;&#30340;&#20869;&#23384;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#19981;&#20351;&#29992;</FONT><FONT face="Courier New" 
+size=2>`<B>-O</B>'</FONT><FONT size=2>&#36873;&#39033;&#26102;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#32534;&#35793;&#22120;&#30340;&#30446;&#26631;&#26159;&#20943;&#23569;&#32534;&#35793;&#30340;&#24320;&#38144;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20351;&#32534;&#35793;&#32467;&#26524;&#33021;&#22815;&#35843;&#35797;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#35821;&#21477;&#26159;&#29420;&#31435;&#30340;</FONT><FONT face="Courier New" 
+size=2>:</FONT><FONT size=2>&#22914;&#26524;&#22312; &#20004;&#26465;&#35821;&#21477;&#20043;&#38388;&#29992;&#26029;&#28857;&#20013;&#27490;&#31243;&#24207;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20320;&#21487;&#20197;&#23545;&#20219;&#20309;&#21464;&#37327;&#37325;&#26032;&#36171;&#20540;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#25110;&#32773;&#22312;&#20989;&#25968;&#20307;&#20869;&#25226;&#31243;&#24207;&#35745;&#25968;&#22120;&#25351;&#21040;&#20854;&#20182;&#35821;&#21477;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20197;&#21450;&#20174;&#28304;&#31243;&#24207;&#20013; &#31934;&#30830;&#22320;&#33719;&#21462;&#20320;&#26399;&#24453;&#30340;&#32467;&#26524;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT size=2>&#19981;&#20351;&#29992;</FONT><FONT face="Courier New" 
+size=2>`<B>-O</B>'</FONT><FONT size=2>&#36873;&#39033;&#26102;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#21482;&#26377;&#22768;&#26126;&#20102;</FONT><FONT face="Courier New" 
+size=2><B>register</B></FONT><FONT size=2>&#30340;&#21464;&#37327;&#25165;&#20998;&#37197;&#20351;&#29992;&#23492;&#23384;&#22120;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#32534;&#35793;&#32467;&#26524;&#27604;&#19981;&#29992; </FONT><FONT 
+face="Courier New" size=2>`<B>-O</B>'</FONT><FONT size=2>&#36873;&#39033;&#30340;</FONT><FONT 
+face="Courier New" size=2>PCC</FONT><FONT size=2>&#35201;&#30053;&#36874;&#19968;&#31609;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#20351;&#29992;&#20102;</FONT><FONT face="Courier New" 
+size=2>`<B>-O</B>'</FONT><FONT size=2>&#36873;&#39033;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#32534;&#35793;&#22120;&#20250;&#35797;&#22270;&#20943;&#23569;&#30446;&#26631;&#30721;&#30340;&#22823;&#23567;&#21644;&#25191;&#34892;&#26102;&#38388;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT size=2>&#22914;&#26524;&#25351;&#23450;&#20102;</FONT><FONT face="Courier New" 
+size=2>`<B>-O</B>'</FONT><FONT size=2>&#36873;&#39033;</FONT><FONT face="Courier New" size=2>, `<B>-fthread-jumps</B>'</FONT><FONT size=2>&#21644;</FONT><FONT face="Courier New" 
+size=2>`<B>-fdefer-pop</B>'</FONT><FONT size=2>&#36873;&#39033;&#23558;&#34987; &#25171;&#24320;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#22312;&#26377;</FONT><FONT face="Courier New" 
+size=2>delay slot</FONT><FONT size=2>&#30340;&#26426;&#22120;&#19978;</FONT><FONT face="Courier New" 
+size=2>, `<B>-fdelayed-branch</B>'</FONT><FONT size=2>&#36873;&#39033;&#23558;&#34987;&#25171;&#24320;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#22312;&#21363;&#20351;&#27809;&#26377;&#24103;&#25351;&#38024; </FONT><FONT 
+face="Courier New" size=2>(frame pointer)</FONT><FONT 
+size=2>&#20063;&#25903;&#25345;&#35843;&#35797;&#30340;&#26426;&#22120;&#19978;</FONT><FONT face="Courier New" size=2>, `<B>-fomit-frame-pointer</B>'</FONT><FONT size=2>&#36873;&#39033;&#23558;&#34987;&#25171;&#24320;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#26576;&#20123;&#26426;&#22120;&#19978; &#36824;&#21487;&#33021;&#20250;&#25171;&#24320;&#20854;&#20182;&#36873;&#39033;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-O2</FONT></B>
+  <DD><FONT size=2>&#22810;&#20248;&#21270;&#19968;&#20123;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#38500;&#20102;&#28041;&#21450;&#31354;&#38388;&#21644;&#36895;&#24230;&#20132;&#25442;&#30340;&#20248;&#21270;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#25191;&#34892;&#20960;&#20046;&#25152;&#26377;&#30340;&#20248;&#21270;&#24037;&#20316;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#20363;&#22914;&#19981;&#36827;&#34892;&#24490;&#29615;&#23637;&#24320;</FONT><FONT face="Courier New" size=2>(loop unrolling)</FONT><FONT size=2>&#21644;&#20989;&#25968;&#20869;&#23884;</FONT><FONT face="Courier New" 
+size=2>(inlining).</FONT><FONT size=2>&#21644;</FONT><FONT face="Courier New" 
+size=2><B>-O</B></FONT><FONT size=2>&#36873;&#39033;&#27604;&#36739;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#36825;&#20010;&#36873;&#39033;&#26082;&#22686;&#21152;&#20102;&#32534;&#35793;&#26102;&#38388;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20063;&#25552;&#39640;&#20102;&#29983;&#25104;&#20195;&#30721;&#30340; &#36816;&#34892;&#25928;&#26524;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-O3</FONT></B>
+  <DD><FONT size=2>&#20248;&#21270;&#30340;&#26356;&#22810;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#38500;&#20102;&#25171;&#24320;</FONT><FONT face="Courier New" size=2><B>-O2</B></FONT><FONT 
+size=2>&#25152;&#20570;&#30340;&#19968;&#20999;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#23427;&#36824;&#25171;&#24320;&#20102;</FONT><FONT face="Courier New" 
+size=2><B>-finline-functions</B></FONT><FONT size=2>&#36873;&#39033;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-O0</FONT></B>
+  <DD><FONT size=2>&#19981;&#20248;&#21270;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#22914;&#26524;&#25351;&#23450;&#20102;&#22810;&#20010;</FONT><FONT face="Courier New" 
+size=2><B>-O</B></FONT><FONT size=2>&#36873;&#39033;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#19981;&#31649;&#24102;&#19981;&#24102;&#25968;&#23383;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#26368;&#21518;&#19968;&#20010;&#36873;&#39033;&#25165;&#26159;&#29983;&#25928;&#30340;&#36873;&#39033;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  </DD>
+</DL>
+<P><FONT size=2>&#35832;&#22914;</FONT><FONT face="Courier New" 
+size=2>`<B>-f</B><I>flag</I>'</FONT><FONT size=2>&#27492;&#31867;&#30340;&#36873;&#39033;&#25551;&#36848;&#19968;&#20123;&#26426;&#22120;&#26080;&#20851;&#30340;&#24320;&#20851;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#22823;&#22810;&#25968;&#24320;&#20851;&#20855;&#26377;&#32943;&#23450;&#21644;&#21542;&#23450;&#20004;&#31181;&#26684;&#24335;</FONT><FONT 
+face="Courier New" size=2>; `<B>-ffoo</B>'</FONT><FONT 
+size=2>&#24320;&#20851;&#36873;&#39033;&#30340;&#21542;&#23450;&#26684;&#24335;&#24212;&#35813;&#26159;</FONT><FONT face="Courier New" 
+size=2>`<B>-fno-foo</B>'.</FONT><FONT size=2>&#19979;&#38754;&#30340;&#21015;&#34920;&#21482;&#23637;&#31034;&#20102;&#19968;&#31181;&#26684;&#24335;</FONT><FONT 
+face="Courier New" size=2>---</FONT><FONT size=2>&#37027;&#20010;&#19981;&#26159; &#40664;&#35748;&#36873;&#39033;&#30340;&#26684;&#24335;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#20320;&#21487;&#20197;&#36890;&#36807;&#21435;&#25481;&#25110;&#28155;&#21152;</FONT><FONT 
+face="Courier New" size=2>`<B>no-</B>'</FONT><FONT size=2>&#26500;&#36896;&#20986;&#21478;&#19968;&#31181;&#26684;&#24335;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+<P>
+<DL compact>
+  <DT><B><FONT face="Courier New" size=2>-ffloat-store</FONT></B>
+  <DD><FONT size=2>&#19981;&#35201;&#22312;&#23492;&#23384;&#22120;&#20013;&#23384;&#25918;&#28014;&#28857;&#21464;&#37327;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#36825;&#26679;&#21487;&#20197;&#38450;&#27490;&#26576;&#20123;&#26426;&#22120;&#19978;&#19981;&#24076;&#26395;&#30340;&#36807;&#39640;&#31934;&#24230;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#22914;</FONT><FONT face="Courier New" 
+size=2>68000</FONT><FONT size=2>&#30340;&#28014;&#28857;&#23492;&#23384;&#22120;</FONT><FONT face="Courier New" 
+size=2>(</FONT><FONT size=2>&#26469;&#33258; </FONT><FONT face="Courier New" 
+size=2>68881)</FONT><FONT size=2>&#20445;&#23384;&#30340;&#31934;&#24230;&#36229;&#36807;&#20102;</FONT><FONT face="Courier New" 
+size=2><B>double</B></FONT><FONT size=2>&#24212;&#35813;&#20855;&#26377;&#30340;&#31934;&#24230;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT size=2>&#23545;&#20110;&#22823;&#22810;&#25968;&#31243;&#24207;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#36807;&#39640;&#31934;&#24230;&#21482;&#26377;&#22909;&#22788;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#20294;&#26159;&#26377;&#20123;&#31243;&#24207;&#20005;&#26684;&#20381;&#36182;&#20110;</FONT><FONT face="Courier New" size=2>IEEE</FONT><FONT 
+size=2>&#28014;&#28857;&#25968;&#30340;&#23450;&#20041;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#23545;&#36825;&#26679;&#30340;&#31243;&#24207;&#21487;&#20197;&#20351;&#29992; </FONT><FONT face="Courier New" 
+size=2>`<B>-ffloat-store</B>'</FONT><FONT size=2>&#36873;&#39033;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fmemoize-lookups</FONT></B>
+  <DD>
+  <DT><B><FONT face="Courier New" size=2>-fsave-memoized</FONT></B>
+  <DD><FONT size=2>&#20351;&#29992;&#25506;&#32034;&#27861;</FONT><FONT face="Courier New" 
+size=2>(heuristic)</FONT><FONT size=2>&#36827;&#34892;&#26356;&#24555;&#30340;&#32534;&#35793;</FONT><FONT face="Courier New" 
+size=2>(</FONT><FONT size=2>&#20165;&#23545;</FONT><FONT face="Courier New" 
+size=2>C++).</FONT><FONT size=2>&#40664;&#35748;&#24773;&#20917;&#19979;&#19981;&#20351;&#29992;&#25506;&#32034;&#27861;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#30001;&#20110;&#25506;&#32034;&#27861;&#21482;&#23545;&#26576;&#20123;&#36755;&#20837;&#25991;&#20214; &#26377;&#25928;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20854;&#20182;&#31243;&#24207;&#30340;&#32534;&#35793;&#36895;&#24230;&#20250;&#21464;&#24471;&#26356;&#24930;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT size=2>&#31532;&#19968;&#27425;&#32534;&#35793;&#22120;&#24517;&#39035;&#23545;&#25104;&#21592;&#20989;&#25968;</FONT><FONT face="Courier New" 
+size=2>(</FONT><FONT size=2>&#25110;&#23545;&#25104;&#21592;&#25968;&#25454;&#30340;&#24341;&#29992;</FONT><FONT face="Courier New" 
+size=2>)</FONT><FONT size=2>&#24314;&#31435;&#19968;&#20010;&#35843;&#29992;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#23427;&#24517;&#39035;</FONT><FONT face="Courier New" 
+size=2>(1)</FONT><FONT size=2>&#21028;&#26029;&#20986;&#36825;&#20010;&#31867;&#26159;&#21542;&#23454;&#29616;&#20102;&#37027;&#20010;&#21517;&#23383;&#30340; &#25104;&#21592;&#20989;&#25968;</FONT><FONT 
+face="Courier New" size=2>; (2)</FONT><FONT size=2>&#20915;&#23450;&#35843;&#29992;&#21738;&#20010;&#25104;&#21592;&#20989;&#25968;</FONT><FONT 
+face="Courier New" size=2>(</FONT><FONT size=2>&#28041;&#21450;&#21040;&#25512;&#27979;&#38656;&#35201;&#20570;&#21738;&#31181;&#31867;&#22411;&#36716;&#25442;</FONT><FONT 
+face="Courier New" size=2>); (3)</FONT><FONT size=2>&#26816;&#26597;&#25104;&#21592;&#20989;&#25968;&#23545;&#35843;&#29992;&#32773;&#26159;&#21542;&#21487;&#35265;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#25152;&#26377;&#36825;&#20123;&#26500;&#25104; &#26356;&#24930;&#30340;&#32534;&#35793;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#19968;&#33324;&#24773;&#24418;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#31532;&#20108;&#27425;&#23545;&#25104;&#21592;&#20989;&#25968;</FONT><FONT 
+face="Courier New" size=2>(</FONT><FONT size=2>&#25110;&#23545;&#25104;&#21592;&#25968;&#25454;&#30340;&#24341;&#29992;</FONT><FONT 
+face="Courier New" size=2>)</FONT><FONT size=2>&#24314;&#31435;&#30340;&#35843;&#29992;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#24517;&#39035;&#20877;&#27425;&#32463;&#36807;&#30456;&#21516;&#38271;&#24230;&#30340;&#22788;&#29702;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#36825;&#24847;&#21619;&#30528;&#35937; &#36825;&#26679;&#30340;&#20195;&#30721;</FONT>
+      <P><FONT face="Courier New" size=2>cout &lt;&lt; "This " &lt;&lt; p &lt;&lt; " has " &lt;&lt; n &lt;&lt; " legs.\n";</FONT>
+      <P><FONT size=2>&#23545;&#25972;&#20010;&#19977;&#27493;&#39588;&#35201;&#20570;&#20845;&#27425;&#36941;&#21382;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#36890;&#36807;&#20351;&#29992;&#36719;&#20214;&#32531;&#23384;</FONT><FONT face="Courier New" size=2>, ``</FONT><FONT 
+size=2>&#21629;&#20013;</FONT><FONT face="Courier New" size=2>''</FONT><FONT 
+size=2>&#33021;&#22815;&#26174;&#33879;&#22320;&#20943;&#23569;&#36825;&#31181;&#20195;&#20215;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#28982;&#32780;&#19981;&#24184;&#30340;&#26159;</FONT><FONT face="Courier New" size=2>,</FONT><FONT size=2>&#20351;&#29992;&#36825;&#31181;&#32531;&#23384; &#24517;&#39035;&#23454;&#29616;&#20854;&#20182;&#26426;&#21046;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#24102;&#26469;&#20102;&#23427;&#33258;&#24049;&#30340;&#24320;&#38144;</FONT><FONT face="Courier New" size=2>. `<B>-fmemoize-lookups</B>'</FONT><FONT size=2>&#36873;&#39033;&#25171;&#24320;&#36719;&#20214;&#32531;&#23384;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#22240;&#20026;&#20989;&#25968;&#30340;&#27491;&#25991;&#29615;&#22659;&#19981;&#21516;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20989;&#25968;&#23545;&#25104;&#21592;&#21644;&#25104;&#21592;&#20989;&#25968;&#30340;&#35775;&#38382;&#26435;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#21487;&#35265;&#24615;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#20063;&#21487;&#33021;&#19981;&#21516;</FONT><FONT face="Courier New" size=2>, <B>g++</B></FONT><FONT 
+size=2>&#21487;&#33021;&#38656;&#35201;&#21047;&#26032;&#32531;&#23384;</FONT><FONT face="Courier New" size=2>. </FONT><FONT 
+size=2>&#20351;&#29992;</FONT><FONT face="Courier New" 
+size=2>`<B>-fmemoize-lookups</B>'</FONT><FONT size=2>&#36873;&#39033;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#27599;&#32534;&#35793;&#23436;&#19968;&#20010;&#20989;&#25968;&#23601;&#21047;&#26032;&#32531;&#23384;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#32780;</FONT><FONT face="Courier New" 
+size=2>`-fsave-memoized'</FONT><FONT size=2>&#36873;&#39033; &#20063;&#21551;&#29992;&#21516;&#26679;&#30340;&#32531;&#23384;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20294;&#26159;&#24403;&#32534;&#35793;&#22120;&#21457;&#35273;&#26368;&#21518;&#32534;&#35793;&#30340;&#20989;&#25968;&#30340;&#27491;&#25991;&#29615;&#22659;&#20135;&#29983;&#30340;&#35775;&#38382;&#26435;&#21644;&#19979;&#19968;&#20010;&#24453;&#32534;&#35793;&#30340;&#20989;&#25968;&#30456;&#21516;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#32534;&#35793;&#22120;&#23601; &#20445;&#30041;&#32531;&#23384;&#20869;&#23481;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#36825;&#23545;&#26576;&#20010;&#31867;&#23450;&#20041;&#35768;&#22810;&#25104;&#21592;&#20989;&#25968;&#26102;&#38750;&#24120;&#26377;&#29992;</FONT><FONT face="Courier New" 
+size=2>:</FONT><FONT size=2>&#38500;&#20102;&#26576;&#20123;&#20854;&#20182;&#31867;&#30340;&#21451;&#20989;&#25968;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#27599;&#20010;&#25104;&#21592;&#20989;&#25968;&#25317;&#26377;&#21644;&#20854;&#20182;&#25104;&#21592;&#20989;&#25968;&#23436;&#20840;&#19968;&#26679; &#30340;&#35775;&#38382;&#26435;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#22240;&#32780;&#26080;&#38656;&#21047;&#26032;&#32531;&#23384;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fno-default-inline</FONT></B>
+  <DD><FONT size=2>&#40664;&#35748;&#20026;&#19981;&#35201;&#25226;&#25104;&#21592;&#20989;&#25968;&#20869;&#23884;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#22240;&#20026;&#23427;&#20204;&#23450;&#20041;&#22312;&#31867;&#30340;&#20316;&#29992;&#22495;&#20869;</FONT><FONT face="Courier New" 
+size=2>(</FONT><FONT size=2>&#20165;</FONT><FONT face="Courier New" size=2>C++).</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fno-defer-pop</FONT></B>
+  <DD><FONT size=2>&#19968;&#26086;&#20989;&#25968;&#36820;&#22238;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#21442;&#25968;&#23601;&#31435;&#21363;&#24377;&#20986;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#23545;&#20110;&#37027;&#20123;&#35843;&#29992;&#20989;&#25968;&#21518;&#24517;&#39035;&#24377;&#20986;&#21442;&#25968;&#30340;&#26426;&#22120;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#32534;&#35793;&#22120;&#19968;&#33324;&#24773;&#20917;&#19979;&#35753;&#20960;&#27425;&#20989;&#25968;&#35843;&#29992;&#30340;&#21442;&#25968; &#22534;&#31215;&#22312;&#26632;&#19978;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#28982;&#21518;&#19968;&#27425;&#20840;&#37096;&#24377;&#20986;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fforce-mem</FONT></B>
+  <DD><FONT size=2>&#20570;&#25968;&#23398;&#36816;&#31639;&#21069;&#25226;&#23558;&#35201;&#20351;&#29992;&#30340;&#20869;&#23384;&#25805;&#20316;&#25968;&#36865;&#20837;&#23492;&#23384;&#22120;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#36890;&#36807;&#25226;&#20869;&#23384;&#35775;&#38382;&#36716;&#25442;&#25104;&#28508;&#22312;&#30340;&#20844;&#20849;&#23376;&#34920;&#36798;&#24335;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#23427;&#21487;&#33021;&#20135;&#29983;&#36739;&#22909;&#30340;&#30446;&#26631;&#30721;</FONT><FONT face="Courier New" size=2>. </FONT><FONT size=2>&#22914;&#26524;&#23427;&#20204;&#19981;&#26159;&#20844;&#20849;&#23376;&#34920;&#36798;&#24335;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#25351;&#20196;&#32452;&#21512;&#24212;&#35813;&#28040;&#38500;&#21508;&#33258;&#30340;&#23492;&#23384;&#22120;&#36733;&#33655;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#25105;&#20048;&#24847;&#20542;&#21548;&#19981;&#21516;&#24847;&#35265;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fforce-addr</FONT></B>
+  <DD><FONT size=2>&#20570;&#25968;&#23398;&#36816;&#31639;&#21069;&#25226;&#23558;&#35201;&#20351;&#29992;&#30340;&#20869;&#23384;&#22320;&#22336;&#24120;&#25968;&#36865;&#20837;&#23492;&#23384;&#22120;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#23427;&#21487;&#33021;&#21644;</FONT><FONT face="Courier New" 
+size=2>`<B>-fforce-mem</B>'</FONT><FONT size=2>&#19968;&#26679;&#20135;&#29983;&#36739;&#22909;&#30340; &#30446;&#26631;&#30721;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#25105;&#20048;&#24847;&#20542;&#21548;&#19981;&#21516;&#24847;&#35265;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fomit-frame-pointer</FONT></B>
+  <DD><FONT size=2>&#23545;&#20110;&#19981;&#38656;&#35201;&#24103;&#25351;&#38024;</FONT><FONT face="Courier New" size=2>(frame pointer)</FONT><FONT size=2>&#30340;&#20989;&#25968;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#19981;&#35201;&#22312;&#23492;&#23384;&#22120;&#20013;&#20445;&#23384;&#24103;&#25351;&#38024;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#36825;&#26679;&#33021;&#22815;&#36991;&#20813;&#20445;&#23384;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#35774;&#32622;&#21644;&#24674;&#22797; &#24103;&#25351;&#38024;&#30340;&#25351;&#20196;</FONT><FONT face="Courier New" 
+size=2>;</FONT><FONT size=2>&#21516;&#26102;&#23545;&#35768;&#22810;&#20989;&#25968;&#25552;&#20379;&#19968;&#20010;&#39069;&#22806;&#30340;&#23492;&#23384;&#22120;</FONT><FONT face="Courier New" 
+size=2>. </FONT><I><FONT size=2>&#20294;&#26159;&#22312;&#22823;&#22810;&#25968;&#26426;&#22120;&#19978;&#23558;&#26080;&#27861;&#35843;&#35797;</FONT></I><FONT 
+face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#26576;&#20123;&#26426;&#22120;&#19978;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#22914;</FONT><FONT face="Courier New" size=2>Vax,</FONT><FONT 
+size=2>&#36825;&#20010;&#36873;&#39033;&#26080;&#25928;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#22240;&#20026;&#26631;&#20934;&#35843;&#29992;&#24207;&#21015;&#33258;&#21160;&#22788;&#29702;&#24103;&#25351;&#38024;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#36890;&#36807;&#20551;&#35013;&#19981;&#23384;&#22312;&#32780;&#19981;&#20445;&#23384;&#20219;&#20309;&#19996;&#35199;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#26426;&#22120;&#25551;&#36848;&#23439; </FONT><FONT face="Courier New" 
+size=2><B>FRAME_POINTER_REQUIRED</B></FONT><FONT 
+size=2>&#25511;&#21046;&#30446;&#26631;&#26426;&#26159;&#21542;&#25903;&#25345;&#36825;&#20010;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-finline-functions</FONT></B>
+  <DD><FONT size=2>&#25226;&#25152;&#26377;&#31616;&#21333;&#30340;&#20989;&#25968;&#38598;&#25104;&#36827;&#35843;&#29992;&#32773;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#32534;&#35793;&#22120;&#25506;&#32034;&#24335;&#22320;&#20915;&#23450;&#21738;&#20123;&#20989;&#25968;&#36275;&#22815;&#31616;&#21333;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20540;&#24471;&#36825;&#31181;&#38598;&#25104;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT size=2>&#22914;&#26524;&#38598;&#25104;&#20102;&#25152;&#26377;&#32473;&#23450;&#20989;&#25968;&#30340;&#35843;&#29992;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#32780;&#19988;&#20989;&#25968;&#22768;&#26126;&#20026;</FONT><FONT face="Courier New" 
+size=2><B>static</B>,</FONT><FONT size=2>&#37027;&#20040;&#19968;&#33324;&#35828;&#26469;</FONT><FONT face="Courier New" 
+size=2>GCC</FONT><FONT size=2>&#26377;&#26435;&#19981;&#25353;&#27719;&#32534;&#20195;&#30721;&#36755;&#20986;&#20989;&#25968;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fcaller-saves</FONT></B>
+  <DD><FONT size=2>&#20801;&#35768;&#22312;&#23492;&#23384;&#22120;&#37324;&#20998;&#37197;&#25968;&#20540;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20294;&#26159;&#36825;&#20010;&#26041;&#26696;&#36890;&#24120;&#21463;&#21040;&#21508;&#20010;&#20989;&#25968;&#35843;&#29992;&#30340;&#20914;&#20987;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#22240;&#27492;</FONT><FONT face="Courier New" size=2>GCC</FONT><FONT 
+size=2>&#29983;&#25104;&#39069;&#22806;&#30340;&#20195;&#30721;</FONT><FONT face="Courier New" size=2>,</FONT><FONT size=2>&#22312;&#20989;&#25968;&#35843;&#29992;&#30340; &#21069;&#21518;&#20445;&#23384;&#21644;&#22797;&#21407;&#23492;&#23384;&#22120;&#20869;&#23481;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#20165;&#24403;&#29983;&#25104;&#20195;&#30721;&#30475;&#19978;&#21435;&#20248;&#20110;&#21453;&#20043;&#32467;&#26524;&#26102;&#25165;&#23454;&#29616;&#36825;&#26679;&#30340;&#20998;&#37197;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#26576;&#20123;&#26426;&#22120;&#19978;&#35813;&#36873;&#39033;&#40664;&#35748;&#20026;&#20801;&#35768;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#36890;&#24120;&#36825;&#20123;&#26426;&#22120;&#27809;&#26377;&#35843;&#29992;&#20445;&#25252;&#23492;&#23384;&#22120;&#20195;&#26367;&#20351;&#29992;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fkeep-inline-functions</FONT></B>
+  <DD><FONT size=2>&#21363;&#20351;&#38598;&#25104;&#20102;&#26576;&#20010;&#20989;&#25968;&#30340;&#25152;&#26377;&#35843;&#29992;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#32780;&#19988;&#35813;&#20989;&#25968;&#22768;&#26126;&#20026;</FONT><FONT face="Courier New" 
+size=2><B>static</B>,</FONT><FONT size=2>&#20173;&#28982;&#36755;&#20986;&#36825;&#20010;&#20989;&#25968;&#19968;&#20010;&#29420;&#31435;&#30340;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#36816;&#34892;&#26102;&#21487;&#35843;&#29992; &#30340;&#29256;&#26412;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fno-function-cse</FONT></B>
+  <DD><FONT size=2>&#19981;&#35201;&#25226;&#20989;&#25968;&#22320;&#22336;&#23384;&#20837;&#23492;&#23384;&#22120;</FONT><FONT face="Courier New" 
+size=2>;</FONT><FONT size=2>&#35753;&#35843;&#29992;&#22266;&#23450;&#20989;&#25968;&#30340;&#25351;&#20196;&#26174;&#24335;&#32473;&#20986;&#20989;&#25968;&#22320;&#22336;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT size=2>&#36825;&#20010;&#36873;&#39033;&#20135;&#29983;&#25928;&#29575;&#36739;&#20302;&#30340;&#30446;&#26631;&#30721;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20294;&#26159;&#22914;&#26524;&#19981;&#29992;&#36825;&#20010;&#36873;&#39033;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#26576;&#20123;&#19981;&#23547;&#24120;&#30340;</FONT><FONT face="Courier New" 
+size=2>hack,</FONT><FONT size=2>&#25913;&#21464;&#27719;&#32534;&#22120;&#30340;&#36755;&#20986;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#21487;&#33021;&#22240;&#20248;&#21270;&#32780;&#24102;&#26469; &#22256;&#24785;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fno-peephole</FONT></B>
+  <DD><FONT size=2>&#31105;&#27490;&#20219;&#20309;&#26426;&#22120;&#30456;&#20851;&#30340;</FONT><FONT face="Courier New" 
+size=2>peephole</FONT><FONT size=2>&#20248;&#21270;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-ffast-math</FONT></B>
+  <DD><FONT size=2>&#36825;&#20010;&#36873;&#39033;&#20986;&#20110;&#36895;&#24230;&#20248;&#21270;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20801;&#35768;</FONT><FONT face="Courier New" size=2>GCC</FONT><FONT 
+size=2>&#36829;&#21453;&#26576;&#20123;</FONT><FONT face="Courier New" size=2>ANSI</FONT><FONT 
+size=2>&#25110;</FONT><FONT face="Courier New" size=2>IEEE</FONT><FONT 
+size=2>&#35268;&#21017;</FONT><FONT face="Courier New" size=2>/</FONT><FONT 
+size=2>&#35268;&#26684;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#20363;&#22914;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#23427;&#20801;&#35768;&#32534;&#35793;&#22120;&#20551;&#35774;</FONT><FONT face="Courier New" size=2><B>sqrt</B> </FONT><FONT 
+size=2>&#20989;&#25968;&#30340;&#21442;&#25968;&#26159;&#38750;&#36127;&#25968;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#36825;&#20010;&#36873;&#39033;&#19981;&#34987;&#20219;&#20309;</FONT><FONT face="Courier New" 
+size=2>`<B>-O</B>'</FONT><FONT size=2>&#36873;&#39033;&#25171;&#24320;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#22240;&#20026;&#23545;&#20110;&#20005;&#26684;&#20381;&#38752;</FONT><FONT face="Courier New" 
+size=2>IEEE</FONT><FONT size=2>&#25110;</FONT><FONT face="Courier New" 
+size=2>ANSI</FONT><FONT size=2>&#35268;&#21017;</FONT><FONT face="Courier New" 
+size=2>/</FONT><FONT size=2>&#35268;&#26684;&#23454;&#29616;&#30340;&#25968;&#23398;&#20989;&#25968;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#31243;&#24207;&#21487;&#33021; &#20250;&#20135;&#29983;&#38169;&#35823;&#30340;&#32467;&#26524;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  </DD>
+</DL>
+<P><FONT size=2>&#19979;&#21015;&#36873;&#39033;&#25511;&#21046;&#29305;&#23450;&#30340;&#20248;&#21270;</FONT><FONT face="Courier New" size=2>. `<B>-O2</B>'</FONT><FONT size=2>&#36873;&#39033;&#25171;&#24320;&#19979;&#38754;&#30340;&#22823;&#22810;&#25968;&#20248;&#21270;&#39033;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#38500;&#20102;</FONT><FONT face="Courier New" 
+size=2>`<B>-funroll-loops</B>'</FONT><FONT size=2>&#21644; </FONT><FONT 
+face="Courier New" size=2>`<B>-funroll-all-loops</B>'</FONT><FONT 
+size=2>&#39033;</FONT><FONT face="Courier New" size=2>.</FONT>
+<P><FONT size=2>&#32780;</FONT><FONT face="Courier New" size=2>`<B>-O</B>'</FONT><FONT 
+size=2>&#36873;&#39033;&#36890;&#24120;&#25171;&#24320;</FONT><FONT face="Courier New" 
+size=2>`<B>-fthread-jumps</B>'</FONT><FONT size=2>&#21644;</FONT><FONT 
+face="Courier New" size=2>`<B>-fdelayed-branch</B>' </FONT><FONT 
+size=2>&#20248;&#21270;&#39033;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20294;&#26159;&#29305;&#23450;&#30340;&#26426;&#22120;&#19978;&#30340;&#40664;&#35748;&#20248;&#21270;&#39033;&#26377;&#21487;&#33021;&#25913;&#21464;</FONT><FONT face="Courier New" size=2>.</FONT>
+<P><FONT size=2>&#22914;&#26524;&#29305;&#21035;&#24773;&#20917;&#19979;&#38750;&#24120;&#38656;&#35201;</FONT><FONT face="Courier New" size=2>``</FONT><FONT 
+size=2>&#24494;&#35843;</FONT><FONT face="Courier New" size=2>''</FONT><FONT 
+size=2>&#20248;&#21270;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20320;&#21487;&#20197;&#20351;&#29992;&#19979;&#38754;&#30340;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>.</FONT>
+<P>
+<DL compact>
+  <DT><B><FONT face="Courier New" size=2>-fstrength-reduce</FONT></B>
+  <DD><FONT size=2>&#25191;&#34892;&#24490;&#29615;&#24378;&#24230;&#32553;&#23567;</FONT><FONT face="Courier New" size=2>(loop strength reduction)</FONT><FONT size=2>&#20248;&#21270;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#24182;&#19988;&#28040;&#38500;&#37325;&#22797;&#21464;&#37327;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fthread-jumps</FONT></B>
+  <DD><FONT size=2>&#25191;&#34892;&#20248;&#21270;&#30340;&#22320;&#28857;&#26159;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#22914;&#26524;&#26576;&#20010;&#36339;&#36716;&#20998;&#25903;&#30340;&#30446;&#30340;&#22320;&#23384;&#22312;&#21478;&#19968;&#20010;&#26465;&#20214;&#27604;&#36739;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#32780;&#19988;&#35813;&#26465;&#20214;&#27604;&#36739;&#21253;&#21547;&#22312;&#21069;&#19968;&#20010;&#27604;&#36739;&#35821;&#21477;&#20043;&#20869;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#37027;&#20040; &#25191;&#34892;&#20248;&#21270;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#26681;&#25454;&#26465;&#20214;&#26159;</FONT><FONT face="Courier New" size=2>true</FONT><FONT 
+size=2>&#25110;&#32773;</FONT><FONT face="Courier New" size=2>false,</FONT><FONT 
+size=2>&#21069;&#38754;&#37027;&#26465;&#20998;&#25903;&#37325;&#23450;&#21521;&#21040;&#31532;&#20108;&#26465;&#20998;&#25903;&#30340;&#30446;&#30340;&#22320;&#25110;&#32773;&#32039;&#36319;&#22312;&#31532;&#20108;&#26465;&#20998;&#25903;&#21518;&#38754;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-funroll-loops</FONT></B>
+  <DD><FONT size=2>&#25191;&#34892;&#24490;&#29615;&#23637;&#24320;</FONT><FONT face="Courier New" size=2>(loop unrolling)</FONT><FONT size=2>&#20248;&#21270;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#20165;&#23545;&#24490;&#29615;&#27425;&#25968;&#33021;&#22815;&#22312;&#32534;&#35793;&#26102;&#25110;&#36816;&#34892;&#26102;&#30830;&#23450;&#30340;&#24490;&#29615;&#23454;&#34892;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-funroll-all-loops</FONT></B>
+  <DD><FONT size=2>&#25191;&#34892;&#24490;&#29615;&#23637;&#24320;</FONT><FONT face="Courier New" size=2>(loop unrolling)</FONT><FONT size=2>&#20248;&#21270;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#23545;&#25152;&#26377;&#24490;&#29615;&#23454;&#34892;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#36890;&#24120;&#20351;&#31243;&#24207;&#36816;&#34892;&#30340;&#26356;&#24930;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fcse-follow-jumps</FONT></B>
+  <DD><FONT size=2>&#22312;&#20844;&#20849;&#23376;&#34920;&#36798;&#24335;&#28040;&#20803;</FONT><FONT face="Courier New" size=2>(common subexpression elimination)</FONT><FONT size=2>&#30340;&#26102;&#20505;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#22914;&#26524;&#27809;&#26377;&#20854;&#20182;&#36335;&#24452;&#21040;&#36798;&#26576;&#20010;&#36339;&#36716;&#30340; &#30446;&#30340;&#22320;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#23601;&#25195;&#36807;&#36825;&#26465;</FONT><FONT face="Courier New" 
+size=2>jump</FONT><FONT size=2>&#25351;&#20196;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#20363;&#22914;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#22914;&#26524;</FONT><FONT face="Courier New" 
+size=2>CSE</FONT><FONT size=2>&#36935;&#21040;&#24102;&#26377;</FONT><FONT face="Courier New" 
+size=2><B>else</B></FONT><FONT size=2>&#20174;&#21477;&#30340;</FONT><FONT face="Courier New" 
+size=2><B>if</B></FONT><FONT size=2>&#35821;&#21477;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#24403;&#26465;&#20214;&#27979;&#35797;&#20026; </FONT><FONT face="Courier New" 
+size=2>false</FONT><FONT size=2>&#26102;</FONT><FONT face="Courier New" size=2>, CSE</FONT><FONT size=2>&#23601;&#36319;&#22312;</FONT><FONT face="Courier New" 
+size=2>jump</FONT><FONT size=2>&#21518;&#38754;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fcse-skip-blocks</FONT></B>
+  <DD><FONT size=2>&#23427;&#31867;&#20284;&#20110;</FONT><FONT face="Courier New" 
+size=2>`<B>-fcse-follow-jumps</B>'</FONT><FONT size=2>&#36873;&#39033;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#20294;&#26159;</FONT><FONT face="Courier New" 
+size=2>CSE</FONT><FONT size=2>&#36319;&#22312;&#26465;&#20214;&#36339;&#36716;&#21518;&#38754;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#26465;&#20214;&#36339;&#36716;&#36339;&#36807;&#20102; &#35821;&#21477;&#22359;</FONT><FONT face="Courier New" 
+size=2>(block).</FONT><FONT size=2>&#22914;&#26524;</FONT><FONT face="Courier New" 
+size=2>CSE</FONT><FONT size=2>&#36935;&#21040;&#19968;&#26465;&#31616;&#21333;&#30340;</FONT><FONT face="Courier New" 
+size=2><B>if</B></FONT><FONT size=2>&#35821;&#21477;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#19981;&#24102;</FONT><FONT face="Courier New" 
+size=2>else</FONT><FONT size=2>&#20174;&#21477;</FONT><FONT face="Courier New" size=2>, `<B>-fcse-skip-blocks</B>'</FONT><FONT size=2>&#36873;&#39033;&#23558;&#23548;&#33268;</FONT><FONT 
+face="Courier New" size=2>CSE</FONT><FONT size=2>&#36319;&#22312;</FONT><FONT 
+face="Courier New" size=2><B>if</B></FONT><FONT size=2>&#20135;&#29983;&#30340;&#36339;&#36716;&#21518;&#38754;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-frerun-cse-after-loop</FONT></B>
+  <DD><FONT size=2>&#25191;&#34892;&#24490;&#29615;&#20248;&#21270;&#21518;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#37325;&#26032;&#36827;&#34892;&#20844;&#20849;&#23376;&#34920;&#36798;&#24335;&#28040;&#20803;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-felide-constructors</FONT></B>
+  <DD><FONT size=2>&#22914;&#26524;&#30475;&#19978;&#21435;&#21512;&#29702;&#23601;&#30465;&#30053;&#26500;&#36896;&#23376;</FONT><FONT face="Courier New" 
+size=2>(</FONT><FONT size=2>&#20165;</FONT><FONT face="Courier New" 
+size=2>C++).</FONT><FONT size=2>&#26681;&#25454;&#36825;&#20010;&#36873;&#39033;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#23545;&#20110;&#19979;&#38754;&#30340;&#20195;&#30721;</FONT><FONT face="Courier New" size=2>, GNU C++</FONT><FONT size=2>&#30452;&#25509;&#20174;&#35843;&#29992;</FONT><FONT face="Courier New" size=2><B>foo</B> </FONT><FONT size=2>&#21021;&#22987;&#21270;</FONT><FONT face="Courier New" 
+size=2><B>y</B>,</FONT><FONT size=2>&#32780;&#26080;&#38656;&#36890;&#36807;&#20020;&#26102;&#21464;&#37327;</FONT><FONT face="Courier New" 
+size=2>:</FONT>
+      <P><FONT face="Courier New" size=2>A foo (); A y = foo ();</FONT>
+      <P><FONT size=2>&#22914;&#26524;&#27809;&#26377;&#36825;&#20010;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>, GNU C++</FONT><FONT size=2>&#39318;&#20808;&#36890;&#36807;&#35843;&#29992;&#31867;&#22411;</FONT><FONT face="Courier New" size=2><B>A </B></FONT><FONT size=2>&#21512;&#36866;&#30340;&#26500;&#36896;&#23376;&#21021;&#22987;&#21270;</FONT><FONT face="Courier New" 
+size=2><B>y</B>;</FONT><FONT size=2>&#28982;&#21518;&#25226; </FONT><FONT face="Courier New" 
+size=2><B>foo</B></FONT><FONT size=2>&#30340;&#32467;&#26524;&#36171;&#32473;&#20020;&#26102;&#21464;&#37327;</FONT><FONT face="Courier New" 
+size=2>;</FONT><FONT size=2>&#26368;&#21518;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#29992;&#20020;&#26102;&#21464;&#37327;&#26367;&#25442;</FONT><FONT face="Courier New" 
+size=2>`<B>y</B>'</FONT><FONT size=2>&#30340;&#21021;&#22987;&#20540;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P><FONT face="Courier New" size=2>ANSI C++</FONT><FONT 
+size=2>&#26631;&#20934;&#33609;&#26696;&#35268;&#23450;&#20102;&#40664;&#35748;&#34892;&#20026;</FONT><FONT face="Courier New" 
+size=2>(`<B>-fno-elide-constructors</B>').</FONT><FONT size=2>&#22914;&#26524;&#31243;&#24207;&#30340;&#26500;&#36896;&#23376;&#23384;&#22312; &#21103;&#25928;&#24212;</FONT><FONT face="Courier New" size=2>, `<B>-felide-constructors</B>'</FONT><FONT size=2>&#36873;&#39033;&#33021;&#22815;&#20351;&#31243;&#24207;&#26377;&#19981;&#21516;&#30340;&#34920;&#29616;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#22240;&#20026;&#21487;&#33021;&#24573;&#30053;&#19968;&#20123;&#26500;&#36896;&#23376;&#30340;&#35843;&#29992;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fexpensive-optimizations</FONT></B>
+  <DD><FONT size=2>&#25191;&#34892;&#19968;&#20123;&#30456;&#23545;&#24320;&#38144;&#36739;&#22823;&#30340;&#27425;&#35201;&#20248;&#21270;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fdelayed-branch</FONT></B>
+  <DD><FONT size=2>&#22914;&#26524;&#23545;&#30446;&#26631;&#26426;&#25903;&#25345;&#36825;&#20010;&#21151;&#33021;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#23427;&#35797;&#22270;&#37325;&#26032;&#25490;&#21015;&#25351;&#20196;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20197;&#20415;&#21033;&#29992;&#24310;&#36831;&#20998;&#25903;</FONT><FONT face="Courier New" 
+size=2>(delayed branch)</FONT><FONT size=2>&#25351;&#20196;&#21518;&#38754;&#30340;&#25351;&#20196;&#31354;&#38553;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fschedule-insns</FONT></B>
+  <DD><FONT size=2>&#22914;&#26524;&#23545;&#30446;&#26631;&#26426;&#25903;&#25345;&#36825;&#20010;&#21151;&#33021;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#23427;&#35797;&#22270;&#37325;&#26032;&#25490;&#21015;&#25351;&#20196;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#20197;&#20415;&#28040;&#38500;&#22240;&#25968;&#25454;&#26410;&#32490;&#36896;&#25104;&#30340;&#25191;&#34892;&#20572;&#39039;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#36825;&#21487;&#20197;&#24110;&#21161;&#28014;&#28857;&#36816;&#31639;&#25110;&#20869;&#23384;&#35775;&#38382; &#36739;&#24930;&#30340;&#26426;&#22120;&#35843;&#21462;&#25351;&#20196;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#20801;&#35768;&#20854;&#20182;&#25351;&#20196;&#20808;&#25191;&#34892;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#30452;&#21040;&#35843;&#21462;&#25351;&#20196;&#25110;&#28014;&#28857;&#36816;&#31639;&#23436;&#25104;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  <DT><B><FONT face="Courier New" size=2>-fschedule-insns2</FONT></B>
+  <DD><FONT size=2>&#31867;&#20284;&#20110;</FONT><FONT face="Courier New" 
+size=2>`<B>-fschedule-insns</B>'</FONT><FONT size=2>&#36873;&#39033;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#20294;&#26159;&#22312;&#23492;&#23384;&#22120;&#20998;&#37197;&#23436;&#25104;&#21518;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#38656;&#35201;&#19968;&#20010;&#39069;&#22806;&#30340;&#25351;&#20196;&#35843;&#24230;&#36807;&#31243;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#23545;&#20110; &#23492;&#23384;&#22120;&#25968;&#30446;&#30456;&#23545;&#36739;&#23569;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#32780;&#19988;&#21462;&#20869;&#23384;&#25351;&#20196;&#22823;&#20110;&#19968;&#20010;&#21608;&#26399;&#30340;&#26426;&#22120;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#36825;&#20010;&#36873;&#39033;&#29305;&#21035;&#26377;&#29992;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+      <P></P>
+  </DD>
+</DL>
+<H2><FONT size=2>&#30446;&#26631;&#26426;&#36873;&#39033;</FONT><FONT face="Courier New" size=2>(TARGET OPTION)</FONT></H2>
+<FONT size=2>&#32570;&#30465;&#24773;&#20917;&#19979;</FONT><FONT face="Courier New" size=2>, GNU CC</FONT><FONT size=2>&#32534;&#35793;&#20986;&#26412;&#26426;&#31867;&#22411;&#30340;&#30446;&#26631;&#30721;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#28982;&#32780;&#20063;&#21487;&#20197;&#25226;&#20182;&#23433;&#35013;&#25104;&#20132;&#21449;&#32534;&#35793;&#22120;</FONT><FONT face="Courier New" 
+size=2>, </FONT><FONT size=2>&#20026;&#20854;&#20182;&#26426;&#22411;&#32534;&#35793;&#31243;&#24207;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#20107;&#23454;&#19978;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#38024;&#23545;&#19981;&#21516;&#30340;&#30446;&#26631;&#26426;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#21487;&#20197;&#21516;&#26102;&#23433;&#35013;</FONT><FONT face="Courier New" size=2>GNU CC</FONT><FONT size=2>&#30456;&#24212;&#30340;&#37197;&#32622;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#28982;&#21518;&#29992;</FONT><FONT face="Courier New" size=2>`<B>-b</B>'</FONT><FONT 
+size=2>&#36873;&#39033;&#25351;&#23450; &#30446;&#26631;&#26426;&#31181;</FONT><FONT face="Courier New" size=2>.</FONT>
+<P>
+<P><FONT size=2>&#39034;&#20415;&#25552;&#19968;&#19979;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#26032;&#29256;&#26412;&#21644;&#26087;&#29256;&#26412;&#30340;</FONT><FONT face="Courier New" size=2>GNU CC</FONT><FONT 
+size=2>&#21487;&#20197;&#20849;&#23384;</FONT><FONT face="Courier New" size=2>.</FONT><FONT 
+size=2>&#20854;&#20013;&#19968;&#20010;&#29256;&#26412;</FONT><FONT face="Courier New" size=2>(</FONT><FONT 
+size=2>&#21487;&#33021;&#26159;&#26368;&#26032;&#30340;&#37027;&#20010;</FONT><FONT face="Courier New" size=2>)</FONT><FONT 
+size=2>&#20026;&#32570;&#30465;&#29256;&#26412;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#20294;&#26159;&#26377;&#26102;&#20505;&#20320;&#24076;&#26395;&#20351;&#29992; &#20854;&#20182;&#29256;&#26412;</FONT><FONT face="Courier New" size=2>.</FONT>
+<P>
+
+<DL compact>
+  <DT><FONT face="Courier New" size=2><B>-b </B><I>machine</I> </FONT>
+  <DD><FONT size=2>&#21442;&#25968;</FONT><FONT face="Courier New" 
+size=2><I>machine</I></FONT><FONT size=2>&#25351;&#20986;&#32534;&#35793;&#30340;&#30446;&#26631;&#26426;&#31181;</FONT><FONT 
+face="Courier New" size=2>.</FONT><FONT size=2>&#36825;&#20010;&#36873;&#39033;&#29992;&#20110;&#23433;&#35013;&#20026;&#20132;&#21449;&#32534;&#35793;&#22120;&#30340;</FONT><FONT 
+face="Courier New" size=2>GNU CC.</FONT>
+      <P><FONT size=2>&#21442;&#25968;</FONT><FONT face="Courier New" 
+size=2><I>machine</I></FONT><FONT size=2>&#30340;&#20540;&#21644;&#37197;&#32622;</FONT><FONT face="Courier New" 
+size=2>GNU CC</FONT><FONT size=2>&#20132;&#21449;&#32534;&#35793;&#22120;&#26102;&#35774;&#32622;&#30340;&#26426;&#22120;&#31867;&#22411;&#19968;&#26679;</FONT><FONT face="Courier New" 
+size=2>.</FONT><FONT size=2>&#20363;&#22914;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#22914;&#26524;&#20132;&#21449;&#32534;&#35793;&#22120;&#37197;&#32622;&#26377; </FONT><FONT face="Courier New" 
+size=2>`<B>configure</B> i386v',</FONT><FONT size=2>&#24847;&#24605;&#26159;&#32534;&#35793;</FONT><FONT 
+face="Courier New" size=2>80386</FONT><FONT size=2>&#19978;&#30340;</FONT><FONT 
+face="Courier New" size=2>System V</FONT><FONT size=2>&#30446;&#26631;&#30721;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#37027;&#20040;&#20320;&#21487;&#20197;&#36890;&#36807;</FONT><FONT 
+face="Courier New" size=2>`<B>-b i386v</B>'</FONT><FONT 
+size=2>&#36816;&#34892;&#20132;&#21449;&#32534;&#35793;&#22120;</FONT><FONT face="Courier New" size=2>.</FONT>
+      <P><FONT size=2>&#22914;&#26524;&#27809;&#26377;&#25351;&#23450;</FONT><FONT face="Courier New" 
+size=2>`<B>-b</B>'</FONT><FONT size=2>&#36873;&#39033;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#36890;&#24120;&#25351;&#32534;&#35793;&#26412;&#26426;&#30446;&#26631;&#30721;</FONT><FONT face="Courier New" 
+size=2>.</FONT>
+      <P></P>
+  <DT><FONT face="Courier New" size=2><B>-V </B><I>version</I> </FONT>
+  <DD><FONT size=2>&#21442;&#25968;</FONT><FONT face="Courier New" 
+size=2><I>version</I></FONT><FONT size=2>&#25351;&#20986;&#36816;&#34892;&#21738;&#20010;&#29256;&#26412;&#30340;</FONT><FONT 
+face="Courier New" size=2>GNU CC.</FONT><FONT size=2>&#36825;&#20010;&#36873;&#39033;&#29992;&#20110;&#23433;&#35013;&#20102;&#22810;&#20010;&#29256;&#26412;&#30340;</FONT><FONT 
+face="Courier New" size=2>GCC.</FONT><FONT size=2>&#20363;&#22914;</FONT><FONT 
+face="Courier New" size=2>,</FONT><FONT size=2>&#22914;&#26524; </FONT><FONT 
+face="Courier New" size=2><I>version</I></FONT><FONT size=2>&#26159;</FONT><FONT 
+face="Courier New" size=2>`<B>2.0</B>',</FONT><FONT size=2>&#24847;&#21619;&#30528;&#36816;&#34892;</FONT><FONT 
+face="Courier New" size=2>GNU CC 2.0</FONT><FONT size=2>&#29256;</FONT><FONT 
+face="Courier New" size=2>.</FONT>
+  <P><FONT size=2>&#22914;&#26524;&#27809;&#26377;&#25351;&#23450;</FONT><FONT face="Courier New" 
+size=2>`<B>-V</B>'</FONT><FONT size=2>&#36873;&#39033;</FONT><FONT face="Courier New" 
+size=2>,</FONT><FONT size=2>&#32570;&#30465;&#29256;&#26412;&#21462;&#20915;&#20110;</FONT><FONT face="Courier New" size=2>GNU CC</FONT><FONT size=2>&#30340;&#23433;&#35013;&#26041;&#24335;</FONT><FONT face="Courier New" size=2>,</FONT><FONT 
+size=2>&#19968;&#33324;&#35828;&#26469;&#25512;&#33616;&#20351;&#29992;&#36890;&#29992;&#29256;&#26412;</FONT><FONT face="Courier New" size=2>.</FONT></DD>
+  <dt>&nbsp;</dt>
+  <DD>
+    <P><FONT face="Courier New" size=2></FONT>  
+  </DD>
+
+  <DD>
+      <P>          
+      <P>
+  </DD>
+</DL>
+
+</body>
+</html>
+
