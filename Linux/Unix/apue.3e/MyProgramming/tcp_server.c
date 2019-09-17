@@ -56,9 +56,13 @@ int main(int argc, char *argv[])
         if(send(client_sockfd,buf,len,0)<0)  
         {  
             perror("write");  
-            return 1;  
+          //  return 1;  
         }  
     }  
+	printf("对方close了\n");
+	if(	send(client_sockfd, "24kshaib", 8, 0) < 0)
+	    perror("write");  
+         
     close(client_sockfd);  
     close(server_sockfd);  
         return 0;  

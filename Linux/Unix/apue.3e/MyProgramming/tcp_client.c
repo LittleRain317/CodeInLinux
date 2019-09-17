@@ -47,5 +47,11 @@ int main(int argc, char *argv[])
         printf("received:%s\n",buf);  
     }  
     close(client_sockfd);//关闭套接字  
+	printf("新的数据有吗\n");
+	bzero(buf, sizeof(buf));
+	len=recv(client_sockfd,buf,BUFSIZ,0);  
+        buf[len]='\0';  
+        printf("received:%s\n",buf);  
+
          return 0;  
 }  
