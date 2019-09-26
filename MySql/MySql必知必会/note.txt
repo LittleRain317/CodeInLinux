@@ -783,7 +783,7 @@ DROP USER username;
 
 查看访问权限:
 SHOW GRANTS FOR username;
-GRANT USAGE ON *.* TO 'bforta'@'%' IDENTIFIED BY PASSWORD '*652F5C6351D0ED09328FE3DE88902CDFB6948F7E'
+//结果GRANT USAGE ON *.* TO 'bforta'@'%' IDENTIFIED BY PASSWORD '*652F5C6351D0ED09328FE3DE88902CDFB6948F7E'
 //结果中USAGE ON表示没有权限 *.*任何数据库任何表 username@hostname来标识用户 hostname为%表示使用默认的主机名
 
 授权
