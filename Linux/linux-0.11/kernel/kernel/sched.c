@@ -57,7 +57,7 @@ union task_union {
 
 static union task_union init_task = {INIT_TASK,};
 
-long volatile jiffies=0;
+long volatile jiffies=0; //通过该变量累计自系统启动以来经过的时钟滴答数(Intel 8253被设置成每隔10ms就发出一个时钟中断信号(IRQ0))
 long startup_time=0;
 struct task_struct *current = &(init_task.task);
 struct task_struct *last_task_used_math = NULL;
@@ -302,37 +302,40 @@ void add_timer(long jiffies, void (*fn)(void))
 	sti();
 }
 
-void do_timer(long cpl)
+//当CPL为0时表示内核态，内核态进程若本次CPU时间片使用完，不会进行进程调度(也就不会被抢占)
+//而用户态进程当使用完本次CPU时间片时，会进行进程调度算法
+void do_timer(long cpl) //每进行一次IRQ0则调用该函数处理时间中断
 {
 	extern int beepcount;
 	extern void sysbeepstop(void);
 
-	if (beepcount)
+	if (beepcount) //beepcount为蜂鸣器的鸣叫时间 
+		//蜂鸣器 广泛应用于计算机、打印机、复印机、报警器、电子玩具、汽车电子设备、电话机、定时器等电子产品中作发声器件。
 		if (!--beepcount)
 			sysbeepstop();
 
 	if (cpl)
-		current->utime++;
+		current->utime++; //user time
 	else
-		current->stime++;
+		current->stime++; //system time cpl(当前特权级 0 为内核态)
 
-	if (next_timer) {
-		next_timer->jiffies--;
+	if (next_timer) { //定时器链表
+		next_timer->jiffies--; //jiffies用于记录自系统启动以来所经过的时钟滴答数
 		while (next_timer && next_timer->jiffies <= 0) {
 			void (*fn)(void);
 			
 			fn = next_timer->fn;
 			next_timer->fn = NULL;
 			next_timer = next_timer->next;
-			(fn)();
+			(fn)(); //调用该定时器的处理函数
 		}
 	}
-	if (current_DOR & 0xf0)
+	if (current_DOR & 0xf0) //0xf0 11110000 16
 		do_floppy_timer();
 	if ((--current->counter)>0) return;
-	current->counter=0;
-	if (!cpl) return;
-	schedule();
+	current->counter=0; //当前进程在本次的CPU时间片使用完
+	if (!cpl) return;  //内核态进程直接退出
+	schedule();  //用户态进程开始进程调度
 }
 
 int sys_alarm(long seconds)

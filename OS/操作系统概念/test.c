@@ -1,11 +1,9 @@
-#include <stdio.h>
-#include <unistd.h>
+int f()
+{
+	return 5;
+}
 int main()
 {
-	while (1)
-	{
-		printf("he");
-		sleep(1);
-	}
+	f();
 	return 0;
 }

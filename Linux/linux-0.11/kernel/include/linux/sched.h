@@ -77,14 +77,14 @@ struct tss_struct {
 
 struct task_struct {
 /* these are hardcoded - don't touch */
-	long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
+	long state;	/* -1 unrunnable, 0 runnable, >0 stopped */ //进程状态信息
 	long counter;
 	long priority;
 	long signal;
 	struct sigaction sigaction[32];
-	long blocked;	/* bitmap of masked signals */
+	long blocked;	/* bitmap of masked signals */ //屏蔽信号
 /* various fields */
-	int exit_code;
+	int exit_code; //_exit(code)
 	unsigned long start_code,end_code,end_data,brk,start_stack;
 	long pid,father,pgrp,session,leader;
 	unsigned short uid,euid,suid;
@@ -98,7 +98,7 @@ struct task_struct {
 	struct m_inode * pwd;
 	struct m_inode * root;
 	struct m_inode * executable;
-	unsigned long close_on_exec;
+	unsigned long close_on_exec; //是否使用close() fd文件状态描述符
 	struct file * filp[NR_OPEN];
 /* ldt for this task 0 - zero 1 - cs 2 - ds&ss */
 	struct desc_struct ldt[3];
@@ -108,7 +108,7 @@ struct task_struct {
 
 /*
  *  INIT_TASK is used to set up the first task table, touch at
- * your own risk!. Base=0, limit=0x9ffff (=640kB)
+ * your own risk!. Base=0, limit=0x9ffff (=640kB) 
  */
 #define INIT_TASK \
 /* state etc */	{ 0,15,15, \

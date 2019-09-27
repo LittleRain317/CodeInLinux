@@ -1,0 +1,1 @@
+cmd_/home/abc/Code/OS/操作系统概念/programming/list/list.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/abc/Code/OS/操作系统概念/programming/list/list.ko /home/abc/Code/OS/操作系统概念/programming/list/list.o /home/abc/Code/OS/操作系统概念/programming/list/list.mod.o ;  true
