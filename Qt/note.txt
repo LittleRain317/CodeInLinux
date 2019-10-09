@@ -1,0 +1,21 @@
+注意qt中的信号与Unix中的信号并不相关(但是推测内部实现依旧是利用信号机制以及观察者模式)
+
+qt的界面风格默认和所在平台有关
+
+qt控件默认不显示
+
+QLabel
+QPushButton
+QSpinBox(微调框)
+QSlider
+QHBoxLayout(水平)
+QVBoxLayout
+QGridLayout(网格布局)
+
+----------------------可重入和线程安全------------------------------------
+A thread-safe function can be called simultaneously from multiple threads, even when the invocations use shared data, because all references to the shared data are serialized.
+A reentrant function can also be called simultaneously from multiple threads, but only if each invocation uses its own data.
+
+------------------------------QObject-----------------------------------
+是所有QT对象的基类
+

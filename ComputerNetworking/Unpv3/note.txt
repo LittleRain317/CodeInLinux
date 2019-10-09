@@ -219,7 +219,7 @@ struct in6_addr
     uint32_t __u6_addr32[4];
       } __in6_u;
 
-------------------新的通用套接字地址结构-------------------
+------------------新的通用套接字地址结构(在ANSIC之前void*不存在,采用此办法代替)-------------------
 /* Structure large enough to hold any socket address 
 (with the historical exception of AF_UNIX). 128 bytes reserved.  */
 
@@ -237,5 +237,168 @@ struct sockaddr_storage
     __ss_aligntype __ss_align;  /* Force desired alignment.  */强制所需要的内存对齐
     char __ss_padding[_SS_PADSIZE];		//对于用户透明，使用时需要强转成其他类型如sockaddr_in
 };
+
+---------------字节排序函数-----------------------------
+我们把某个给定系统所用的字节序称之为主机字节序host byte order
+字节序中大小端的区别是指高地址存放高位数据还是低位数据，但是单个字节里面的内容是不会变的
+un.s = 0x2102; // 0010 0001 0000 0010 //<--------高---------低 (小端模式)
+//0x0221 0000 0010 0010 0001 //<--------高---------------低(大端模式)
+
+#include <arpa/inet.h>
+uint32_t htonl(uint32_t hostlong);
+uint16_t htons(uint16_t hostshort);
+uint32_t ntohl(uint32_t netlong);
+uint32_t ntohl(uint32_t netlong);
+
+h:host n:network s:short l:long
+
+--------------字节操纵函数(标准库里面是mem开头eg:memset)------------------
+#include <strings.h>
+void bzero(void *dest, size_t nbtyes);
+void bcopy(const void*src, void *dest, size_t nbytes);
+int bcmp(const void* ptr1, const void*ptr2, size_t nbytes);
+//最后一个若两个数据相等则为0，否则返回非0
+
+
+
+------------------IP地址转换函数----------------------------
+------------------inet_aton, inet_addr和 inet_ntoa函数-------------
+#include <arpa/inet.h>
+typedef uint32_t in_addr_t;
+struct in_addr
+{
+	in_addr_t s_addr;
+}
+
+int inet_aton(const char* strptr, struct in_addr *addrptr);
+//返回若字符串有效则1否则为0
+
+in_addr_t inet_addr(const char*strptr);//
+//返回若字符串有效则为32位二进制网络字节序的IPv4地址，否则返回INADDR_NONE(被定义为-1,导致255.255.255.255不可区分)
+//已被废弃，inet_aton替换
+
+char *inet_ntoa(struct in_addr inaddr);//返回一个指向点分十进制串的指针(eg:127.0.0.1)
+
+
+------------------通用IP地址转换函数----------------------------
+------------------inet_pton和inet_ntop函数-------------------------
+//IPv4和IPv6协议都可以
+#include <arpa/inet.h>
+//AF_INET AF_INET6
+//p表达的意思presentation
+//n数值的意思numeric
+
+addrptr应该指向struct in_addr(6)
+int inet_pton(int family, const char* strptr, void* addrptr);
+//成功返回1，失败返回0，错误-1
+
+//strptr应该为至少len个字节,ipv4 16个字节，ipv6 46个字节
+const char* inet_ntop(int family, const void* addrptr, char *strptr, size_t len);
+//成功返回指向结果的指针，失败NULL
+
+------------------------第四章基本TCP套接字编程-------------------------------
+#include <sys/socket.h>
+int socket(int family, int type, int protocol);//成功返回非负的socket描述符，失败-1
+family:
+       Name                Purpose                          Man page
+       AF_UNIX, AF_LOCAL   Local communication(UNIX域协议)              unix(7)
+       AF_INET             IPv4 Internet protocols          ip(7)
+       AF_INET6            IPv6 Internet protocols          ipv6(7)
+       AF_IPX              IPX - Novell protocols
+       AF_NETLINK          Kernel user interface device     netlink(7)
+       AF_X25              ITU-T X.25 / ISO-8208 protocol   x25(7)
+       AF_AX25             Amateur radio AX.25 protocol
+       AF_ATMPVC           Access to raw ATM PVCs
+       AF_APPLETALK        AppleTalk                        ddp(7)
+       AF_PACKET           Low level packet interface       packet(7)
+       AF_ALG              Interface to kernel crypto API
+
+type:
+       SOCK_STREAM     Provides sequenced, reliable, two-way, connection-based byte streams.  An out-of-band data transmission mechanism may be supported.
+
+       SOCK_DGRAM      Supports datagrams (connectionless, unreliable messages of a fixed maximum length).
+
+       SOCK_SEQPACKET  Provides  a sequenced, reliable, two-way connection-based data transmission path for datagrams of fixed maxi‐
+                       mum length; a consumer is required to read an entire packet with each input system call.
+
+       SOCK_RAW        Provides raw network protocol access.
+
+       SOCK_RDM        Provides a reliable datagram layer that does not guarantee ordering.
+
+       SOCK_PACKET     Obsolete and should not be used in new programs; see packet(7).
+
+       Some socket types may not be implemented by all protocol families.
+
+       Since Linux 2.6.27, the type argument serves a second purpose: in addition to specifying a socket type, it  may  include  the
+       bitwise OR of any of the following values, to modify the behavior of socket():
+
+       SOCK_NONBLOCK   Set  the  O_NONBLOCK file status flag on the new open file description.  Using this flag saves extra calls to
+                       fcntl(2) to achieve the same result.
+
+       SOCK_CLOEXEC    Set the close-on-exec (FD_CLOEXEC) flag on the new file descriptor.  See the  description  of  the  O_CLOEXEC
+                       flag in open(2) for reasons why this may be useful.
+
+protocol:
+	IPPROTO_TCP
+	IPPROTO_UDP
+	IPPROTO_SCTP
+	0表示根据domain以及type自动决定采用某个协议
+		AF_INET             AF_INET6            AF_LOCAL              AF_ROUTE(路由套接字)             AF_KEY(密匙套接字)
+SOCK_STREAM TCP|SCTP        TCP|SCTP            是(暂无具体词汇描述)
+SOCK_DGRAM  UDP             UDP                 是
+SOCK_SEQPACKET SCTP         SCTP                是
+SOCK_RAW    IPv4            IPv6	                                 是                                是
+
+
+---------------------------connect函数-------------------------
+#include <sys/socket.h>
+int connect(int sockfd, const struct sockaddr* servaddr, socklen_t addrlen);
+//成功返回0失败-1
+//若失败则sockfd不可使用必须关闭开启新的套接字
+
+//TCP错误返回情况:
+	1.TCP客户没有收到SYN分节的相应，返回ETIMEDOUT错误
+	超时
+	2.对于客户的SYN的响应是RST(表示复位),该服务器主机在我们指定的端口没有进程在等待与之连接(硬错误)
+	ECONNERFUSED
+	3.客户发出的SYN在中间的路由器上引发了一个"destination unreachable"(目的地不可达)ICMP错误(软错误)
+	ENETUNREACH
+     Network is unreachable.
+
+抓包工具tcpdump(命令)
+
+-------------------------bind函数------------------------
+#include <sys/socket.h>
+int bind(int sockfd, const struct sockaddr* addr, socklen_t addrlen);
+//成功0失败-1
+//对于TCP可以选择绑定一个ip或者端口号或者两者都具有，或者都不具有
+
+//对于服务器绑定它众所周知的端口(但是远程过程调用(RPC)除外,一般由内核为它们分配临时端口，然后通过RPC端口映射器进行注册，客户端由RPC端口映射器来获取它们的临时端口
+	如果没有绑定端口，则内核就要为相应的套接字选择一个临时端口
+
+//进程可以绑定特定的IP，对于TCP客户，为绑定的套接字指派了源IP地址，对于服务器就限定了该套接字只接收那些目的为该IP地址的客户连接，
+
+	若客户没有bind则内核会根据所用的外出网络接口(取决于到达的服务器所需的路径)来选择源IP地址
+	若服务没有bind则内核会根据客户发出的SYN的目的地址作为服务器的源IP地址
+
+struct sockadd_in serv;
+serv.sin_addr.s_addr = htonl(INADDR_ANY);
+对于IPv4的通配地址为INADDR_ANY来指定
+
+struct sockaddr_in6 serv;
+serv.sin6_addr = in6addr_any;
+对于IPv6的通配地址为in6addr_any;
+
+进程指定
+IP           端口      结果
+通配地址     0         内核选择IP地址和端口(ip根据到达的服务器所需路径选择源ip地址，分配临时端口)
+通配地址    非0        内核选择IP地址，进程指定端口
+本地IP地址  0          进程指定IP地址，内核选择端口
+本地IP地址  非0        进程指定IP地址和端口(服务器一般用通配地址否则只能接受来自于目的地为指定ip的连接eg:127.0.0.1若设置，则无法接受192.168.42.203的连接(尽管都是本机),而设置为INADDR_ANY 或in6addr_any则可以)
+
+//常见错误EADDRINUSE地址已使用
+
+
+
 
 

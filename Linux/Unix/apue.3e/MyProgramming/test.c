@@ -1,28 +1,15 @@
-#include <signal.h>
-#include <apue.h>
-#include <stdio.h>
+#include <fcntl.h>
+//#include <sys/stat.h>
 #include <unistd.h>
-#include <stdlib.h>
-void f(int id)
+#include <stdio.h>
+int main()
 {
-	printf("%d\n", id);
-}
-int main (void){
-	pid_t pid;
-	if (signal(SIGCHLD, f) == SIG_ERR)
-	{
-		perror("error for signal");
-	}
-		pid = fork();
-		if (pid < 0)
-			exit(-1);
-		else if (pid == 0)
-		{
-			exit(12);
-		}
-		else
-		{
-			sleep(4);
-		}
+	int a = 0x12;
+	int fd = open("test.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	if (fd == -1)
+		perror("open error");
+	if (write(fd, &a, sizeof(a)) != sizeof(a))
+		perror("write error");
+	close(fd);
 	return 0;
 }
