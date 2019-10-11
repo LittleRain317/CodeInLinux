@@ -1,3 +1,0 @@
-css样式中body
-{
-	background-color: #d2b48c;  //:以及颜色之间需要空格

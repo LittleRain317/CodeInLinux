@@ -289,4 +289,85 @@ IO请求 等待子进程结束 等待中断-->进程进入等待状态
 2.远程过程调用(RPC)
 3.管道
 
+------------------远程过程调用----------------
+RPC通信交换的消息具有明确结构，因此不再仅仅是数据包
+消息包含:执行函数的一个标识符以及传递给该函数的一些参数，然后函数按照要求来执行，而所有结果会通过另一个消息，传递回请求者
+
+通过客户端提供的存根stub(该存根定位服务器的端口并且封装参数)，RPC系统隐藏通信细节
+
+对于PRC因为网络问题可能执行失败或多次重复执行，解决该问题的方法是操作系统确保只执行一次而不是最多执行一次
+
+最多一次:(增加时间戳，超过该时间忽略)
+
+正好一次执行:在最多一次的基础上增加ACK确认消息
+
+
+
+客户端如何知道服务器上面的端口:
+1.预留端口
+2.绑定通过交会机制动态进行（服务器在预留RPC端口上提供交会服务程序),客户通过该端口获取服务器的端口号,然后发送RPC消息
+
+RPC可以实现分布式文件系统
+
+------------------管道-------------------
+设计管道应该考虑四个问题:
+1.管道允许单向通信还是双向通信
+2.管道如果是双向的那么是全双工(数据在同一时间内可以在两个方向上传输),半双工
+3.通信进程是否应该具有一定的关系(eg父子)
+4.管道通信能否通过网络，还是只能在本地进行
+
+---------普通管道---------------
+单向通信
+UNIX: pipe(int fd[])//fd[0]读 fd[1]写
+
+一般父进程创建普通管道和子进程通信
+
+
+!!!注意点:若一开始fork之后，双方没有关闭没有使用的一端，那么无法确保父进程写入端关闭后子进程能够检测到EOF
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 25
+#define READ_END 0
+#define WRITE_END 1
+
+int main(void)
+{
+	char write_msg[BUFFER_SIZE] = "Greetings";
+	char read_msg[BUFFER_SIZE];
+	int fd[2];
+	pid_t pid;
+	if (pipe(fd) == -1)
+	{
+		perror("Pipe error");
+		return 1;
+	}
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("fork error");
+		return 1;
+	}
+	if (pid > 0)
+	{
+//		close(fd[READ_END]);
+		write(fd[WRITE_END], write_msg, strlen(write_msg) + 1);
+		close(fd[WRITE_END]);
+	}
+	else 
+	{
+//		close(fd[WRITE_END]);
+		while (read(fd[READ_END], read_msg, BUFFER_SIZE))
+			printf("read %s", read_msg);
+		close(fd[READ_END]);
+	}
+	return 0;
+}
+
+
+------------------命名管道----------------
+UNIX的命名管道:FIFO，类似普通文件直到被删除，可以允许多个进程读写，但是是半双工
+
 

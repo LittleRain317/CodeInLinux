@@ -398,7 +398,36 @@ IP           端口      结果
 
 //常见错误EADDRINUSE地址已使用
 
+---------------------------listen函数--------------
+listen用于将未连接的套接字变成被动套接字，指示内核应接受指向该套接字的连接请求
 
+#include <sys/socket.h>
+int listen(int sockfd, int backlog);//成功返回0，失败返回-1
+对于backlog的理解:
+1.内核为任何一个给定的监听套接字维护了两个队列
+	1.未完成连接队列:等待客户的ACK确认 处于SYN_RCVD状态(保留服务的ACK和SYN直到三路握手的第三个分节到达,或者超时(超过往返时间(RTT))
+			ddos攻击
+	2.已完成连接队列:完成三路握手处于ESTABLISHED状态
+以上两个队列之和不超过backlog
+2.不应该设置为0，若不想让客户连接应该关闭套接字
+3.操作系统的内部实现可能为backlog增加了一个模糊因子，把backlog乘以一个常数得到最大长度
+4.若backlog超过操作系统所支持的最大值，内核会截断成内核所支持的最大值
 
+如果三路握手正常那么该项就从未完成连接队列移动到已完成连接队列,之后由accept取出队列头部
 
+若一个客户的SYN到达时这些队列是满的，那么TCP就忽略该分节,也就是不发送RST,是为了让客户能够重新发送SYN，否则connect会直接返回错误(而不是让TCP重传机制来处理)(尽管不同的操作系统可能不这么实现)
+
+-------------------------accept函数--------------------
+#include <sys/socket.h>
+int accept(int sockfd, struct sockaddr* cliaddr, socklen_t *addrlen);
+//成功非负的socket描述符(已连接的socketfd),失败-1
+
+------------------------getsockname和getpeername函数-----------------
+#include <sys/socket.h>
+int getsockname(int sockfd, struct sockaddr* localaddr, socklen_t* addrlen);
+//对于服务sockfd应该是accept返回的已连接的socketfd，可以获取内核赋予该连接的本地IP地址
+//对于没有调用bind的TCP客户，connect成功返回后，用于返回由内核赋予该连接的本地ip地址和本地端口号
+
+int getpeername(int sockfd, struct sockaddr* peeraddr, socklen_t* addrlen);
+//返回对方的ip信息
 

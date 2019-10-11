@@ -11,7 +11,7 @@ int main(int argc, char * argv[])
 		err_sys("socket error");
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_port = htons(9999);
+	servaddr.sin_port = htons(13);
 	if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0)
 		err_quit("inet_pton error for %s", argv[1]);
 	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) < 0)
@@ -28,6 +28,14 @@ int main(int argc, char * argv[])
 			err_sys("fputs error");
 		}
 	}
+	struct sockaddr_in localaddr;
+	bzero(&localaddr, sizeof(localaddr));
+	socklen_t len = 0;
+	if (getsockname(sockfd, (struct sockaddr *)&localaddr, &len) == -1)
+		perror("getsockname error");
+	char buff[1024] = { 0 };
+	printf("local IP: %s port: %d\n", inet_ntop(AF_INET, &localaddr.sin_addr, buff, sizeof(buff)), ntohs(localaddr.sin_port));
+
 	if (n < 0)
 		err_sys("read error");
 	printf("count = %lu\n", count);
