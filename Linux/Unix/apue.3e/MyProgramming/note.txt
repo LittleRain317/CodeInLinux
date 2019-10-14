@@ -1567,7 +1567,7 @@ clock_t类型的值可以通过sysconf(_SC_CLK_TCK)来获取每秒时钟滴答�
 void (*signal(int sig, void (*func)(int)))(int);
 //!注意点:then first either the disposition is reset to SIG_DFL, or the signal  is  blocked  (see Portability  below)//首次调用func后会重置该信号的处理函数（设置为SIG_DFL)
 
-//返回值 成功返回func，失败返回SIG_ERR
+//返回值 成功返回之前的信号处理程序，失败返回SIG_ERR
 sig是signal(7)中的值，func是常量SIG_IGN(忽略)或SIG_DFL(默认)或当接收到该信号的时候处理函数的地址
 信号处理函数也叫作（signal handler）（signal-catching function)
 
@@ -1590,11 +1590,39 @@ sig是signal(7)中的值，func是常量SIG_IGN(忽略)或SIG_DFL(默认)或当�
 -----------------------可靠信号术语和语义------------------------
 当造成信号的事件发生时，为进程！！产生！！一个信号（或向一个进程发送一个信号），当一个信号产生时，内核通常在进程表中以某种形式设置一个标记位，当对信号采取了这种动作时，我们说向进程！！递送！！了一个信号，在信号产生和递送之间的时间间隔内，称信号为未决的
 
-执行信号的处理动作成为信号递达（Delivery），信号从产生到递达之间的状态称为信号未决(Pending)。进程可以选择阻塞(Block)某个信号。
-被阻塞的信号产生时将保持在未决状态，直到进程解除对此信号的阻塞，才执行递达的动作
-注意：阻塞和忽略是不同的，只要信号被阻塞就不会递达，而忽略是在递达之后可选的一种处理动作
+进程可以选择阻塞(Block)某个信号。
+被阻塞的信号产生时将保持在未决状态，直到进程解除对此信号的阻塞，才执行递送的动作
+注意：阻塞和忽略是不同的，只要信号被阻塞就不会递送，而忽略是在递达之后可选的一种处理动作
 
 每一个进程都有一个信号屏蔽字，它规定了当前要阻塞递送到该进程的信号集
+
+--------------------函数kill(发送信号给进程或进程组)和raise(允许进程向自身发送信号)------------------------------
+#include <signal.h>
+int kill(pid_t pid, int signo);
+int raise(int signo);
+//成功返回0错误返回-1
+
+raise==kill(getpid(), signo);
+
+kill中pid的理解:
+1.pid>0 将该信号发送给进程ID为pid的进程
+2.pid==0 发送给调用该函数的进程所属的同一进程组的所有进程(不包括系统进程)
+3.pid<0 将该信号发送给其进程组ID等于pid绝对值的
+4.pid==-1 将该信号发送给发送进程具有权限向它们发送信号的所有进程(不包括系统进程)
+
+POSIX.1 requires that if a process sends a signal to itself, and the sending thread does not have the signal blocked, and  no other  thread  has  it  unblocked  or is waiting for it in sigwait(3), at least one unblocked signal must be delivered to the sending thread before the kill() returns.
+
+--------------------函数alarm和pause-----------------------
+#include <unistd.h>
+unistd ing alarm(unsigned int seconds);//返回值0或以前设置的闹钟时间的剩余秒数(未对该信号进行捕获或忽略则默认是终止该进程)
+//由于存在进程调度的延迟，所以进程得到控制从而能够处理该信号还需要一个时间间隔
+//每个进程只有一个闹钟时间，如果在调用alarm之前，存在alarm的时间还没有超时则会返回之前设置的闹钟时间的剩余秒数，并且将新值替换
+//若新值为0则取消之前的闹钟，但是返回值依旧是之前设置的闹钟时间的剩余秒数
+
+#include <unistd.h>
+int pause(void);//返回值-1，errno设置为EINTR
+//只有执行了一次信号处理程序并且返回，pause才会返回，这种情况下pause返回-1
+//或者终止该进程才会返回
 
 ==================================第11章:线程========================
 每个线程都包含有表示执行环境所必须的信息，其中包括线程id，一组寄存器值，栈，调度优先级和策略以及信号屏蔽字，errno变量以及线程私有数据
