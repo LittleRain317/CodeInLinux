@@ -1,22 +1,26 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <signal.h>
-void sig_alrm(int arg)
-{
-	return;
-}
-int main()
-{
-	printf("24k傻逼\n");
-	if (signal(SIGALRM, sig_alrm) == SIG_ERR)
-	{
-		perror("signal error");
-		return -1;
-	}
-	alarm(1);
-	pause();
-	perror("what");
+#include <apue/apue.h>
+extern unsigned int sleep2(unsigned int seconds);
 
-	printf("24k傻逼\n");
-	return 0;
+static void sig_int(int signo)
+{
+	int i, j;
+	volatile int k;
+
+	printf("\nsig_int starting\n");
+	for ( i = 0; i < 300000; i++)
+		for (j = 0; j < 4000; j++)
+			k += i * j;
+	printf("sig_int finished\n");
 }
+
+int main(void)
+{
+	unsigned int unslept;
+	if (signal(SIGINT, sig_int) == SIG_ERR)
+		err_sys("signal error");
+	unslept = sleep2(5);
+	printf("slee2 returned: %u\n", unslept);
+	return 0;	
+}
+
+

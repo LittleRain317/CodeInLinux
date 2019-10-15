@@ -1564,7 +1564,7 @@ clock_t类型的值可以通过sysconf(_SC_CLK_TCK)来获取每秒时钟滴答�
 信号处理是每个进程的属性，在多线程应用中，信号的处理对于所有线程都是相同的
 
 #include <signal.h>
-void (*signal(int sig, void (*func)(int)))(int);
+void (*signal(int sig, void (*func)(int)))(int); //func的参数为sig
 //!注意点:then first either the disposition is reset to SIG_DFL, or the signal  is  blocked  (see Portability  below)//首次调用func后会重置该信号的处理函数（设置为SIG_DFL)
 
 //返回值 成功返回之前的信号处理程序，失败返回SIG_ERR
@@ -1623,6 +1623,50 @@ unistd ing alarm(unsigned int seconds);//返回值0或以前设置的闹钟时�
 int pause(void);//返回值-1，errno设置为EINTR
 //只有执行了一次信号处理程序并且返回，pause才会返回，这种情况下pause返回-1
 //或者终止该进程才会返回
+
+-----------------信号集--------------------------
+sigset_t信号集(以便告诉内核不允许发生该信号集中的信号)
+#include <signal.h>
+int sigemptyset(sigset_t *set);
+//初始化set并且清空所有信号
+int sigfillset(sigset_t *set);
+//初始化set并且装满所有信号
+int sigaddset(sigset_t *set, int signo);
+int sigdelset(sigset_t *set, int signo);
+//返回值 成功0 错误-1
+int sigismember(const sigset_t *set, int signo);
+//成功 若真返回1 若假返回0
+
+----------------函数sigprocmask(可以检测信号屏蔽(阻塞信号)字或者更改,无法阻塞SIGKILL和SIGSTOP)-----------------
+#include <signal.h>
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+//返回值 成功0 失败-1        返回之前将选择任何未决的不再阻塞的信号之一递送给进程
+how:
+SIG_BLOCK: 新的信号屏蔽字是其当前信号屏蔽字和set所指向的信号集的并集(set包含了希望阻塞的附加信号)
+SIG_UNBLOCK: 新的信号屏蔽字是其当前信号屏蔽字和set所指向的信号集补集的交集(set包含了希望解除阻塞的信号)
+SIG_SETMASK: 该进程新的信号屏蔽字是set所指向的值
+if (set == NULL)
+	则how无意义并且不改变信号屏蔽字
+
+----------------函数sigpending(返回信号集，其中各信号是未决的)---------------
+#include <signal.h>
+int sigpending(sigset_t *set);
+//返回值 成功0 错误 -1
+
+-----------------函数sigaction(检查或修改与指定信号相关联的处理函数)--------------------
+#include <signal.h>
+int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
+struct sigaction {
+    void     (*sa_handler)(int); //addr of signal handler
+    void     (*sa_sigaction)(int, siginfo_t *, void *); //与signal handler不要同时赋值
+    sigset_t   sa_mask; //additional signals block
+    int        sa_flags; //signal options 
+    void     (*sa_restorer)(void); //
+};
+  
+//返回值 成功0 失败-1
+//参数signum为要检测或修改其具体处理函数的信号编号
+
 
 ==================================第11章:线程========================
 每个线程都包含有表示执行环境所必须的信息，其中包括线程id，一组寄存器值，栈，调度优先级和策略以及信号屏蔽字，errno变量以及线程私有数据
