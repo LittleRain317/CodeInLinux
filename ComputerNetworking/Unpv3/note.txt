@@ -424,10 +424,89 @@ int accept(int sockfd, struct sockaddr* cliaddr, socklen_t *addrlen);
 
 ------------------------getsockname和getpeername函数-----------------
 #include <sys/socket.h>
+addrlen所指向的元素的值应该预先设置为sizeof(struct sockaddr)
 int getsockname(int sockfd, struct sockaddr* localaddr, socklen_t* addrlen);
 //对于服务sockfd应该是accept返回的已连接的socketfd，可以获取内核赋予该连接的本地IP地址
 //对于没有调用bind的TCP客户，connect成功返回后，用于返回由内核赋予该连接的本地ip地址和本地端口号
 
 int getpeername(int sockfd, struct sockaddr* peeraddr, socklen_t* addrlen);
 //返回对方的ip信息
+
+
+=========================第5章:TCP客户/服务器程序示例
+ps -t pts/num -o pid,ppid,tty,stat,args,wchan
+输出该终端上的pid,ppid,...
+
+netstat -a 可以获取状态流程图
+
+#include <unp/unp.h>
+#include <errno.h>
+void str_echo(int sockfd)
+{
+	ssize_t n;
+	char buf[MAXLINE];
+again:
+	while ((n = readline(sockfd, buf, MAXLINE)) > 0)
+		Writen(sockfd, buf, n);
+	if (n < 0 && errno == EINTR)
+		goto again;
+	else if (n < 0)
+		err_sys("str_echo error");
+}
+
+void sig_chld(int signo)
+{
+	pid_t pid;
+	int stat;
+	while ((pid = waitpid(-1, &stat, WNOHANG)) > 0)      //信号不排队,wait若循环则会阻塞,从而导致僵尸进程产生
+		printf("child %d terminated\n", pid);
+	return;
+}
+int main(int argc, char * argv[])
+{
+	if (signal(SIGCHLD, sig_chld) == SIG_ERR) //子进程退出会发出SIGCHLD信号，若不处理会产生僵尸进程
+	{
+		perror("signal error");
+		return -1;
+	}
+	int listenfd, connfd;
+	pid_t childpid;
+	socklen_t clilen;
+	struct sockaddr_in cliaddr, servaddr;
+	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servaddr.sin_port = htons(SERV_PORT);
+	Bind(listenfd, (SA*)&servaddr, sizeof(servaddr));
+	Listen(listenfd, LISTENQ);
+	while (1)
+	{
+		clilen = sizeof(cliaddr);
+		//connfd = Accept(listenfd, (SA *)&cliaddr, &clilen);
+		//accept为慢系统调用，可能运行时会被其他信号处理程序中断,但是内核并不保证会重启该系统调用
+		if ((connfd = accept(listenfd, (SA *)&cliaddr, &clilen)) < 0)
+		{
+			if (errno == EINTR)
+				continue;
+			else
+				err_sys("accept error");
+		}
+		if ((childpid = fork()) == 0)
+		{
+			Close(listenfd);
+			str_echo(connfd);
+			exit(0);
+		}
+		Close(connfd);
+	}
+}
+
+--------------accept返回前连接中止(只需要再次调用accept)
+在三路握手完成连接建立后，客户TCP却发送了一个RST(复位),在服务器进程看来在调用accept返回之前RST已经到达
+accept会设置errno为ECONNABORTED
+              A connection has been aborted.
+
+--------------服务器进程终止
+
 
