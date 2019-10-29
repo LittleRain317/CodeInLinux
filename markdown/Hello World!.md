@@ -57,11 +57,11 @@ int a = 10;
 
 <www.baidu.com>
 
-[百度](www.baidu.com)
+[百度](www.baidu.com) //不添加协议默认为相对路径
 
-[百度][var]
+[百度][var] 
 
-[var]: www.baidu.com
+[var]: www.baidu.com //不添加协议默认为相对路径
 
 
 
