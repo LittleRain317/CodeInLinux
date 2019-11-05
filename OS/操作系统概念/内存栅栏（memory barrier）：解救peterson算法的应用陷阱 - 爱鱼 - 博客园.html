@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)https://www.cnblogs.com/mightycode/p/9226887.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta property="og:description" content="最近一个项目中用到了peterson算法来做临界区的保护，简简单单的十几行代码，就能实现两个线程对临界区的无锁访问，确实很精炼。但是在这不是来分析peterson算法的，在实际应用中发现peterso">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <title>内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园</title>
+    
+    <link rel="stylesheet" href="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/bundle-lightyblue.min.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/bundle-lightyblue-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/mightycode/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/mightycode/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/mightycode/wlwmanifest.xml">
+    <script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/amp4ads-host-v0.js"></script><script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/pubads_impl_rendering_2019103101.js"></script><script async="" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/analytics.js"></script><script type="text/javascript" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/encoder.js"></script><script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/jquery-2.2.0.min.js"></script>
+    <script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/blog-common.min.js"></script>
+    <script>
+        var currentBlogId = 327995;
+        var currentBlogApp = 'mightycode';
+        var cb_enable_mathjax = true;
+        var isLogined = false;
+    </script>
+    <script type="text/x-mathjax-config;executed=true">
+        MathJax.Hub.Config({
+        tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']], processClass: 'math', processEscapes: true },
+        TeX: {
+        equationNumbers: { autoNumber: ['AMS'], useLabelIds: true },
+        extensions: ['extpfeil.js', 'mediawiki-texvc.js'],
+        Macros: {bm: "\\boldsymbol"}
+        },
+        'HTML-CSS': { linebreaks: { automatic: true } },
+        SVG: { linebreaks: { automatic: true } }
+        });
+    </script>
+    <script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/MathJax.js"></script>
+    
+<style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 5px 0px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; -khtml-border-radius: 5px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 1px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: .7em}
+.MathJax_MenuRadioCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuLabel {padding: 1px 2em 3px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #DDDDDD; margin: 4px 3px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: #606872; color: white}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover, .MJXp-munder {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > *, .MJXp-munder > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><link rel="preload" href="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/f.txt"></script><script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/pubads_impl_2019103101.js" async=""></script><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-36/html/container.html"></head>
+<body><div id="MathJax_Message" style="display: none;"></div>
+    <a name="top"></a>
+    
+    <div class="pagelayout">
+    
+<div id="header">
+	<span>
+		<a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/mightycode/">爱鱼</a>
+<br>
+		<p id="tagline">
+
+</p>
+	</span>
+</div>
+
+
+    <div id="menu">
+        
+            
+<h1>导航</h1>
+<ul class="list">
+	<li class="listitem"><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+	<li class="listitem">
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/mightycode/">
+首页</a>
+</li>
+	<li class="listitem">
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+	<li class="listitem">
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/%E7%88%B1%E9%B1%BC">
+联系</a></li>
+	<li class="listitem">
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/mightycode/rss/">
+订阅</a>
+<a id="blog_nav_rss_image" href="https://www.cnblogs.com/mightycode/rss/">
+    <img src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/xml.gif" alt="订阅">
+</a></li>
+	<li class="listitem">
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+            <h1>统计</h1>
+	<ul class="list">
+		<li class="listitem">随笔 - 
+18</li>
+		<li class="listitem">文章 - 
+0</li>
+		<li class="listitem">评论 - 
+54</li>
+		<li class="listitem">引用 - 
+0
+	</li>
+</ul>
+
+
+            
+<div id="sidebar_news" class="newsItem"><h1>公告</h1>
+	<ul class="list">
+		<li class="listitem">
+			
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/mightycode/">
+            爱鱼
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/mightycode/" title="入园时间：2017-01-13">
+            2年9个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/mightycode/followers/">
+            27
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/mightycode/followees/">
+            1
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow(&#39;23edacd5-58d9-e611-845c-ac853d9f53ac&#39;)">+加关注</a></div>
+        <script>getFollowStatus('23edacd5-58d9-e611-845c-ac853d9f53ac');</script>
+    </div>
+</div>
+	</li>
+</ul>
+
+</div>
+
+            <div id="blog-sidecolumn">
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+    
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+        <li>
+
+<a href="https://www.cnblogs.com/mightycode/p/" title="我的博客的随笔列表">我的随笔</a>
+</li>
+        <li>
+
+<a href="https://www.cnblogs.com/mightycode/MyComments.html" title="我的发表过的评论列表">我的评论</a>
+</li>
+        <li>
+
+<a href="https://www.cnblogs.com/mightycode/OtherPosts.html" title="我评论过的随笔列表">我的参与</a>
+</li>
+        <li>
+
+<a href="https://www.cnblogs.com/mightycode/RecentComments.html" title="我的博客的评论列表">最新评论</a>
+</li>
+        <li>
+
+<a href="https://www.cnblogs.com/mightycode/tag/" title="我的博客的标签列表">我的标签</a>
+</li>
+</ul>
+
+<!-- TODO: 检查是否有使用这一部分的控件，如果没有则应该删除。 -->
+<div id="itemListLin_con" style="display:none">
+    <ul>
+
+    </ul>
+</div>
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+		<h1 class="listtitle">
+
+随笔档案
+<span style="font-size:11px;font-weight:normal">(18)</span>
+
+</h1>
+				<ul class="list">
+			
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2019/10.html" rel="" target="">
+    2019年10月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2019/05.html" rel="" target="">
+    2019年5月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2019/03.html" rel="" target="">
+    2019年3月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2019/02.html" rel="" target="">
+    2019年2月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2018/11.html" rel="" target="">
+    2018年11月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2018/10.html" rel="" target="">
+    2018年10月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2018/07.html" rel="" target="">
+    2018年7月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2018/05.html" rel="" target="">
+    2018年5月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2018/02.html" rel="" target="">
+    2018年2月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2017/12.html" rel="" target="">
+    2017年12月(2)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2017/09.html" rel="" target="">
+    2017年9月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2017/06.html" rel="" target="">
+    2017年6月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2017/03.html" rel="" target="">
+    2017年3月(2)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2017/02.html" rel="" target="">
+    2017年2月(1)
+</a>
+ 
+</li>
+				<li class="listitem">
+<a href="https://www.cnblogs.com/mightycode/archive/2017/01.html" rel="" target="">
+    2017年1月(2)
+</a>
+ 
+</li>
+			
+				</ul>
+
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div id="recent_comments_wrap" class="RecentComment">
+    <h3 class="catListTitle">最新评论</h3>
+    <div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/9095059.html#4320597">1. Re:UR机械臂运动学正逆解方法</a></li>
+                    <li class="recent_comment_body">8组逆解</li>
+                    <li class="recent_comment_author">--itfanr</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/10365697.html#4292196">2. Re:OpenCV Mat格式存储YUV图像</a></li>
+                    <li class="recent_comment_body">相当棒的文章</li>
+                    <li class="recent_comment_author">--duohappy</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/8005514.html#4291559">3. Re:导向滤波算法分析</a></li>
+                    <li class="recent_comment_body">@ czy0410这本来就是一个参数，控制滤波的程度。...</li>
+                    <li class="recent_comment_author">--爱鱼</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/8005514.html#4277168">4. Re:导向滤波算法分析</a></li>
+                    <li class="recent_comment_body">你好！我想问下那个正则化参数e是如何取值的，自己随便取吗？</li>
+                    <li class="recent_comment_author">--czy0410</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/9095059.html#4206162">5. Re:UR机械臂运动学正逆解方法</a></li>
+                    <li class="recent_comment_body"><a href="https://www.cnblogs.com/mightycode/p/9226887.html" target="_blank"></a></li>
+                    <li class="recent_comment_author">--itfanr</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/6952381.html#4186290">6. Re:一种基于腐蚀膨胀运算实现的局部自适应对比度增强算法</a></li>
+                    <li class="recent_comment_body">@ 爱鱼或者高斯模糊之类的处理也应该是可以的。...</li>
+                    <li class="recent_comment_author">--Imageshop</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/6952381.html#4186246">7. Re:一种基于腐蚀膨胀运算实现的局部自适应对比度增强算法</a></li>
+                    <li class="recent_comment_body">@ Imageshop是的，你说的没错。在对比度比较大的边缘处，这种块状效应更明显。通过领域来计算的方法都很难避免。不过你说的再用导向滤波一下，我刚才试了一下，确实还不错，效果挺明显的。赞！...</li>
+                    <li class="recent_comment_author">--爱鱼</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/6952381.html#4185640">8. Re:一种基于腐蚀膨胀运算实现的局部自适应对比度增强算法</a></li>
+                    <li class="recent_comment_body">@ 爱鱼比如这个结果图，当半径小一点的时候就很明显了，这个可以用腐蚀或者膨胀后的图加原图作为导向图的导向滤波结果来改进。 半径比较大时，确实不会出现，这个主要是原因大半径时整个的结果图就已经趋向了一个...</li>
+                    <li class="recent_comment_author">--Imageshop</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/10365697.html#4185245">9. Re:OpenCV Mat格式存储YUV图像</a></li>
+                    <li class="recent_comment_body">使用QT+OpenCV的时候，我也遇到过YUV422，你的这篇文章有所帮助。</li>
+                    <li class="recent_comment_author">--jsxyhelu</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/mightycode/p/10365697.html#4183686">10. Re:OpenCV Mat格式存储YUV图像</a></li>
+                    <li class="recent_comment_body">点赞一下，现在博客园的图像文章很少了。</li>
+                    <li class="recent_comment_author">--Imageshop</li>
+        </ul>
+    </div>
+</div>
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    
+<div id="topview_posts_wrap">
+    <h3 class="catListTitle">阅读排行榜</h3>
+    <div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/6394810.html">
+                            1. Canny边缘检测算法的实现(60783)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/9095059.html">
+                            2. UR机械臂运动学正逆解方法(8634)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/6560784.html">
+                            3. Canny边缘检测算法的一些改进(6275)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/7561623.html">
+                            4. 嵌入系统squashfs挂载常见问题总结(5970)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/8370616.html">
+                            5. 生成符合高斯分布或者其他任意分布的随机数(4725)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/10365697.html">
+                            6. OpenCV Mat格式存储YUV图像(3364)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/8018327.html">
+                            7. 导向滤波算法的实现(3300)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/8005514.html">
+                            8. 导向滤波算法分析(3070)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/9712593.html">
+                            9. Android程序backtrace分析方法(1818)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/6952381.html">
+                            10. 一种基于腐蚀膨胀运算实现的局部自适应对比度增强算法(1648)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    
+<div id="topfeedback_posts_wrap">
+    <h3 class="catListTitle">评论排行榜</h3>
+    <div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/8018327.html">
+                            1. 导向滤波算法的实现(14)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/6952381.html">
+                            2. 一种基于腐蚀膨胀运算实现的局部自适应对比度增强算法(12)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/8005514.html">
+                            3. 导向滤波算法分析(12)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/6294035.html">
+                            4. 图像处理的多线程计算(5)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/9095059.html">
+                            5. UR机械臂运动学正逆解方法(3)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/10365697.html">
+                            6. OpenCV Mat格式存储YUV图像(3)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/6283038.html">
+                            7. 图像处理中表面模糊算法改进的讨论(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/9226887.html">
+                            8. 内存栅栏（memory barrier）：解救peterson算法的应用陷阱(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/mightycode/p/6560784.html">
+                            9. Canny边缘检测算法的一些改进(1)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/6394810.html">
+                                1. Canny边缘检测算法的实现(15)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/9226887.html">
+                                2. 内存栅栏（memory barrier）：解救peterson算法的应用陷阱(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/10365697.html">
+                                3. OpenCV Mat格式存储YUV图像(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/8018327.html">
+                                4. 导向滤波算法的实现(2)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/9095059.html">
+                                5. UR机械臂运动学正逆解方法(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/10876119.html">
+                                6. 使用Visual Studio Code进行远程开发(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/6560784.html">
+                                7. Canny边缘检测算法的一些改进(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/6632371.html">
+                                8. 多线程图像处理中对选入DC的位图保护(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/6952381.html">
+                                9. 一种基于腐蚀膨胀运算实现的局部自适应对比度增强算法(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/mightycode/p/8005514.html">
+                                10. 导向滤波算法分析(1)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+        
+        <div class="spacer">
+            &nbsp;</div>
+    </div>
+    <div id="main">
+        <div id="post_detail">
+<div class="block">
+	<h1 class="block_title">
+<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/mightycode/p/9226887.html">内存栅栏（memory barrier）：解救peterson算法的应用陷阱</a>
+</h1>
+	<div class="post">
+		<div class="postcontent">
+			
+<div id="cnblogs_post_body" class="blogpost-body ">
+    <p><span style="font-size: 15px; font-family: Microsoft YaHei;">最近一个项目中用到了peterson算法来做临界区的保护，简简单单的十几行代码，就能实现两个线程对临界区的无锁访问，确实很精炼。但是在这不是来分析peterson算法的，在实际应用中发现peterson算法并不能对临界区进行互斥访问，也就是说两个线程还是有可能同时进入临界区。但是按照代码的分析，明明可以实现互斥访问的呀，这是怎么回事呢？</span></p>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">首先用一个测试程序来检验一下。临界区是对一个全局变量的自加一运算，两个线程各加一百万次，最后结果应该是两百万。由于自加一运算不是原子的，如果两个线程同时进入临界区，最后的结果就会少于两百万。</span></p>
+<div class="cnblogs_code" onclick="cnblogs_code_show(&#39;f6fb022c-2b06-461e-89ba-6e8c621a8bb4&#39;)"><span style="font-size: 15px; font-family: Microsoft YaHei;"><img id="code_img_closed_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="code_img_closed" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/ContractedBlock.gif" alt="" style="display: none;"><img id="code_img_opened_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="code_img_opened" style="" onclick="cnblogs_code_hide(&#39;f6fb022c-2b06-461e-89ba-6e8c621a8bb4&#39;,event)" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/ExpandedBlockStart.gif" alt=""></span>
+<div id="cnblogs_code_open_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="cnblogs_code_hide" style="display: block;"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="font-size: 15px; font-family: Microsoft YaHei;">#include &lt;iostream&gt;<span style="color: #000000;">
+#include </span>&lt;pthread.h&gt;
+<span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span><span style="color: #000000;"> std;
+
+</span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">volatile</span> <span style="color: #0000ff;">bool</span> flag[<span style="color: #800080;">2</span>] = {<span style="color: #0000ff;">false</span>, <span style="color: #0000ff;">false</span><span style="color: #000000;">};
+</span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">volatile</span> <span style="color: #0000ff;">int</span> turn = <span style="color: #800080;">0</span><span style="color: #000000;">;
+
+</span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">volatile</span> <span style="color: #0000ff;">int</span> gCount = <span style="color: #800080;">0</span><span style="color: #000000;">;
+
+</span><span style="color: #0000ff;">void</span><span style="color: #000000;"> procedure0() {
+    flag[</span><span style="color: #800080;">0</span>] = <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+    turn </span>= <span style="color: #800080;">1</span><span style="color: #000000;">;
+    </span><span style="color: #0000ff;">while</span> (flag[<span style="color: #800080;">1</span>] &amp;&amp; (turn == <span style="color: #800080;">1</span><span style="color: #000000;">));
+    gCount</span>++<span style="color: #000000;">;
+    flag[</span><span style="color: #800080;">0</span>] = <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+}
+
+</span><span style="color: #0000ff;">void</span><span style="color: #000000;"> procedure1() {
+    flag[</span><span style="color: #800080;">1</span>] = <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+    turn </span>= <span style="color: #800080;">0</span><span style="color: #000000;">;
+    </span><span style="color: #0000ff;">while</span> (flag[<span style="color: #800080;">0</span>] &amp;&amp; (turn == <span style="color: #800080;">0</span><span style="color: #000000;">));
+    gCount</span>++<span style="color: #000000;">;
+    flag[</span><span style="color: #800080;">1</span>] = <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+}
+
+</span><span style="color: #0000ff;">void</span>* ThreadFunc0(<span style="color: #0000ff;">void</span>*<span style="color: #000000;"> args)
+{
+    </span><span style="color: #0000ff;">int</span><span style="color: #000000;"> i;
+    </span><span style="color: #0000ff;">for</span> (i = <span style="color: #800080;">0</span>; i&lt;<span style="color: #800080;">1000000</span>; i++<span style="color: #000000;">)
+        procedure0();
+    </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> NULL;
+}
+
+</span><span style="color: #0000ff;">void</span>* ThreadFunc1(<span style="color: #0000ff;">void</span>*<span style="color: #000000;"> args)
+{
+    </span><span style="color: #0000ff;">int</span><span style="color: #000000;"> i;
+    </span><span style="color: #0000ff;">for</span> (i = <span style="color: #800080;">0</span>; i&lt;<span style="color: #800080;">1000000</span>; i++<span style="color: #000000;">)
+        procedure1();
+    </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> NULL;
+}
+
+</span><span style="color: #0000ff;">int</span><span style="color: #000000;"> main()
+{
+    pthread_t pid0, pid1;
+
+    </span><span style="color: #0000ff;">if</span> (pthread_create(&amp;pid0, <span style="color: #800080;">0</span>, &amp;<span style="color: #000000;">ThreadFunc0, NULL))
+    {
+        cout </span>&lt;&lt; <span style="color: #800000;">"</span><span style="color: #800000;">Create thread0 failed.</span><span style="color: #800000;">"</span> &lt;&lt;<span style="color: #000000;"> endl;
+        </span><span style="color: #0000ff;">return</span> <span style="color: #800080;">1</span><span style="color: #000000;">;
+    }
+    </span><span style="color: #0000ff;">if</span> (pthread_create(&amp;pid1, <span style="color: #800080;">0</span>, &amp;<span style="color: #000000;">ThreadFunc1, NULL))
+    {
+        cout </span>&lt;&lt; <span style="color: #800000;">"</span><span style="color: #800000;">Create thread1 failed.</span><span style="color: #800000;">"</span> &lt;&lt;<span style="color: #000000;"> endl;
+        </span><span style="color: #0000ff;">return</span> <span style="color: #800080;">1</span><span style="color: #000000;">;
+    }
+
+    pthread_join(pid0, NULL);
+    pthread_join(pid1, NULL);
+    cout </span>&lt;&lt; gCount &lt;&lt;<span style="color: #000000;"> endl;
+
+    </span><span style="color: #0000ff;">if</span> (gCount == <span style="color: #800080;">2000000</span><span style="color: #000000;">)
+        cout </span>&lt;&lt; <span style="color: #800000;">"</span><span style="color: #800000;">Success</span><span style="color: #800000;">"</span> &lt;&lt;<span style="color: #000000;"> endl;
+    </span><span style="color: #0000ff;">else</span><span style="color: #000000;">
+        cout </span>&lt;&lt; <span style="color: #800000;">"</span><span style="color: #800000;">Fail</span><span style="color: #800000;">"</span> &lt;&lt;<span style="color: #000000;"> endl;
+
+    </span><span style="color: #0000ff;">return</span> <span style="color: #800080;">0</span><span style="color: #000000;">;
+}</span></span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<span class="cnblogs_code_collapse" style="font-size: 15px; font-family: &quot;Microsoft YaHei&quot;; display: none;">peterson测试代码</span></div>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;"><img title="x86平台锁失效" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/1095344-20180629101024094-1030645025.png" alt="" width="625" height="281">&nbsp;&nbsp; <img title="arm平台锁失效" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/1095344-20180629101033027-572945640.png" alt="" width="504" height="282"></span></p>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x86平台peterson锁失效&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; arm平台peterson锁失效</span></p>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">这个测试程序在Linux上用gcc编译，无论用O0，O1，O2编译选项，我试过x86平台，Arm平台，结果都有可能小于两百万，也就是这样实现的peterson锁不能阻止两个线程同时进入临界区。原因在于现代的编译器和多核CPU因为优化代码的原因，最擅长的事情就是指令乱序执行。编译器做的是静态乱序优化，CPU做的是动态乱序优化。简单来说，就是指令最终在CPU的执行顺序和我们在程序中写的顺序可能是大相径庭的。当然这种乱序执行是要在保证最终执行结果正确的前提下的，大多数情况下都不会引起问题，我们对指令的乱序执行也毫无感知。但是在一些特殊的情况下，比如peterson算法里，乱序优化可能会引起问题。</span></p>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">通常情况下，乱序优化都可以把对不同地址的load操作提到store之前去，我想这是因为load操作如果cache命中的话，要比store快很多。以线程0为例，看这3行。</span></p>
+<div class="cnblogs_code">
+<pre><span style="font-size: 15px; font-family: Microsoft YaHei;">    flag[<span style="color: #800080;">0</span>] = <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+    turn </span>= <span style="color: #800080;">1</span><span style="color: #000000;">;
+    </span><span style="color: #0000ff;">while</span> (flag[<span style="color: #800080;">1</span>] &amp;&amp; (turn == <span style="color: #800080;">1</span>));</span></pre>
+</div>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">前两行是store，第三行是load。但是对同一变量turn的store再load，乱序优化是不可能对他们交换顺序的。但是flag[0]和flag[1]是不同的变量，先store后load就可能被乱序优化成先load flag[1]，再store flag[0]。假设两个线程都已退出临界区，准备再次进入，此时flag[0]和flag[1]都是false。按乱序执行先load，两个线程都会有while条件为假，则同时都可以进入了临界区，互斥失效！这就是在有些情况下要保持代码的顺序一致性的重要。</span></p>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">这个问题怎么解决呢？也很简单，就是使用内存栅栏（memory barrier）。顾名思义，他就像个栅栏一样摆在两段代码之间，阻止编译器或者CPU在这两段代码之间进行乱序优化。在x86平台上，阻止编译器的静态乱序优化的汇编代码是</span></p>
+<div class="cnblogs_code">
+<pre><span style="font-size: 15px; font-family: Microsoft YaHei;">asm <span style="color: #0000ff;">volatile</span>(<span style="color: #800000;">""</span> ::: <span style="color: #800000;">"</span><span style="color: #800000;">memory</span><span style="color: #800000;">"</span>);</span></pre>
+</div>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">但是它不能阻止CPU运行时的乱序优化。在这里我们需要的不仅仅是阻止静态乱序，还要阻止动态乱序。x86的动态内存栅栏汇编命令有三条，分别是lfence，sfence和mfence，分别表示load栅栏，store栅栏和读写栅栏。也就是lfence只能保证lfence之前的读命令不和它之后的读命令发生乱序。sfence保证sfence之前的写命令不和它之后的写命令发生乱序。mfence保证了它前后的读写命令不发生乱序。这里我们需要用mfence，不过实际上我是了sfence也是可以的，但是lfence不行。</span></p>
+<div class="cnblogs_code">
+<pre><span style="font-size: 15px; font-family: Microsoft YaHei;">    flag[<span style="color: #800080;">0</span>] = <span style="color: #0000ff;">true</span><span style="color: #000000;">;<br>    turn </span>= <span style="color: #800080;">1</span><span style="color: #000000;">;
+    asm(</span><span style="color: #800000;">"</span><span style="color: #800000;">mfence</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+    </span><span style="color: #0000ff;">while</span> (flag[<span style="color: #800080;">1</span>] &amp;&amp; (turn == <span style="color: #800080;">1</span>));</span></pre>
+</div>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">在中间插入一行内存栅栏指令，这样peterson测试程序执行才是完全正确的。</span></p>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">在arm平台，相应的内存栅栏指令有三条，dmb（data memroy barrier），dsb（date synchronization barrier）和isb（instruction synchronization barrier）。dmb保证在dmb之前的内存访问指令在它之后的内存访问指令之前完成，也就是阻止了乱序。dsb更严格一些，保证在dsb完成之前，所有它之前的指令都执行完成。isb最严格，它会清空处理器的流水线，当然就能保证之前的所有指令执行完，它之后的指令必须从cache或内存获取。在这里我们用dmb就足够了，dmb指令带有参数。用来表达该barrier生效的Shareability Domain（NSH表示Non-shareable、ISH表示Inner Shareable、OSH表示Outer Shareable、SY表示Full system，缺省是SY）和内存操作类型（LD表示读操作，ST表示写操作，缺省表示读写操作），比如DMB ISHST 表示对Inner Shareability Domain的读写操作生效。在peterson算法这里是能保证正常工作的，或者直接用dmb sy。</span></p>
+<div class="cnblogs_code">
+<pre><span style="font-size: 15px; font-family: Microsoft YaHei;">    flag[<span style="color: #800080;">0</span>] = <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+    turn </span>= <span style="color: #800080;">1</span><span style="color: #000000;">;
+    asm(</span><span style="color: #800000;">"</span><span style="color: #800000;">dmb ishst</span><span style="color: #800000;">"</span><span style="color: #000000;">);<br>    //asm(<span style="color: #800000;">"<span style="color: #800000;">dmb sy<span style="color: #800000;">"<span style="color: #000000;">);<br>    </span></span></span></span></span><span style="color: #0000ff;">while</span> (flag[<span style="color: #800080;">1</span>] &amp;&amp; (turn == <span style="color: #800080;">1</span><span style="color: #000000;">)); </span></span></pre>
+</div>
+<p><span style="font-size: 15px;">&nbsp;<span style="font-family: Microsoft YaHei;">由于汇编指令和平台相关，移植不便。4.4.0和之后版本的gcc方便地提供了<code>__sync_synchronize</code>函数完成内存栅栏指令。</span></span></p>
+<div class="cnblogs_code">
+<pre><span style="font-size: 15px; font-family: Microsoft YaHei;">    flag[<span style="color: #800080;">0</span>] = <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+    turn </span>= <span style="color: #800080;">1</span><span style="color: #000000;">;
+    __sync_synchronize();
+    </span><span style="color: #0000ff;">while</span> (flag[<span style="color: #800080;">1</span>] &amp;&amp; (turn == <span style="color: #800080;">1</span>));</span></pre>
+</div>
+<p><span style="font-size: 15px; font-family: Microsoft YaHei;">&nbsp;</span></p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(9226887,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;23edacd5-58d9-e611-845c-ac853d9f53ac&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/mightycode/">爱鱼</a><br>
+            <a href="https://home.cnblogs.com/u/mightycode/followees/">关注 - 1</a><br>
+            <a href="https://home.cnblogs.com/u/mightycode/followers/">粉丝 - 27</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;23edacd5-58d9-e611-845c-ac853d9f53ac&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(9226887,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">3</span>
+    </div>
+    <div class="buryit" onclick="votePost(9226887,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/mightycode/p/9095059.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/mightycode/p/9095059.html" title="发布于 2018-05-27 15:36">UR机械臂运动学正逆解方法</a>
+    <br>
+    <a href="https://www.cnblogs.com/mightycode/p/9712593.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/mightycode/p/9712593.html" title="发布于 2018-10-11 20:04">Android程序backtrace分析方法</a>
+
+</div>
+</div>
+		</div>
+		<div class="itemdesc">
+			posted on 
+<span id="post-date">2018-07-04 10:04</span>&nbsp;<a href="https://www.cnblogs.com/mightycode/">爱鱼</a> 阅读(<span id="post_view_count">805</span>) 评论(<span id="post_comment_count">2</span>) <a href="https://i.cnblogs.com/EditPosts.aspx?postid=9226887" rel="nofollow"> 编辑</a> <a href="javascript:void(0)" onclick="AddToWz(9226887); return false;">收藏</a>
+
+		</div>
+	</div>
+	<div class="seperator">&nbsp;</div>
+	
+	
+<script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 327995, cb_blogApp = 'mightycode', cb_blogUserGuid = '23edacd5-58d9-e611-845c-ac853d9f53ac';
+    var cb_entryId = 9226887, cb_entryCreatedDate = '2018-07-04 10:04', cb_postType = 1; 
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<div class="post">
+<a name="feedback"></a>
+<div class="moreinfo">
+	<div class="moreinfotitle">
+		Comments
+	</div>
+	<div class="feedbackNoItems"></div>
+			<div class="comments">
+		
+			<div class="comment">
+				<div class="comment_title">
+					
+<a href="https://www.cnblogs.com/mightycode/p/9226887.html#4012322" class="layer">#1楼</a>
+<a name="4012322" id="comment_anchor_4012322"></a>
+
+
+				</div>
+				<div class="comment_author">
+
+            <a id="a_comment_author_4012322" href="https://www.cnblogs.com/zhangbob/" target="_blank">菲菲菲菲翔</a>
+</div>
+				<div class="comment_content">
+<div id="comment_body_4012322" class="blog_comment_body">
+    eval("alert('ok')");
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4012322, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4012322, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4012322_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1016404/20170510191605.png
+        </span>
+</div>
+				<div class="itemdesc">Posted @ 
+<span class="comment_date">2018-07-04 14:06</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+</div>
+			</div>
+			<div class="comment">
+				<div class="comment_title">
+					
+<a href="https://www.cnblogs.com/mightycode/p/9226887.html#4013695" class="layer">#2楼</a>
+<a name="4013695" id="comment_anchor_4013695"></a>
+
+        <span id="comment-maxId" style="display:none">4013695</span>
+        <span id="comment-maxDate" style="display:none">2018/7/5 下午11:13:38</span>
+
+				</div>
+				<div class="comment_author">
+
+            <a id="a_comment_author_4013695" href="https://www.cnblogs.com/zhouandke/" target="_blank">zhouandke</a>
+</div>
+				<div class="comment_content">
+<div id="comment_body_4013695" class="blog_comment_body">
+    c++开发对基础知识的要求真高啊
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4013695, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4013695, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4013695_avatar" style="display:none">
+            https://pic.cnblogs.com/face/781286/20170416085837.png
+        </span>
+</div>
+				<div class="itemdesc">Posted @ 
+<span class="comment_date">2018-07-05 23:13</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+</div>
+			</div>
+		
+			</div>
+</div>
+</div>
+<div class="seperator">&nbsp;</div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/mightycode/p/9226887.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/mightycode/p/9226887.html#top">返回顶部</a></div>
+    <div id="comment_form_container"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-工控&#39;)">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://www.jdcloud.com/cn/activity/year-end?utm_source=DMT_cnblogs&amp;utm_medium=CH&amp;utm_campaign=q4vm&amp;utm_term=Virtual-Machines" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-京东云&#39;)">【活动】京东云服务器_云主机低于1折，低价高性能产品备战双11</a><br><a href="https://www.ctyun.cn/activity/#/201910/ecs?hmsr=%E7%9C%8B%E7%9C%8B-%E5%8D%9A%E5%AE%A2%E5%9B%AD-10.16-10%E6%9C%88%E7%89%B9%E6%83%A0&amp;hmpl=&amp;hmcu=&amp;hmkw=&amp;hmci=?track=|cp:cz_blog|tgdy:46861|ttjh:shouyedingbuyoucefenlan|key:czkk12|pf:pc" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-天翼云&#39;)">【推荐】天翼云双十一提前开抢，1核1G云主机3个月仅需59元</a><br><a href="http://click.aliyun.com/m/1000081987/" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-阿里云&#39;)">【推荐】阿里云双11冰点钜惠，热门产品低至一折等你来抢！</a><br><a href="https://www.getui.com/2019devfest?f=5&amp;p=10&amp;c=15&amp;ch=1&amp;hmsr=%E5%8D%9A%E5%AE%A2%E5%9B%AD&amp;hmpl=2019%E5%BC%80%E5%8F%91%E8%80%85%E8%8A%82&amp;hmcu=PC&amp;hmkw=&amp;hmci=" target="_blank">【福利】个推四大热门移动开发SDK全部免费用一年，限时抢！</a><br></div>
+    <div id="opt_under_post"></div>
+    <script async="async" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/gpt.js"></script>
+    <script>
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+    </script>
+    <script>
+        googletag.cmd.push(function () {
+            googletag.defineSlot("/1090369/C1", [300, 250], "div-gpt-ad-1546353474406-0").addService(googletag.pubads());
+            googletag.defineSlot("/1090369/C2", [468, 60], "div-gpt-ad-1539008685004-0").addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CIWuv_T60eUCFZBxYAodqE4PWQ"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" sandbox="allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" style="border: 0px; vertical-align: bottom;" data-google-container-id="1" data-load-complete="true" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="X86平台乱序执行简要分析（翻译为主）" href="https://www.cnblogs.com/chobits/p/4800727.html" target="_blank" onclick="clickRecomItmem(4800727)">X86平台乱序执行简要分析（翻译为主）</a><br>·  <a title="memory barrier  内存栅栏   并发编程" href="https://www.cnblogs.com/hubaoxi/p/4995243.html" target="_blank" onclick="clickRecomItmem(4995243)">memory barrier  内存栅栏   并发编程</a><br>·  <a title="[SPDK/NVMe存储技术分析]006 - 内存屏障(MB)" href="https://www.cnblogs.com/vlhn/p/7764908.html" target="_blank" onclick="clickRecomItmem(7764908)">[SPDK/NVMe存储技术分析]006 - 内存屏障(MB)</a><br>·  <a title="内存屏障（经典）" href="https://www.cnblogs.com/hehehaha/archive/2013/05/07/6332844.html" target="_blank" onclick="clickRecomItmem(6332844)">内存屏障（经典）</a><br>·  <a title="内存屏障（经典）" href="https://www.cnblogs.com/wangfengju/archive/2013/05/07/6173132.html" target="_blank" onclick="clickRecomItmem(6173132)">内存屏障（经典）</a><br>»  <a target="_blank" href="https://recomm.cnblogs.com/blogpost/9226887">更多推荐...</a></div></div>
+    <div id="cnblogs_c2" class="c_ad_block">
+        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CIauv_T60eUCFZBxYAodqE4PWQ">
+            
+        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" sandbox="allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" style="border: 0px; vertical-align: bottom;" data-google-container-id="2" data-load-complete="true" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/saved_resource(1).html"></iframe></div></div>
+    </div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·              <a href="https://news.cnblogs.com/n/647108/" target="_blank">Canonical 表示 Ubuntu Linux 将支持所有树莓派设备</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/647106/" target="_blank">美参议员抨击苹果投钱解决住房危机：危机就是苹果造成的</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/647105/" target="_blank">Facebook公布新Logo 曾计划公司更名但放弃</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/647104/" target="_blank">QQ为什么是一只企鹅？官方答案公布！</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/647103/" target="_blank">107亿美元 博通完成收购赛门铁克企业安全软件业务</a>
+            <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+        deliverAdT2();
+        deliverAdC1();
+        deliverAdC2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div></div>
+</div>
+
+        <div class="spacer">
+            &nbsp;</div>
+    </div>
+    <div class="footer">
+	Powered by: 
+	<br>
+	
+	
+<a href="https://www.cnblogs.com/" id="Footer1_Hyperlink3" style="font-size: 12px; font-family: Verdana">博客园</a>
+	<br>
+	Copyright © 2019 爱鱼
+<br><span id="poweredby">Powered by .NET Core 3.0.0 on Linux</span>
+
+</div>
+
+
+</div>
+
+
+    
+
+
+</body></html>
