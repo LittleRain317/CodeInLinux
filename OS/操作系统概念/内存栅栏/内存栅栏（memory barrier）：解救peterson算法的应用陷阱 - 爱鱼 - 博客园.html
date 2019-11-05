@@ -39,7 +39,7 @@
     </script>
     <script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/MathJax.js"></script>
     
-<style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+<link rel="preload" href="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/f.txt"></script><script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/pubads_impl_2019103101.js" async=""></script><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
 .MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
 .MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
 .MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
@@ -134,7 +134,7 @@
 .MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
 .MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
 .MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
-</style><link rel="preload" href="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/f.txt"></script><script src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/pubads_impl_2019103101.js" async=""></script><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-36/html/container.html"></head>
+</style><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-36/html/container.html"></head>
 <body><div id="MathJax_Message" style="display: none;"></div>
     <a name="top"></a>
     
@@ -460,12 +460,12 @@
         <ul style="word-break:break-all">
                     <li>
                         <a href="https://www.cnblogs.com/mightycode/p/6394810.html">
-                            1. Canny边缘检测算法的实现(60783)
+                            1. Canny边缘检测算法的实现(60787)
                         </a>
                     </li>
                     <li>
                         <a href="https://www.cnblogs.com/mightycode/p/9095059.html">
-                            2. UR机械臂运动学正逆解方法(8634)
+                            2. UR机械臂运动学正逆解方法(8636)
                         </a>
                     </li>
                     <li>
@@ -485,12 +485,12 @@
                     </li>
                     <li>
                         <a href="https://www.cnblogs.com/mightycode/p/10365697.html">
-                            6. OpenCV Mat格式存储YUV图像(3364)
+                            6. OpenCV Mat格式存储YUV图像(3365)
                         </a>
                     </li>
                     <li>
                         <a href="https://www.cnblogs.com/mightycode/p/8018327.html">
-                            7. 导向滤波算法的实现(3300)
+                            7. 导向滤波算法的实现(3301)
                         </a>
                     </li>
                     <li>
@@ -500,7 +500,7 @@
                     </li>
                     <li>
                         <a href="https://www.cnblogs.com/mightycode/p/9712593.html">
-                            9. Android程序backtrace分析方法(1818)
+                            9. Android程序backtrace分析方法(1819)
                         </a>
                     </li>
                     <li>
@@ -650,8 +650,8 @@
 <div id="cnblogs_post_body" class="blogpost-body ">
     <p><span style="font-size: 15px; font-family: Microsoft YaHei;">最近一个项目中用到了peterson算法来做临界区的保护，简简单单的十几行代码，就能实现两个线程对临界区的无锁访问，确实很精炼。但是在这不是来分析peterson算法的，在实际应用中发现peterson算法并不能对临界区进行互斥访问，也就是说两个线程还是有可能同时进入临界区。但是按照代码的分析，明明可以实现互斥访问的呀，这是怎么回事呢？</span></p>
 <p><span style="font-size: 15px; font-family: Microsoft YaHei;">首先用一个测试程序来检验一下。临界区是对一个全局变量的自加一运算，两个线程各加一百万次，最后结果应该是两百万。由于自加一运算不是原子的，如果两个线程同时进入临界区，最后的结果就会少于两百万。</span></p>
-<div class="cnblogs_code" onclick="cnblogs_code_show(&#39;f6fb022c-2b06-461e-89ba-6e8c621a8bb4&#39;)"><span style="font-size: 15px; font-family: Microsoft YaHei;"><img id="code_img_closed_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="code_img_closed" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/ContractedBlock.gif" alt="" style="display: none;"><img id="code_img_opened_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="code_img_opened" style="" onclick="cnblogs_code_hide(&#39;f6fb022c-2b06-461e-89ba-6e8c621a8bb4&#39;,event)" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/ExpandedBlockStart.gif" alt=""></span>
-<div id="cnblogs_code_open_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="cnblogs_code_hide" style="display: block;"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<div class="cnblogs_code" onclick="cnblogs_code_show(&#39;f6fb022c-2b06-461e-89ba-6e8c621a8bb4&#39;)"><span style="font-size: 15px; font-family: Microsoft YaHei;"><img id="code_img_closed_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="code_img_closed" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/ContractedBlock.gif" alt=""><img id="code_img_opened_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="code_img_opened" style="display: none;" onclick="cnblogs_code_hide(&#39;f6fb022c-2b06-461e-89ba-6e8c621a8bb4&#39;,event)" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/ExpandedBlockStart.gif" alt=""></span>
+<div id="cnblogs_code_open_f6fb022c-2b06-461e-89ba-6e8c621a8bb4" class="cnblogs_code_hide">
 <pre><span style="font-size: 15px; font-family: Microsoft YaHei;">#include &lt;iostream&gt;<span style="color: #000000;">
 #include </span>&lt;pthread.h&gt;
 <span style="color: #0000ff;">using</span> <span style="color: #0000ff;">namespace</span><span style="color: #000000;"> std;
@@ -719,8 +719,8 @@
 
     </span><span style="color: #0000ff;">return</span> <span style="color: #800080;">0</span><span style="color: #000000;">;
 }</span></span></pre>
-<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
-<span class="cnblogs_code_collapse" style="font-size: 15px; font-family: &quot;Microsoft YaHei&quot;; display: none;">peterson测试代码</span></div>
+</div>
+<span class="cnblogs_code_collapse" style="font-size: 15px; font-family: Microsoft YaHei;">peterson测试代码</span></div>
 <p><span style="font-size: 15px; font-family: Microsoft YaHei;"><img title="x86平台锁失效" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/1095344-20180629101024094-1030645025.png" alt="" width="625" height="281">&nbsp;&nbsp; <img title="arm平台锁失效" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/1095344-20180629101033027-572945640.png" alt="" width="504" height="282"></span></p>
 <p><span style="font-size: 15px; font-family: Microsoft YaHei;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x86平台peterson锁失效&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; arm平台peterson锁失效</span></p>
 <p><span style="font-size: 15px; font-family: Microsoft YaHei;">这个测试程序在Linux上用gcc编译，无论用O0，O1，O2编译选项，我试过x86平台，Arm平台，结果都有可能小于两百万，也就是这样实现的peterson锁不能阻止两个线程同时进入临界区。原因在于现代的编译器和多核CPU因为优化代码的原因，最擅长的事情就是指令乱序执行。编译器做的是静态乱序优化，CPU做的是动态乱序优化。简单来说，就是指令最终在CPU的执行顺序和我们在程序中写的顺序可能是大相径庭的。当然这种乱序执行是要在保证最终执行结果正确的前提下的，大多数情况下都不会引起问题，我们对指令的乱序执行也毫无感知。但是在一些特殊的情况下，比如peterson算法里，乱序优化可能会引起问题。</span></p>
@@ -973,27 +973,27 @@
         });
     </script>
     <div id="cnblogs_c1" class="c_ad_block">
-        <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CIWuv_T60eUCFZBxYAodqE4PWQ"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" sandbox="allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" style="border: 0px; vertical-align: bottom;" data-google-container-id="1" data-load-complete="true" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/saved_resource.html"></iframe></div></div>
+        <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CI-O5tWN0uUCFYu8lgod-zQJbQ"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" style="border: 0px; vertical-align: bottom;" data-google-container-id="1" data-load-complete="true" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/saved_resource.html"></iframe></div></div>
     </div>
     <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="X86平台乱序执行简要分析（翻译为主）" href="https://www.cnblogs.com/chobits/p/4800727.html" target="_blank" onclick="clickRecomItmem(4800727)">X86平台乱序执行简要分析（翻译为主）</a><br>·  <a title="memory barrier  内存栅栏   并发编程" href="https://www.cnblogs.com/hubaoxi/p/4995243.html" target="_blank" onclick="clickRecomItmem(4995243)">memory barrier  内存栅栏   并发编程</a><br>·  <a title="[SPDK/NVMe存储技术分析]006 - 内存屏障(MB)" href="https://www.cnblogs.com/vlhn/p/7764908.html" target="_blank" onclick="clickRecomItmem(7764908)">[SPDK/NVMe存储技术分析]006 - 内存屏障(MB)</a><br>·  <a title="内存屏障（经典）" href="https://www.cnblogs.com/hehehaha/archive/2013/05/07/6332844.html" target="_blank" onclick="clickRecomItmem(6332844)">内存屏障（经典）</a><br>·  <a title="内存屏障（经典）" href="https://www.cnblogs.com/wangfengju/archive/2013/05/07/6173132.html" target="_blank" onclick="clickRecomItmem(6173132)">内存屏障（经典）</a><br>»  <a target="_blank" href="https://recomm.cnblogs.com/blogpost/9226887">更多推荐...</a></div></div>
     <div id="cnblogs_c2" class="c_ad_block">
-        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CIauv_T60eUCFZBxYAodqE4PWQ">
+        <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CJCO5tWN0uUCFYu8lgod-zQJbQ">
             
-        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" sandbox="allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" style="border: 0px; vertical-align: bottom;" data-google-container-id="2" data-load-complete="true" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/saved_resource(1).html"></iframe></div></div>
+        <div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" style="border: 0px; vertical-align: bottom;" data-google-container-id="2" data-load-complete="true" src="./内存栅栏（memory barrier）：解救peterson算法的应用陷阱 - 爱鱼 - 博客园_files/saved_resource(1).html"></iframe></div></div>
     </div>
     <div id="under_post_kb">
 <div class="itnews c_ad_block">
     <b>最新 IT 新闻</b>:
     <br>
+ ·              <a href="https://news.cnblogs.com/n/647111/" target="_blank">欧洲云计划Gaia-X引发亚马逊等美国科技巨头强烈反对</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/647110/" target="_blank">NASA的旅行者2号探测器在太阳系边缘发现了新的谜团</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/647109/" target="_blank">微软云新服务：可访问量子计算机 让你提前了解技术</a>
+            <br>
+ ·              <a href="https://news.cnblogs.com/n/647107/" target="_blank">互联网乌托邦：诺基亚的崩溃，芬兰小镇的新机遇</a>
+            <br>
  ·              <a href="https://news.cnblogs.com/n/647108/" target="_blank">Canonical 表示 Ubuntu Linux 将支持所有树莓派设备</a>
-            <br>
- ·              <a href="https://news.cnblogs.com/n/647106/" target="_blank">美参议员抨击苹果投钱解决住房危机：危机就是苹果造成的</a>
-            <br>
- ·              <a href="https://news.cnblogs.com/n/647105/" target="_blank">Facebook公布新Logo 曾计划公司更名但放弃</a>
-            <br>
- ·              <a href="https://news.cnblogs.com/n/647104/" target="_blank">QQ为什么是一只企鹅？官方答案公布！</a>
-            <br>
- ·              <a href="https://news.cnblogs.com/n/647103/" target="_blank">107亿美元 博通完成收购赛门铁克企业安全软件业务</a>
             <br>
     » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
 </div></div>
