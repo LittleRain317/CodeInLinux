@@ -1,21 +1,20 @@
+#include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
-#include <stdio.h>
-#include <signal.h>
-void sig_tin(int signo)
-{
-	printf("signo=%d\n", signo);
-}
 int main()
 {
-	printf("pid=%d ppid=%d pgid=%d tcgetsid=%d tcgetpgrp=%d  \
-			\t stdout=%d stderr=%d\n", getpid(), getppid(), getpgrp(), tcgetsid(STDIN_FILENO), tcgetpgrp(STDIN_FILENO),
-				tcgetpgrp(STDOUT_FILENO), tcgetpgrp(STDERR_FILENO));
+
+	printf("pid=%d ppid=%d pgid=%d tc=%d sid=%d\n", getpid(), getppid(), getpgrp(), tcgetpgrp(STDIN_FILENO), tcgetsid(STDIN_FILENO));
 	if (setsid() == -1)
 	{
 		perror(NULL);
 		return -1;
 	}
-	printf("pid=%d ppid=%d pgid=%d sid=%d \n", getpid(), getppid(), getpgrp(), getsid(0));
+	printf("pid=%d ppid=%d pgid=%d tc=%d sid=%d\n", getpid(), getppid(), getpgrp(), tcgetpgrp(STDIN_FILENO), tcgetsid(STDIN_FILENO));
+	perror(NULL);
+	tcsetpgrp(STDIN_FILENO, getpgrp());
+	perror(NULL);
+	printf("tcgetpgrp=%d\n", tcgetpgrp(STDIN_FILENO));
+	perror(NULL);
 	return 0;
 }

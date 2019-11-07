@@ -1,11 +1,14 @@
 #include <apue/apue.h>
 #include <errno.h>
-
+#include <time.h>
 static void sig_hup(int signo)
 {
 	printf("SIGHUP received, pid = %ld\n", (long)getpid());
 }
-
+static void sig_cont(int signo)
+{
+	printf("SIGCONT received, pid = %ld\n", (long)getpid());
+}
 static void pr_ids(char *name)
 {
 	printf("%s: pid = %ld, ppid = %ld, pgrp = %ld, tpgrp = %ld\n", 
@@ -26,16 +29,21 @@ int main(void)
 	}
 	else if (pid > 0)
 	{
-		if ((pid2 = fork()) == 0)
+		pid2 = fork();
+		if (pid2 == 0)
 		{
-			pr_ids("child");
+			printf("我是另外一个子进程\n");
+			pr_ids("另外");
 			signal(SIGHUP, sig_hup);
-			kill(getpid(), SIGTSTP);
-			pr_ids("child");
-			if (read(STDIN_FILENO, &c, 1) != 1)
+			signal(SIGCONT, sig_cont);
+			//
+			clock_t start = clock();
+			clock_t end;
+			while (((end - start) / CLOCKS_PER_SEC) <= 10)
 			{
-				printf("read error %d on controlling TTY\n", errno);
+				end = clock();
 			}
+			pr_ids("另外");
 		}
 		sleep(5);
 	}
@@ -43,12 +51,22 @@ int main(void)
 	{
 		pr_ids("child");
 		signal(SIGHUP, sig_hup);
-		kill(getpid(), SIGTSTP);
+		signal(SIGCONT, sig_cont);
+		//kill(getpid(), SIGTSTP);
+		printf("已经停止\n");
+		clock_t s = clock();
+		clock_t e;
+		while (((e - s) / CLOCKS_PER_SEC) <= 10)
+		{
+			e = clock();
+		}
 		pr_ids("child");
-		if (read(STDIN_FILENO, &c, 1) != 1)
+		/*if (read(STDIN_FILENO, &c, 1) != 1)
 		{
 			printf("read error %d on controlling TTY\n", errno);
+			perror(NULL);
 		}
+		*/
 	}
 	exit(0);
 }
