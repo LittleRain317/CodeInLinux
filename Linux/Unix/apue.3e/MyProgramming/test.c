@@ -1,26 +1,21 @@
-#include <apue/apue.h>
-extern unsigned int sleep2(unsigned int seconds);
-
-static void sig_int(int signo)
+#include <unistd.h>
+#include <termios.h>
+#include <stdio.h>
+#include <signal.h>
+void sig_tin(int signo)
 {
-	int i, j;
-	volatile int k;
-
-	printf("\nsig_int starting\n");
-	for ( i = 0; i < 300000; i++)
-		for (j = 0; j < 4000; j++)
-			k += i * j;
-	printf("sig_int finished\n");
+	printf("signo=%d\n", signo);
 }
-
-int main(void)
+int main()
 {
-	unsigned int unslept;
-	if (signal(SIGINT, sig_int) == SIG_ERR)
-		err_sys("signal error");
-	unslept = sleep2(5);
-	printf("slee2 returned: %u\n", unslept);
-	return 0;	
+	printf("pid=%d ppid=%d pgid=%d tcgetsid=%d tcgetpgrp=%d  \
+			\t stdout=%d stderr=%d\n", getpid(), getppid(), getpgrp(), tcgetsid(STDIN_FILENO), tcgetpgrp(STDIN_FILENO),
+				tcgetpgrp(STDOUT_FILENO), tcgetpgrp(STDERR_FILENO));
+	if (setsid() == -1)
+	{
+		perror(NULL);
+		return -1;
+	}
+	printf("pid=%d ppid=%d pgid=%d sid=%d \n", getpid(), getppid(), getpgrp(), getsid(0));
+	return 0;
 }
-
-

@@ -1,10 +1,10 @@
+#include <unistd.h>
 #include <stdio.h>
-#include <process.h>
-int main( void )
+int main()
 {
-/* If run froom command line, shows different ID for
-* command line than for operating system shell.
-*/
-printf( "Process id: %d\n", _getpid() );
-return 0;
+	char buf[1024] = { 0 };
+	fgets(buf, 1024, stdin);
+	printf("buf=%s\n", buf);
+	printf("pid=%d ppid=%d pgid=%d\n", getpid(), getppid(), getpgrp());
+	return 0;
 }

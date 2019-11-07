@@ -164,6 +164,8 @@ TCP必须为发送的数据保留副本因为可能存在丢包现象
 
 
 ========================第3章:套接字编程简介===========================
+//#include <apra/inet.h>
+
 typedef uint32_t in_addr_t;
 struct in_addr
  {
@@ -197,6 +199,7 @@ struct sockaddr_in {
 #endif
 
 ---------------------IPv6套接字地址结构-------------------
+
 #if !__USE_KERNEL_IPV6_DEFS
 /* Ditto, for IPv6.  */
 struct sockaddr_in6
@@ -231,12 +234,13 @@ struct in6_addr
 #define _SS_SIZE        128
 #define _SS_PADSIZE     (_SS_SIZE - (2 * sizeof (__ss_aligntype)))
 
+	使用时需要强转成其他类型如sockaddr_in
+
 struct sockaddr_storage
 {
     sa_family_t ss_family;      /* Address family */
     __ss_aligntype __ss_align;  /* Force desired alignment.  */强制所需要的内存对齐
-    char __ss_padding[_SS_PADSIZE];		//对于用户透明，使用时需要强转成其他类型如sockaddr_in
-};
+    char __ss_padding[_SS_PADSIZE];		//对于用户透明，};
 
 ---------------字节排序函数-----------------------------
 我们把某个给定系统所用的字节序称之为主机字节序host byte order
